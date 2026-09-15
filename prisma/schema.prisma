@@ -1,0 +1,383 @@
+// Prisma Schema for nuvelll: Indonesia Book Release Intelligence Platform
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum SourceType {
+  PUBLISHER
+  BOOKSTORE
+  CATALOG
+  FEED
+  SITEMAP
+}
+
+enum SourceStatus {
+  HEALTHY
+  DEGRADED
+  UNAVAILABLE
+  BLOCKED
+  DISABLED
+  CIRCUIT_OPEN
+}
+
+enum ConfidenceRating {
+  OFFICIAL_PUBLISHER // 5 stars
+  OFFICIAL_BOOKSTORE // 4 stars
+  SECONDARY_CATALOG  // 3 stars
+  COMMUNITY_SUBMISSION // 2 stars
+}
+
+enum PublicationStatus {
+  ANNOUNCED
+  PREORDER
+  RELEASED
+  AVAILABLE
+  OUT_OF_STOCK
+  DELAYED
+  DISCONTINUED
+  UNKNOWN
+}
+
+enum BookFormat {
+  TANKOBON
+  BUNKOBAN
+  KANZENBAN
+  PAPERBACK
+  HARDCOVER
+  EBOOK
+  OMNIBUS
+  ARTBOOK
+  MAGAZINE
+}
+
+enum AuthorRole {
+  AUTHOR
+  ILLUSTRATOR
+  ORIGINAL_CREATOR
+  TRANSLATOR
+  EDITOR
+}
+
+enum ChangeField {
+  PRICE
+  RELEASE_DATE
+  STATUS
+  AVAILABILITY
+  COVER
+  TITLE
+  DESCRIPTION
+}
+
+enum ReviewStatus {
+  PENDING
+  RESOLVED
+  REJECTED
+}
+
+model Source {
+  id               String           @id @default(cuid())
+  name             String
+  slug             String           @unique
+  domain           String           @unique
+  baseUrl          String
+  type             SourceType       @default(PUBLISHER)
+  country          String           @default("ID")
+  enabled          Boolean          @default(true)
+  crawlIntervalMin Int              @default(360)
+  lastCrawledAt    DateTime?
+  lastSuccessAt    DateTime?
+  lastFailureAt    DateTime?
+  status           SourceStatus     @default(HEALTHY)
+  robotsStatus     String           @default("ALLOWED")
+  confidenceLevel  ConfidenceRating @default(OFFICIAL_PUBLISHER)
+  notes            String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  priceObservations        PriceObservation[]
+  availabilityObservations AvailabilityObservation[]
+  crawlLogs                CrawlLog[]
+  crawlJobs                CrawlJob[]
+  publicationChanges       PublicationChange[]
+
+  @@index([domain])
+  @@index([status])
+}
+
+model Publisher {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  logoUrl     String?
+  websiteUrl  String?
+  country     String   @default("Indonesia")
+  description String?
+  isOfficial  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  imprints      Imprint[]
+  series        Series[]
+  publications  Publication[]
+  announcements Announcement[]
+
+  @@index([slug])
+}
+
+model Imprint {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  publisherId String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  publisher    Publisher     @relation(fields: [publisherId], references: [id], onDelete: Cascade)
+  publications Publication[]
+
+  @@index([publisherId])
+}
+
+model Author {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  originalName String?
+  biography    String?
+  country      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  publications PublicationAuthor[]
+
+  @@index([name])
+}
+
+model Series {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  originalTitle String?
+  publisherId   String?
+  totalVolumes  Int?
+  status        String   @default("ONGOING") // ONGOING, COMPLETED, HIATUS
+  description   String?
+  coverUrl      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  publisher    Publisher?    @relation(fields: [publisherId], references: [id], onDelete: SetNull)
+  publications Publication[]
+
+  @@index([slug])
+}
+
+model Publication {
+  id                String            @id @default(cuid())
+  slug              String            @unique
+  title             String
+  originalTitle     String?
+  subtitle          String?
+  seriesId          String?
+  volume            Int?
+  format            BookFormat        @default(PAPERBACK)
+  language          String            @default("id")
+  country           String            @default("Indonesia")
+  isbn10            String?
+  isbn13            String?           @unique
+  description       String?
+  coverImage        String?
+  status            PublicationStatus @default(RELEASED)
+  publicationDate   DateTime?
+  releaseDate       DateTime?
+  announcedAt       DateTime?
+  preorderDate      DateTime?
+  firstSeenAt       DateTime          @default(now())
+  lastSeenAt        DateTime          @default(now())
+  pageCount         Int?
+  completenessScore Int               @default(70) // 0 - 100 percentage
+  publisherId       String
+  imprintId         String?
+  ageRating         String?
+  dimensions        String?
+  weight            Int?              // in grams
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  publisher                Publisher                 @relation(fields: [publisherId], references: [id], onDelete: Cascade)
+  imprint                  Imprint?                  @relation(fields: [imprintId], references: [id], onDelete: SetNull)
+  series                   Series?                   @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  authors                  PublicationAuthor[]
+  genres                   PublicationGenre[]
+  editions                 Edition[]
+  priceObservations        PriceObservation[]
+  availabilityObservations AvailabilityObservation[]
+  changes                  PublicationChange[]
+  announcements            Announcement[]
+  reviewQueue              ReviewQueue[]
+
+  @@index([title])
+  @@index([releaseDate])
+  @@index([publisherId])
+  @@index([seriesId])
+  @@index([isbn13])
+}
+
+model PublicationAuthor {
+  publicationId String
+  authorId      String
+  role          AuthorRole @default(AUTHOR)
+
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  author      Author      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@id([publicationId, authorId, role])
+}
+
+model PublicationGenre {
+  publicationId String
+  genre         String
+
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@id([publicationId, genre])
+  @@index([genre])
+}
+
+model Edition {
+  id               String     @id @default(cuid())
+  publicationId    String
+  editionName      String
+  format           BookFormat @default(PAPERBACK)
+  isbn             String?
+  releaseDate      DateTime?
+  isSpecialEdition Boolean    @default(false)
+  notes            String?
+
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId])
+}
+
+model PriceObservation {
+  id            String   @id @default(cuid())
+  publicationId String
+  sourceId      String
+  price         Float
+  currency      String   @default("IDR")
+  recordedAt    DateTime @default(now())
+
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  source      Source      @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId, recordedAt])
+  @@index([sourceId])
+}
+
+model AvailabilityObservation {
+  id            String   @id @default(cuid())
+  publicationId String
+  sourceId      String
+  availability  String   @default("AVAILABLE")
+  sourceUrl     String
+  recordedAt    DateTime @default(now())
+
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  source      Source      @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId])
+  @@index([sourceId])
+}
+
+model PublicationChange {
+  id            String      @id @default(cuid())
+  publicationId String
+  sourceId      String?
+  field         ChangeField
+  oldValue      String?
+  newValue      String
+  detectedAt    DateTime    @default(now())
+
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  source      Source?     @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  @@index([publicationId, detectedAt])
+  @@index([detectedAt])
+}
+
+model Announcement {
+  id                   String    @id @default(cuid())
+  title                String
+  slug                 String    @unique
+  publisherId          String
+  publishedAt          DateTime  @default(now())
+  sourceUrl            String
+  excerpt              String
+  relatedPublicationId String?
+  createdAt            DateTime  @default(now())
+
+  publisher          Publisher    @relation(fields: [publisherId], references: [id], onDelete: Cascade)
+  relatedPublication Publication? @relation(fields: [relatedPublicationId], references: [id], onDelete: SetNull)
+
+  @@index([publisherId])
+  @@index([publishedAt])
+}
+
+model CrawlJob {
+  id         String    @id @default(cuid())
+  sourceId   String
+  status     String    @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
+  startedAt  DateTime?
+  finishedAt DateTime?
+  durationMs Int?
+  error      String?
+  createdAt  DateTime  @default(now())
+
+  source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId, status])
+}
+
+model CrawlLog {
+  id            String    @id @default(cuid())
+  sourceId      String
+  startedAt     DateTime
+  finishedAt    DateTime
+  durationMs    Int
+  requestsCount Int       @default(0)
+  successCount  Int       @default(0)
+  failedCount   Int       @default(0)
+  itemsFound    Int       @default(0)
+  itemsUpdated  Int       @default(0)
+  itemsCreated  Int       @default(0)
+  itemsSkipped  Int       @default(0)
+  errorCount    Int       @default(0)
+  errorMessage  String?
+  createdAt     DateTime  @default(now())
+
+  source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId, startedAt])
+}
+
+model ReviewQueue {
+  id              String       @id @default(cuid())
+  publicationId   String?
+  candidateData   String       // Serialized JSON of crawler candidate
+  confidenceScore Float
+  matchReason     String
+  status          ReviewStatus @default(PENDING)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  publication Publication? @relation(fields: [publicationId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+}

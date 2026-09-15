@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light Theme Defaults */
+  --bg-rgb: 247 248 250;
+  --surface-rgb: 255 255 255;
+  --surface-raised-rgb: 243 244 246;
+  --surface-sunken-rgb: 230 233 238;
+  --surface-overlay-rgb: 255 255 255;
+
+  --background: #F7F8FA;
+  --surface: #FFFFFF;
+  --surface-raised: #F3F4F6;
+  --surface-sunken: #E6E9EE;
+  --surface-overlay: #FFFFFF;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-medium: rgba(0, 0, 0, 0.16);
+  --border-bold: rgba(0, 0, 0, 0.28);
+  --editorial-title: #111827;
+  --editorial-body: #374151;
+  --editorial-muted: #6B7280;
+  --editorial-faint: #9CA3AF;
+  --gold: #A9843F;
+  --burgundy: #8B263E;
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-card-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.08);
+}
+
+.dark {
+  /* Dark Theme Tokens (Refined deep charcoal, not harsh blue) */
+  --bg-rgb: 9 11 14;
+  --surface-rgb: 17 20 26;
+  --surface-raised-rgb: 22 26 34;
+  --surface-sunken-rgb: 6 7 9;
+  --surface-overlay-rgb: 27 32 42;
+
+  --background: #090B0E;
+  --surface: #11141A;
+  --surface-raised: #161A22;
+  --surface-sunken: #060709;
+  --surface-overlay: #1B202A;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.16);
+  --border-bold: rgba(255, 255, 255, 0.28);
+  --editorial-title: #F9FAFB;
+  --editorial-body: #E5E7EB;
+  --editorial-muted: #9CA3AF;
+  --editorial-faint: #6B7280;
+  --gold: #C5A059;
+  --burgundy: #8B263E;
+
+  --glass-bg: rgba(17, 20, 26, 0.78);
+  --glass-card-bg: rgba(22, 26, 34, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--editorial-body);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Density Modifier */
+[data-density="compact"] {
+  --spacing-compact-factor: 0.8;
+}
+
+/* Reduced Motion Modifier */
+[data-motion="reduced"] *,
+[data-motion="reduced"] *::before,
+[data-motion="reduced"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* Custom Editorial Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+
+/* Liquid Glass Utilities */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-card {
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(197, 160, 89, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.25);
+}
+
+.glass-pill {
+  background: rgba(125, 125, 125, 0.08);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  transition: all 0.2s ease;
+}
+
+.glass-pill:hover {
+  background: rgba(125, 125, 125, 0.15);
+  border-color: var(--gold);
+}
+
+/* Editorial Serif Accents */
+.font-editorial {
+  font-family: 'Merriweather', Georgia, serif;
+}
+
+/* Subtle background noise texture */
+.bg-noise {
+  background-image: radial-gradient(rgba(125, 125, 125, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Hide scrollbars utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
