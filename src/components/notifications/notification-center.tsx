@@ -76,10 +76,10 @@ export function NotificationCenter() {
 
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-raised border border-border-medium rounded-xl shadow-2xl glass-panel z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+          className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-overlay border border-border-medium rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-surface-raised/60">
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-editorial-title">Radar Notifikasi</span>
               {unreadCount > 0 && (

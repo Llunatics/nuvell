@@ -23,7 +23,9 @@
   --editorial-muted: #6B7280;
   --editorial-faint: #9CA3AF;
   --gold: #A9843F;
+  --gold-rgb: 169 132 63;
   --burgundy: #8B263E;
+  --burgundy-rgb: 139 38 62;
 
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-card-bg: rgba(255, 255, 255, 0.7);
@@ -51,7 +53,9 @@
   --editorial-muted: #9CA3AF;
   --editorial-faint: #6B7280;
   --gold: #C5A059;
+  --gold-rgb: 197 160 89;
   --burgundy: #8B263E;
+  --burgundy-rgb: 139 38 62;
 
   --glass-bg: rgba(17, 20, 26, 0.78);
   --glass-card-bg: rgba(22, 26, 34, 0.6);
