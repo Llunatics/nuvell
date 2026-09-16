@@ -138,7 +138,7 @@ export function SeriesVolumeMatrix({ series, publications }: SeriesVolumeMatrixP
                     ? 'bg-amber-950/40 border-amber-500/50'
                     : pub
                     ? 'bg-surface hover:bg-surface-raised border-border-subtle hover:border-gold/40'
-                    : 'bg-surface/30 border-border-subtle/40 opacity-40'
+                    : 'bg-surface/20 border-transparent opacity-40'
                 }`}
               >
                 <div className="flex items-center justify-between">

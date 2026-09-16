@@ -242,7 +242,7 @@ export function ReleaseCalendar({ publications }: ReleaseCalendarProps) {
                       ? 'bg-gold/10 border-gold/40'
                       : hasReleases
                       ? 'bg-surface hover:bg-surface-raised border-border-subtle hover:border-gold/30'
-                      : 'bg-surface/40 border-border-subtle/50 text-editorial-faint'
+                      : 'bg-surface/20 hover:bg-surface/35 border-transparent text-editorial-faint'
                   }`}
                 >
                   <div className="flex items-center justify-between w-full">
