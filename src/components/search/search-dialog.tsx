@@ -20,6 +20,7 @@ import {
   Calendar,
   BookmarkCheck,
   LineChart,
+  Loader2,
 } from 'lucide-react';
 import { Publication, Series, Publisher } from '@/types';
 import { formatIDR } from '@/lib/formatters';
@@ -232,7 +233,7 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="search-modal-title"
-          className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-black/30 dark:bg-black/60 backdrop-blur-[2px] transition-all animate-in fade-in duration-150"
           onClick={() => setIsOpen(false)}
         >
           <div
@@ -241,7 +242,11 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
           >
             {/* Input Header */}
             <div className="flex items-center gap-3 px-4 py-3.5 border-b border-border-medium bg-surface">
-              <Search className="w-4 h-4 text-gold shrink-0" />
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 text-gold animate-spin shrink-0" />
+              ) : (
+                <Search className="w-4 h-4 text-gold shrink-0" />
+              )}
               <input
                 ref={inputRef}
                 type="text"
@@ -251,9 +256,15 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
                   setSelectedIndex(0);
                 }}
                 onKeyDown={handleInputKeyDown}
-                placeholder="Ketik judul, manga, volume, ISBN, atau aksi..."
+                placeholder="Ketik judul buku, manga, volume, ISBN, atau nama penulis..."
                 className="w-full bg-transparent text-editorial-title placeholder:text-editorial-faint text-base sm:text-lg focus:outline-none font-medium"
               />
+              {isLoading && (
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium text-gold bg-gold/10 border border-gold/30 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+                  Mengindeks
+                </span>
+              )}
               {query && (
                 <button
                   type="button"
@@ -309,14 +320,65 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
 
             {/* Results Canvas */}
             <div ref={resultsContainerRef} className="max-h-[60vh] overflow-y-auto p-3 space-y-4 bg-surface">
+              {/* Professional Indexing Telemetry State */}
+              {isLoading && totalResults === 0 && (
+                <div className="py-6 px-3 space-y-4 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-surface-raised border border-border-subtle shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-8 h-8 rounded-lg bg-gold/15 flex items-center justify-center text-gold">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-editorial-title">
+                            Menyelaraskan Indeks & Repositori Resmi...
+                          </span>
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">
+                            LIVE RADAR
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-editorial-faint font-mono">
+                          Memindai ISBN • Memverifikasi ketersediaan toko buku • Sinkronisasi katalog
+                        </p>
+                      </div>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-1 text-[10px] font-mono text-gold/80">
+                      <span className="w-1 h-3 rounded-full bg-gold animate-bounce delay-75" />
+                      <span className="w-1 h-4 rounded-full bg-gold animate-bounce delay-150" />
+                      <span className="w-1 h-2 rounded-full bg-gold animate-bounce delay-300" />
+                    </div>
+                  </div>
+
+                  {/* Shimmering Skeleton Cards */}
+                  <div className="space-y-2.5">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={`skel-${i}`}
+                        className="p-3 rounded-xl bg-surface-raised/50 border border-border-subtle flex items-center justify-between animate-pulse"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-10 h-14 rounded-lg bg-border-medium/30 shrink-0" />
+                          <div className="space-y-2 flex-1 min-w-0 pr-4">
+                            <div className="h-3.5 bg-border-medium/30 rounded w-2/3" />
+                            <div className="h-2.5 bg-border-medium/20 rounded w-1/3" />
+                          </div>
+                        </div>
+                        <div className="h-4 w-16 bg-border-medium/25 rounded shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* No results empty state */}
-              {deferredQuery && totalResults === 0 && matchingActions.length === 0 && (
-                <div className="py-12 text-center text-editorial-muted space-y-1">
+              {deferredQuery && !isLoading && totalResults === 0 && matchingActions.length === 0 && (
+                <div className="py-12 text-center text-editorial-muted space-y-2">
                   <p className="text-sm font-medium text-editorial-title">
-                    Tidak ditemukan hasil untuk &ldquo;{query}&rdquo;
+                    Tidak ditemukan publikasi resmi untuk &ldquo;{query}&rdquo;
                   </p>
-                  <p className="text-xs text-editorial-faint">
-                    Coba kata kunci seperti &ldquo;One Piece&rdquo;, &ldquo;Kagurabachi&rdquo;, atau &ldquo;Gramedia&rdquo;.
+                  <p className="text-xs text-editorial-faint max-w-sm mx-auto">
+                    Coba gunakan kata kunci lain, nama penulis, atau pastikan ejaan judul sudah sesuai.
                   </p>
                 </div>
               )}

@@ -288,7 +288,7 @@ export function AppIconCropperModal({ isOpen, onClose, onSaveIcon }: AppIconCrop
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-background/80 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/30 dark:bg-black/60 backdrop-blur-[2px] transition-all animate-fadeIn">
       <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-surface border border-border-subtle rounded-2xl shadow-2xl flex flex-col">
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-border-subtle flex items-center justify-between">

@@ -15,7 +15,7 @@ export function PublisherPosterModal({ post, onClose }: PublisherPosterModalProp
   if (!post) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 dark:bg-black/60 backdrop-blur-[2px] transition-all animate-in fade-in duration-200">
       <div 
         className="relative w-full max-w-4xl max-h-[90vh] bg-surface-raised border border-border-subtle rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
         onClick={(e) => e.stopPropagation()}

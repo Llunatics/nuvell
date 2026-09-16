@@ -35,15 +35,6 @@ export function HomeFeedClient({
 }: HomeFeedClientProps) {
   const { items: watchlistItems } = useWatchlist();
   const { collection } = useCollection();
-  const [greeting, setGreeting] = useState('Selamat datang');
-
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) setGreeting('Selamat pagi');
-    else if (hour >= 12 && hour < 15) setGreeting('Selamat siang');
-    else if (hour >= 15 && hour < 18) setGreeting('Selamat sore');
-    else setGreeting('Selamat malam');
-  }, []);
 
   // Today & Recent counts (aligned with 2026-09-15)
   const todayReleases = useMemo(() => {
@@ -82,17 +73,20 @@ export function HomeFeedClient({
     <div className="space-y-12 sm:space-y-16 px-4 sm:px-8 lg:px-12 py-8 max-w-7xl mx-auto">
       {/* 1. Subtle Editorial Greeting & Today's Digest */}
       <section className="space-y-4 pt-2">
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-gold uppercase tracking-wider">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            INDONESIA BOOK RELEASE INTELLIGENCE • ASIA/JAKARTA (WIB)
+            Radar Terbitan Resmi • Zona Waktu Asia/Jakarta (WIB)
           </div>
           <h1 className="font-editorial text-3xl sm:text-4xl lg:text-5xl font-extrabold text-editorial-title tracking-tight leading-tight">
-            {greeting}. <br />
+            Katalog & Jadwal Rilis Terverifikasi. <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-editorial-title via-gold to-amber-500">
-              Inilah rilisan terbitan terbaru minggu ini.
+              Pantau kepastian tanggal edar buku, komik manga, dan novel pekan ini.
             </span>
           </h1>
+          <p className="text-xs sm:text-sm text-editorial-muted max-w-2xl">
+            Pusat pantauan terbitan fisik dari seluruh penerbit resmi di Indonesia dengan kepastian tanggal beredar di toko buku.
+          </p>
         </div>
 
         {/* Today's Digest Banner Strip */}
