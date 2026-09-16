@@ -71,7 +71,7 @@ export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) 
       case 'PRICE DROP':
         return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
       case 'PREORDER':
-        return 'bg-purple-500/15 text-purple-400 border-purple-500/30';
+        return 'bg-burgundy/15 text-burgundy-400 border-burgundy/30';
       default:
         return 'bg-surface-raised/80 text-editorial-muted border-border-subtle';
     }

@@ -168,7 +168,7 @@ export function InsightsView({ publications, publishers, sources }: InsightsView
           <span className="text-[11px] font-mono text-editorial-faint uppercase block">
             Perubahan Tanggal
           </span>
-          <p className="text-2xl sm:text-3xl font-bold font-editorial text-purple-400">
+          <p className="text-2xl sm:text-3xl font-bold font-editorial text-burgundy-400">
             {dateShifts.length}
           </p>
           <span className="text-[11px] text-editorial-faint block">
@@ -404,7 +404,7 @@ export function InsightsView({ publications, publishers, sources }: InsightsView
                     {shift.oldValue && (
                       <span className="line-through text-editorial-faint">{shift.oldValue}</span>
                     )}
-                    <span className="text-purple-400 font-semibold">→ {shift.newValue}</span>
+                    <span className="text-burgundy-400 font-semibold">→ {shift.newValue}</span>
                   </div>
                 </div>
               ))}

@@ -134,11 +134,11 @@ export function CollectionView({ featuredSeries, publications }: CollectionViewP
           <p className="text-2xl font-bold font-editorial text-amber-400 mt-1">{wishlistCount}</p>
         </div>
         <div className="glass-card p-4 rounded-xl">
-          <div className="flex items-center gap-2 text-xs text-purple-400 font-mono">
+          <div className="flex items-center gap-2 text-xs text-burgundy-400 font-mono">
             <Clock className="w-3.5 h-3.5" />
             Telah Pre-order
           </div>
-          <p className="text-2xl font-bold font-editorial text-purple-400 mt-1">{preorderedCount}</p>
+          <p className="text-2xl font-bold font-editorial text-burgundy-400 mt-1">{preorderedCount}</p>
         </div>
       </div>
 
@@ -238,7 +238,7 @@ export function CollectionView({ featuredSeries, publications }: CollectionViewP
                                 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                                 : it.status === 'WISHLIST'
                                 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                                : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                                : 'bg-burgundy/15 text-burgundy-400 border border-burgundy/30'
                             }`}
                           >
                             {it.status}

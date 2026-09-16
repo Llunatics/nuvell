@@ -201,7 +201,7 @@ export function HomeFeedClient({
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-purple-400" />
+            <Clock className="w-4 h-4 text-burgundy-400" />
             <div>
               <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
                 Akan Segera Terbit

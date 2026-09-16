@@ -547,7 +547,7 @@ Frieren: Beyond Journey's End Vol. 11`);
                               </span>
                             )}
                             {item.hasPostcard && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/15 text-purple-400 border border-purple-500/30">
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-burgundy/15 text-burgundy-400 border border-burgundy/30">
                                 POSTCARD BONUS
                               </span>
                             )}

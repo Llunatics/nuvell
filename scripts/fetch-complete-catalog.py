@@ -68,16 +68,26 @@ STANDARDIZED_PUBLISHERS = {
     'm&c!': ('pub_mnc', 'm&c! Publishing'),
     'm&c! publishing': ('pub_mnc', 'm&c! Publishing'),
     'gramedia pustaka utama': ('pub_gpu', 'Gramedia Pustaka Utama'),
+    'gramedia widiasarana indonesia': ('pub_grasindo', 'Gramedia Widiasarana Indonesia (Grasindo)'),
+    'widiasarana': ('pub_grasindo', 'Gramedia Widiasarana Indonesia (Grasindo)'),
+    'grasindo': ('pub_grasindo', 'Gramedia Widiasarana Indonesia (Grasindo)'),
+    'bhuana ilmu populer': ('pub_bip', 'Bhuana Ilmu Populer'),
+    'bip': ('pub_bip', 'Bhuana Ilmu Populer'),
+    'kpg': ('pub_kpg', 'Kepustakaan Populer Gramedia'),
+    'kepustakaan populer gramedia': ('pub_kpg', 'Kepustakaan Populer Gramedia'),
     'penerbit haru': ('pub_haru', 'Penerbit Haru'),
     'bentang pustaka': ('pub_bentang', 'Bentang Pustaka'),
     'republika': ('pub_republika', 'Republika Penerbit'),
     'republika penerbit': ('pub_republika', 'Republika Penerbit'),
     'mizan': ('pub_mizan', 'Mizan Publishing'),
     'mizan publishing': ('pub_mizan', 'Mizan Publishing'),
-    'bhuana ilmu populer': ('pub_bip', 'Bhuana Ilmu Populer'),
-    'kpg': ('pub_kpg', 'Kepustakaan Populer Gramedia'),
-    'kepustakaan populer gramedia': ('pub_kpg', 'Kepustakaan Populer Gramedia'),
-    'grasindo': ('pub_grasindo', 'Grasindo'),
+    'noura': ('pub_noura', 'Noura Books'),
+    'noura books': ('pub_noura', 'Noura Books'),
+    'gagasmedia': ('pub_gagasmedia', 'GagasMedia'),
+    'gagas media': ('pub_gagasmedia', 'GagasMedia'),
+    'bukune': ('pub_bukune', 'Bukune'),
+    'shira media': ('pub_shira_media', 'Shira Media'),
+    'penerbit inari': ('pub_inari', 'Penerbit Inari'),
     'water lily literary': ('pub_water_lily_literary', 'Water Lily Literary'),
     'yen press': ('pub_yen_press', 'Yen Press'),
     'viz media': ('pub_viz_media', 'VIZ Media'),
@@ -222,10 +232,17 @@ def run_master_ingestion():
         ('mc', 20, 'pub_mnc', 'm&c! Publishing'),
         ('elex-media-komputindo', 20, 'pub_elex', 'Elex Media Komputindo'),
         ('gramedia-pustaka-utama', 20, 'pub_gpu', 'Gramedia Pustaka Utama'),
+        ('gramedia-widiasarana-indonesia', 20, 'pub_grasindo', 'Gramedia Widiasarana Indonesia (Grasindo)'),
+        ('bhuana-ilmu-populer', 20, 'pub_bip', 'Bhuana Ilmu Populer'),
+        ('kpg-kepustakaan-populer-gramedia', 20, 'pub_kpg', 'Kepustakaan Populer Gramedia'),
         ('bentang-pustaka', 20, 'pub_bentang', 'Bentang Pustaka'),
         ('haru', 10, 'pub_haru', 'Penerbit Haru'),
         ('republika', 10, 'pub_republika', 'Republika Penerbit'),
         ('mizan', 20, 'pub_mizan', 'Mizan Publishing'),
+        ('noura-books', 20, 'pub_noura', 'Noura Books'),
+        ('gagasmedia', 10, 'pub_gagasmedia', 'GagasMedia'),
+        ('bukune', 10, 'pub_bukune', 'Bukune'),
+        ('shira-media', 10, 'pub_shira_media', 'Shira Media'),
     ]
 
     print('\n[1/4] Vector A: Crawling Official Publisher Catalogs...')
@@ -243,20 +260,32 @@ def run_master_ingestion():
                 raw_products[slug] = it
                 vendor_defaults[slug] = (pid, pname)
                 c_count += 1
-            time.sleep(0.03)
+            time.sleep(0.02)
         print(f'   -> {vendor}: {c_count} products')
 
     # 2. VECTOR B: Official Category Slugs (all pages up to 20)
     categories = [
-        ('komik', 'Manga / Komik'),
-        ('manga', 'Manga / Komik'),
+        ('fiksi-sastra', 'Novel & Sastra'),
         ('novel', 'Novel & Sastra'),
         ('sastra', 'Novel & Sastra'),
+        ('komik', 'Manga / Komik'),
+        ('manga', 'Manga / Komik'),
+        ('manhwa', 'Manhwa'),
+        ('light-novel', 'Light Novel'),
         ('buku-impor', 'Buku Import'),
         ('international-books', 'Buku Import'),
-        ('fiksi', 'Fiksi'),
-        ('light-novel', 'Light Novel'),
         ('remaja', 'Teen Fiction'),
+        ('fantasi', 'Novel & Sastra'),
+        ('romance', 'Novel & Sastra'),
+        ('horor', 'Novel & Sastra'),
+        ('pengembangan-diri', 'Pengembangan Diri'),
+        ('biografi', 'Biografi & Memoar'),
+        ('bisnis', 'Bisnis & Ekonomi'),
+        ('agama', 'Agama & Spiritualitas'),
+        ('anak', 'Buku Anak'),
+        ('buku-anak', 'Buku Anak'),
+        ('sejarah', 'Sejarah & Humaniora'),
+        ('filsafat', 'Filsafat'),
     ]
 
     print('\n[2/4] Vector B: Crawling Official Book Category Taxonomies...')
@@ -277,12 +306,22 @@ def run_master_ingestion():
                 cat_count += 1
             if page >= total_p:
                 break
-            time.sleep(0.03)
+            time.sleep(0.02)
         print(f'   -> category {cat_slug} ({cat_label}): {cat_count} products (pages 1-{page})')
 
     # 3. VECTOR C: Exhaustive Franchise, Author & Keyword Backlog Queries
     keyword_queries = [
-        # Crucial target franchises & import queries
+        # Crucial target titles & Indonesian authors
+        'setelah melompat', 'setelah melompat aku ingin hidup',
+        'brian khrisna', 'kudapan pagi', 'parmin', 'museum kehilangan',
+        'tere liye', 'leila s chudori', 'eka kurniawan', 'pramoedya ananta toer',
+        'dee lestari', 'ahmad fuadi', 'raditya dika', 'boy candra', 'fiersa besari',
+        'valerie patkar', 'rintik sedu', 'marchella fp', 'alvi syahrin',
+        'cantik itu luka', 'laut bercerita', 'gadis kretek', 'bumi manusia',
+        'aroma karsa', 'perahu kertas', 'hujan', 'bumi', 'bulan', 'matahari', 'bintang',
+        'komet', 'sagaras', 'tentang kamu', 'negeri di ujung tanduk', 'bedebah di ujung tanduk',
+        'pulang pergi', 'si anak kuat', 'si anak pintar', 'si anak badai',
+        # Manga, LN, and Comic franchises
         'kinki', 'tentang suatu tempat di wilayah kinki', 'about a place in the kinki',
         'shiboyugi', 'shuzo oshimi', 'level comic happiness', 'happiness', 'three days of happiness',
         'water lily literary', 'oshi no ko', 'chainsaw man', 'jujutsu kaisen', 'frieren',
@@ -292,8 +331,7 @@ def run_master_ingestion():
         'solo leveling', 'alya sometimes', 'slime tensei', 'vagabond', 'haikyu',
         'attack on titan', 'death note', 'hunter x hunter', 'black clover', 'mashle',
         'dr stone', 'komi sulit', 'blue box', 'choujin x', 'boruto', 'yozakura family',
-        'vinland saga', 'cantik itu luka', 'laut bercerita', 'gadis kretek',
-        'bumi manusia', 'minimarket yang merepotkan', 'keajaiban toko kelontong namiya',
+        'vinland saga', 'minimarket yang merepotkan', 'keajaiban toko kelontong namiya',
         'karada sagashi', 'bungo stray dogs', 'bakemonogatari', 'kanojo okarishimasu',
         'fight ippo', 'record of ragnarok', 'bocchi the rock', 'fire punch',
         'gokushufudo', 'toilet-bound hanako', 'hanako si arwah penasaran',
@@ -304,7 +342,6 @@ def run_master_ingestion():
         'aku no hana', 'chi no wadachi', 'haruki murakami', 'keigo higashino',
         'makoto shinkai', 'junji ito', 'naoki urasawa', 'tsukasa hojo', 'city hunter',
         'slam dunk', 'inuyasha', 'ranma', 'fullmetal alchemist', 'hells paradise',
-        # Crucial backlog and gapped series
         'paman dari dunia lain', 'isekai ojisan', 'otherworldly izakaya nobu',
         'farming life in another world', 'so i\'m a spider', 'my happy marriage',
         'apa salahnya mencari cinta di dungeon', 'danmachi', 'gachiakuta',
@@ -565,27 +602,43 @@ def run_master_ingestion():
             series_id = f'ser_{clean_slug(raw_sname)[:30]}'
             series_name = raw_sname
 
-        # Resolve Format
+        # Resolve Format & Genre
         is_hardcover = (
             'hard cover' in title_lower or 'hardcover' in title_lower or
             (spec_format_val and 'hard cover' in spec_format_val.lower()) or
             (ex and ex.get('format') == 'HARDCOVER')
-        )
         is_ln = (
-            'light novel' in title_lower or 'novel' in title_lower or
-            (category_defaults.get(slug) in ['Light Novel', 'Novel & Sastra']) or
-            ('overlord' in title_lower and 'komik' not in title_lower)
+            'light novel' in title_lower or
+            (category_defaults.get(slug) == 'Light Novel') or
+            ('overlord' in title_lower and 'komik' not in title_lower) or
+            ('re-living my life' in title_lower) or
+            ('reliving my life' in title_lower) or
+            ('alya sometimes' in title_lower) or
+            ('classroom of the elite' in title_lower and 'komik' not in title_lower) or
+            ('sword art online' in title_lower and 'komik' not in title_lower) or
+            ('mushoku tensei' in title_lower and 'komik' not in title_lower) or
+            ('slime tensei' in title_lower and 'komik' not in title_lower) or
+            ('eminence in shadow' in title_lower and 'komik' not in title_lower)
         )
-        is_manhwa = 'manhwa' in title_lower or 'solo leveling' in title_lower or 'webtoon' in title_lower
+        is_manhwa = 'manhwa' in title_lower or 'solo leveling' in title_lower or 'webtoon' in title_lower or (category_defaults.get(slug) == 'Manhwa')
+        is_religious = bool(re.search(r'\b(yaasiin|yasin|tahlil|sholat|shalat|doa|hadits|al-qur\'?an|quran|ramadhan|tasawuf|fiqih|dakwah|hijrah|spiritual|tarbiyah|akhlak|tafsir|surah|as-sunnah|sunnah)\b', title_lower))
+        is_comic = (
+            'komik' in title_lower or 'manga' in title_lower or
+            category_defaults.get(slug) == 'Manga / Komik' or
+            ('akasha' in title_lower) or ('level comic' in title_lower) or
+            (vendor_defaults.get(slug) and vendor_defaults[slug][0] in ['pub_pgi', 'pub_mnc', 'pub_elex'] and vol is not None)
+        ) and not is_ln and not is_religious and not any(k in title_lower for k in ['novel', 'sastra', 'yaasiin', 'yasin', 'doa', 'sholat', 'kumpulan puisi', 'antologi'])
 
         if is_hardcover:
             format_type = 'HARDCOVER'
-        elif is_ln:
-            format_type = 'PAPERBACK'
         elif is_manhwa:
             format_type = 'KANZENBAN'
-        else:
+        elif is_ln:
+            format_type = 'PAPERBACK'
+        elif is_comic:
             format_type = 'TANKOBON'
+        else:
+            format_type = 'PAPERBACK'
 
         # Release Date & Status
         if parsed_date:
@@ -621,8 +674,12 @@ def run_master_ingestion():
             genres.append('Light Novel')
         elif is_manhwa:
             genres.append('Manhwa')
-        elif format_type == 'TANKOBON':
+        elif is_comic:
             genres.append('Manga')
+        elif is_religious:
+            genres.append('Agama & Spiritualitas')
+        elif category_defaults.get(slug) in ['Pengembangan Diri', 'Biografi & Memoar', 'Bisnis & Ekonomi', 'Agama & Spiritualitas', 'Buku Anak', 'Sejarah & Humaniora', 'Filsafat']:
+            genres.append(category_defaults[slug])
         else:
             genres.append('Novel')
 
@@ -697,6 +754,12 @@ def run_master_ingestion():
 
         canonical_pubs.append(pub_obj)
         seen_canonical_slugs.add(slug)
+
+    # Preserve all existing valid book publications so zero books are lost
+    for ex_slug, ex_p in existing_pubs.items():
+        if ex_slug not in seen_canonical_slugs and not is_non_book(ex_p.get('title', '')):
+            canonical_pubs.append(ex_p)
+            seen_canonical_slugs.add(ex_slug)
 
     # 6. DYNAMIC SERIES BUILDER
     series_map = {}

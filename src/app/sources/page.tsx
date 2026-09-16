@@ -65,7 +65,7 @@ export default function SourcesPage() {
         </div>
 
         <div className="glass-card p-6 rounded-2xl space-y-2">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-3">
+          <div className="w-10 h-10 rounded-xl bg-burgundy/15 border border-burgundy/30 flex items-center justify-center text-burgundy-400 mb-3">
             <Lock className="w-5 h-5" />
           </div>
           <h2 className="font-editorial text-base font-bold text-editorial-title">

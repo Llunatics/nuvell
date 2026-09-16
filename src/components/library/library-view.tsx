@@ -270,7 +270,7 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
                 <span className="text-editorial-faint">Wishlist</span>
               </div>
               <div className="pl-6">
-                <span className="font-mono text-xl font-bold text-purple-400 block">
+                <span className="font-mono text-xl font-bold text-burgundy-400 block">
                   {preorderedCount}
                 </span>
                 <span className="text-editorial-faint">Pre-ordered</span>

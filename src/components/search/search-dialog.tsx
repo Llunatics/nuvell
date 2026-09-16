@@ -212,16 +212,16 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-surface/70 hover:bg-surface border border-border-subtle hover:border-gold/40 text-editorial-muted hover:text-editorial-title transition-all text-xs sm:text-sm group shadow-sm"
+        className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-medium hover:border-gold/50 text-editorial-muted hover:text-editorial-title transition-all text-xs sm:text-sm group shadow-sm focus:outline-none focus:ring-1 focus:ring-gold"
         aria-label="Cari buku, manga, komik, atau penerbit (Cmd+K)"
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <Search className="w-3.5 h-3.5 text-editorial-muted group-hover:text-gold transition-colors shrink-0" />
-          <span className="truncate text-editorial-muted group-hover:text-editorial-body text-xs">
+          <span className="truncate text-editorial-muted group-hover:text-editorial-body text-xs font-normal">
             Cari judul buku, manga, ISBN, penerbit...
           </span>
         </div>
-        <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-mono font-medium text-editorial-faint bg-surface-raised rounded-md border border-border-subtle shrink-0">
+        <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-mono font-medium text-editorial-faint bg-surface-raised rounded-md border border-border-medium shrink-0">
           ⌘K
         </kbd>
       </button>
@@ -232,19 +232,16 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="search-modal-title"
-          className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-neutral-950/25 dark:bg-black/50 backdrop-blur-[2px] animate-in fade-in duration-150"
+          className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-150"
           onClick={() => setIsOpen(false)}
         >
           <div
-            className="w-full max-w-2xl bg-surface-raised/95 backdrop-blur-2xl border border-border-medium ring-1 ring-gold/20 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150"
+            className="w-full max-w-2xl bg-surface border border-border-bold dark:border-border-medium rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Top Accent Gold Line */}
-            <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
-
             {/* Input Header */}
-            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-border-subtle bg-surface/40">
-              <Search className="w-4 h-4 text-gold shrink-0 animate-pulse" />
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-border-medium bg-surface">
+              <Search className="w-4 h-4 text-gold shrink-0" />
               <input
                 ref={inputRef}
                 type="text"
@@ -264,21 +261,21 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
                     setQuery('');
                     setSelectedIndex(0);
                   }}
-                  className="p-1 rounded-lg hover:bg-surface text-editorial-muted hover:text-editorial-title transition-colors"
+                  className="p-1 rounded-lg hover:bg-surface-raised text-editorial-muted hover:text-editorial-title transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
               )}
               <kbd
                 onClick={() => setIsOpen(false)}
-                className="hidden sm:inline-flex px-2 py-0.5 text-[10px] font-mono text-editorial-faint bg-surface border border-border-subtle rounded cursor-pointer hover:text-editorial-title"
+                className="hidden sm:inline-flex px-2 py-0.5 text-[10px] font-mono text-editorial-faint bg-surface-raised border border-border-medium rounded cursor-pointer hover:text-editorial-title"
               >
                 ESC
               </kbd>
             </div>
 
             {/* Category Filter Chips */}
-            <div className="flex items-center gap-1.5 px-4 py-2 bg-surface/80 border-b border-border-subtle overflow-x-auto no-scrollbar text-xs">
+            <div className="flex items-center gap-1.5 px-4 py-2.5 bg-surface-raised border-b border-border-subtle overflow-x-auto no-scrollbar text-xs">
               {[
                 { id: 'all', label: 'Semua', icon: Sparkles },
                 { id: 'manga', label: 'Komik & Manga', icon: BookOpen },
@@ -297,13 +294,13 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
                       setActiveTab(tab.id as CategoryTab);
                       setSelectedIndex(0);
                     }}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all font-medium shrink-0 ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all font-medium shrink-0 ${
                       isActive
-                        ? 'bg-surface-raised text-gold font-semibold shadow-sm'
-                        : 'text-editorial-muted hover:text-editorial-title hover:bg-surface-raised/50'
+                        ? 'bg-surface text-editorial-title font-semibold shadow-sm border border-border-medium'
+                        : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/70 border border-transparent'
                     }`}
                   >
-                    <Icon className="w-3 h-3" />
+                    <Icon className={`w-3 h-3 ${isActive ? 'text-gold' : 'text-editorial-faint'}`} />
                     <span>{tab.label}</span>
                   </button>
                 );
@@ -311,7 +308,7 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
             </div>
 
             {/* Results Canvas */}
-            <div ref={resultsContainerRef} className="max-h-[60vh] overflow-y-auto p-3 space-y-4 bg-background/50">
+            <div ref={resultsContainerRef} className="max-h-[60vh] overflow-y-auto p-3 space-y-4 bg-surface">
               {/* No results empty state */}
               {deferredQuery && totalResults === 0 && matchingActions.length === 0 && (
                 <div className="py-12 text-center text-editorial-muted space-y-1">

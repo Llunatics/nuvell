@@ -86,7 +86,7 @@ export default async function PublisherDetailPage({ params }: PageProps) {
           </div>
           <div>
             <span className="text-[10px] font-mono uppercase text-editorial-faint block">Segera Hadir</span>
-            <p className="text-xl font-bold font-editorial text-purple-400">{upcoming.length} Rilis</p>
+            <p className="text-xl font-bold font-editorial text-burgundy-400">{upcoming.length} Rilis</p>
           </div>
           <div>
             <span className="text-[10px] font-mono uppercase text-editorial-faint block">Lini Imprint</span>

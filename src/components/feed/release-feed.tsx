@@ -323,7 +323,7 @@ export function ReleaseFeed({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex justify-end bg-neutral-950/25 dark:bg-black/50 backdrop-blur-[2px] animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex justify-end bg-background/80 backdrop-blur-md animate-in fade-in duration-200"
           onClick={() => setIsFilterDrawerOpen(false)}
         >
           <div
