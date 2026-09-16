@@ -1,10 +1,12 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { X, ExternalLink, Image as ImageIcon, Calendar, BookOpen, CheckCircle2, Sparkles } from 'lucide-react';
 import { PublisherSocialPost } from '@/types';
 import { formatShortDate } from '@/lib/formatters';
+import { useModalOverlay } from '@/hooks/use-modal-overlay';
 
 interface PublisherPosterModalProps {
   post: PublisherSocialPost | null;
@@ -12,10 +14,16 @@ interface PublisherPosterModalProps {
 }
 
 export function PublisherPosterModal({ post, onClose }: PublisherPosterModalProps) {
-  if (!post) return null;
+  const mounted = useModalOverlay(!!post);
+  if (!post || !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 dark:bg-black/60 backdrop-blur-[2px] transition-all animate-in fade-in duration-200">
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="modal-overlay-scrim flex items-center justify-center p-4 transition-all animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div 
         className="relative w-full max-w-4xl max-h-[90vh] bg-surface-raised border border-border-subtle rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
         onClick={(e) => e.stopPropagation()}
@@ -123,6 +131,7 @@ export function PublisherPosterModal({ post, onClose }: PublisherPosterModalProp
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

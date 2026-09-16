@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Upload,
   ZoomIn,
@@ -16,6 +17,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useModalOverlay } from '@/hooks/use-modal-overlay';
 
 interface AppIconCropperModalProps {
   isOpen: boolean;
@@ -23,7 +25,12 @@ interface AppIconCropperModalProps {
   onSaveIcon?: (iconDataUrl: string, config: { appName: string; packageName: string }) => void;
 }
 
-export function AppIconCropperModal({ isOpen, onClose, onSaveIcon }: AppIconCropperModalProps) {
+export function AppIconCropperModal({
+  isOpen,
+  onClose,
+  onSaveIcon,
+}: AppIconCropperModalProps) {
+  const mounted = useModalOverlay(isOpen);
   const { toast } = useToast();
 
   // App Metadata State
@@ -285,11 +292,19 @@ export function AppIconCropperModal({ isOpen, onClose, onSaveIcon }: AppIconCrop
     });
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/30 dark:bg-black/60 backdrop-blur-[2px] transition-all animate-fadeIn">
-      <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-surface border border-border-subtle rounded-2xl shadow-2xl flex flex-col">
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="modal-overlay-scrim flex items-center justify-center p-4 sm:p-6 transition-all animate-fadeIn"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-surface border border-border-bold dark:border-border-medium rounded-2xl shadow-2xl flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-border-subtle flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -588,6 +603,7 @@ export function AppIconCropperModal({ isOpen, onClose, onSaveIcon }: AppIconCrop
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo, useDeferredValue } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import {
   Search,
@@ -24,6 +25,7 @@ import {
 } from 'lucide-react';
 import { Publication, Series, Publisher } from '@/types';
 import { formatIDR } from '@/lib/formatters';
+import { useModalOverlay } from '@/hooks/use-modal-overlay';
 
 interface SearchDialogProps {
   initialQuery?: string;
@@ -37,6 +39,7 @@ const clientQueryCache = new Map<string, { pubs: Publication[]; series: Series[]
 
 export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
+  const mounted = useModalOverlay(isOpen);
   const [query, setQuery] = useState(initialQuery || '');
   const [activeTab, setActiveTab] = useState<CategoryTab>('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -97,19 +100,14 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
       setTimeout(() => inputRef.current?.focus(), 40);
     } else {
-      document.body.style.overflow = '';
       setQuery('');
       setActiveTab('all');
       setSelectedIndex(0);
       setFilteredPubs([]);
       setFilteredSeries([]);
     }
-    return () => {
-      document.body.style.overflow = '';
-    };
   }, [isOpen]);
 
   // Fetch search results via debounced API query
@@ -227,13 +225,13 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
         </kbd>
       </button>
 
-      {/* Modern Command Palette Overlay */}
-      {isOpen && (
+      {/* Modern Command Palette Overlay - Portaled directly to document.body */}
+      {isOpen && mounted && createPortal(
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="search-modal-title"
-          className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-black/30 dark:bg-black/60 backdrop-blur-[2px] transition-all animate-in fade-in duration-150"
+          className="modal-overlay-scrim flex items-start justify-center pt-16 sm:pt-24 p-4 transition-all animate-in fade-in duration-150"
           onClick={() => setIsOpen(false)}
         >
           <div
@@ -575,7 +573,8 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
               </span>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

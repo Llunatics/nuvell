@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import {
   ChevronLeft,
@@ -17,6 +18,7 @@ import {
 import { Publication } from '@/types';
 import { formatIDR, getReleaseCountdown, formatShortDate } from '@/lib/formatters';
 import { ReleaseCard } from '@/components/books/release-card';
+import { useModalOverlay } from '@/hooks/use-modal-overlay';
 
 interface ReleaseCalendarProps {
   publications: Publication[];
@@ -30,6 +32,7 @@ export function ReleaseCalendar({ publications }: ReleaseCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(8); // 8 is September
   const [selectedDay, setSelectedDay] = useState<number | null>(15);
   const [isDayDrawerOpen, setIsDayDrawerOpen] = useState(false);
+  const mounted = useModalOverlay(isDayDrawerOpen);
   const [formatFilter, setFormatFilter] = useState<string>('ALL');
 
   const monthNames = [
@@ -353,12 +356,12 @@ export function ReleaseCalendar({ publications }: ReleaseCalendarProps) {
         </div>
       )}
 
-      {/* Contextual Slide-Over Drawer for Selected Date */}
-      {isDayDrawerOpen && selectedDay && (
+      {/* Contextual Slide-Over Drawer for Selected Date - Portaled to document.body */}
+      {isDayDrawerOpen && selectedDay && mounted && createPortal(
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex justify-end bg-black/30 dark:bg-black/60 backdrop-blur-[2px] transition-all animate-in fade-in duration-200"
+          className="modal-overlay-scrim flex justify-end transition-all animate-in fade-in duration-200"
           onClick={() => setIsDayDrawerOpen(false)}
         >
           <div
@@ -415,7 +418,8 @@ export function ReleaseCalendar({ publications }: ReleaseCalendarProps) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

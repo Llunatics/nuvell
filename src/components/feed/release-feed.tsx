@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Sparkles,
   LayoutGrid,
@@ -17,6 +18,7 @@ import { Publication, Publisher } from '@/types';
 import { ReleaseCard } from '../books/release-card';
 import { useDisplaySettings } from '@/hooks/use-display-settings';
 import { Tooltip } from '@/components/ui/tooltip';
+import { useModalOverlay } from '@/hooks/use-modal-overlay';
 
 interface ReleaseFeedProps {
   initialPublications: Publication[];
@@ -41,6 +43,7 @@ export function ReleaseFeed({
 
   // Advanced filters state (inside drawer)
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const mounted = useModalOverlay(isFilterDrawerOpen);
   const [selectedPublisher, setSelectedPublisher] = useState<string>('ALL');
   const [selectedFormat, setSelectedFormat] = useState<string>('ALL');
   const [priceMax, setPriceMax] = useState<number>(500000);
@@ -318,12 +321,12 @@ export function ReleaseFeed({
         </div>
       )}
 
-      {/* Advanced Filter Slide-Over Drawer */}
-      {isFilterDrawerOpen && (
+      {/* Advanced Filter Slide-Over Drawer - Portaled to document.body */}
+      {isFilterDrawerOpen && mounted && createPortal(
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex justify-end bg-black/30 dark:bg-black/60 backdrop-blur-[2px] transition-all animate-in fade-in duration-200"
+          className="modal-overlay-scrim flex justify-end transition-all animate-in fade-in duration-200"
           onClick={() => setIsFilterDrawerOpen(false)}
         >
           <div
@@ -378,37 +381,37 @@ export function ReleaseFeed({
                   className="w-full bg-surface px-3 py-2 rounded-xl border border-border-subtle text-xs text-editorial-title focus:outline-none focus:ring-1 focus:ring-gold"
                 >
                   <option value="ALL">Semua Format</option>
-                  <option value="TANKOBON">Tankobon (Standar Manga)</option>
-                  <option value="KANZENBAN">Kanzenban (Edisi Spesial)</option>
-                  <option value="PAPERBACK">Paperback / Softcover</option>
-                  <option value="HARDCOVER">Hardcover (Kolektor)</option>
+                  <option value="TANKOBON">Manga Tankobon</option>
+                  <option value="PAPERBACK">Paperback / Novel Reguler</option>
+                  <option value="HARDCOVER">Hardcover Kolektor</option>
+                  <option value="BUNKOBAN">Bunkoban</option>
                 </select>
               </div>
 
               {/* Filter 3: Maximum Price Range */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-mono text-editorial-faint uppercase tracking-wider">
+                  <label className="font-mono text-editorial-faint uppercase tracking-wider">
                     Batas Harga Maksimal
-                  </span>
-                  <span className="font-mono font-semibold text-gold">
-                    {priceMax >= 500000 ? 'Tanpa Batas' : `Rp ${priceMax.toLocaleString('id-ID')}`}
+                  </label>
+                  <span className="font-mono text-gold font-bold">
+                    Rp {priceMax.toLocaleString('id-ID')}
                   </span>
                 </div>
                 <input
                   type="range"
-                  min={30000}
-                  max={500000}
-                  step={10000}
+                  min="20000"
+                  max="500000"
+                  step="5000"
                   value={priceMax}
                   onChange={(e) => setPriceMax(Number(e.target.value))}
-                  className="w-full accent-gold cursor-pointer"
+                  className="w-full accent-gold bg-surface-sunken rounded-lg h-2"
                 />
               </div>
 
-              {/* Filter 4: Availability */}
-              <div className="pt-2">
-                <label className="flex items-center gap-2.5 cursor-pointer text-xs text-editorial-title">
+              {/* Filter 4: Available Only Toggle */}
+              <div className="pt-2 border-t border-border-subtle">
+                <label className="flex items-center gap-3 cursor-pointer text-xs text-editorial-body hover:text-editorial-title">
                   <input
                     type="checkbox"
                     checked={onlyAvailable}
@@ -438,7 +441,8 @@ export function ReleaseFeed({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
   );
