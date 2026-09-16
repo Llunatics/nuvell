@@ -76,16 +76,16 @@ export function HomeFeedClient({
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-gold uppercase tracking-wider">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Radar Terbitan Resmi • Zona Waktu Asia/Jakarta (WIB)
+            Rilis Pekan Ini • WIB
           </div>
           <h1 className="font-editorial text-3xl sm:text-4xl lg:text-5xl font-extrabold text-editorial-title tracking-tight leading-tight">
-            Katalog & Jadwal Rilis Terverifikasi. <br />
+            Jadwal Rilis Buku & Manga <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-editorial-title via-gold to-amber-500">
-              Pantau kepastian tanggal edar buku, komik manga, dan novel pekan ini.
+              Pekan Ini di Indonesia.
             </span>
           </h1>
-          <p className="text-xs sm:text-sm text-editorial-muted max-w-2xl">
-            Pusat pantauan terbitan fisik dari seluruh penerbit resmi di Indonesia dengan kepastian tanggal beredar di toko buku.
+          <p className="text-xs sm:text-sm text-editorial-muted max-w-xl">
+            Cek tanggal edar resmi buku, komik, dan novel favoritmu dari berbagai penerbit.
           </p>
         </div>
 
@@ -139,10 +139,10 @@ export function HomeFeedClient({
               <Bookmark className="w-4 h-4 text-gold" />
               <div>
                 <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
-                  Dari Watchlist Anda
+                  Watchlist Kamu
                 </h2>
                 <p className="text-xs text-editorial-muted">
-                  Buku & manga dari judul serta penerbit yang Anda ikuti
+                  Judul dan penerbit yang kamu ikuti
                 </p>
               </div>
             </div>
@@ -169,10 +169,10 @@ export function HomeFeedClient({
             <Flame className="w-4 h-4 text-emerald-400" />
             <div>
               <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
-                Rilis Terbaru
+                Baru Terbit
               </h2>
               <p className="text-xs text-editorial-muted">
-                Buku fisik & komik resmi beredar di toko buku per September 2026
+                Sudah beredar di toko buku pekan ini
               </p>
             </div>
           </div>
@@ -198,10 +198,10 @@ export function HomeFeedClient({
             <Clock className="w-4 h-4 text-burgundy-400" />
             <div>
               <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
-                Akan Segera Terbit
+                Segera Hadir
               </h2>
               <p className="text-xs text-editorial-muted">
-                Jadwal rilis terkonfirmasi & pembukaan pre-order akhir September hingga Oktober 2026
+                Jadwal rilis dan pre-order mendatang
               </p>
             </div>
           </div>
@@ -226,11 +226,16 @@ export function HomeFeedClient({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Radio className="w-4 h-4 text-gold" />
-              <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
-                Pengumuman Resmi Penerbit
-              </h2>
+              <div>
+                <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
+                  Kabar Penerbit
+                </h2>
+                <p className="text-xs text-editorial-muted">
+                  Update langsung dari kanal resmi penerbit
+                </p>
+              </div>
             </div>
-            <span className="text-xs text-editorial-faint font-mono">Official Aggregated Feed</span>
+            <span className="text-xs text-editorial-faint font-mono">Feed Resmi</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -253,7 +258,7 @@ export function HomeFeedClient({
                 </div>
                 <div className="pt-3 border-t border-border-subtle flex items-center justify-between">
                   <span className="text-[11px] text-editorial-faint">
-                    Sumber Media Sosial Terverifikasi
+                    Kanal Resmi
                   </span>
                   <a
                     href={ann.sourceUrl}
@@ -261,7 +266,7 @@ export function HomeFeedClient({
                     rel="noreferrer"
                     className="text-xs text-gold hover:underline inline-flex items-center gap-1"
                   >
-                    Buka Pengumuman ↗
+                    Lihat postingan ↗
                   </a>
                 </div>
               </div>
@@ -276,13 +281,13 @@ export function HomeFeedClient({
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-mono text-gold mb-1">
               <Layers className="w-3.5 h-3.5" />
-              SERIES TRACKER
+              PELACAK SERI
             </div>
             <h2 className="font-editorial text-xl sm:text-2xl font-bold text-editorial-title">
-              Lacak Kelengkapan Volume Seri
+              Kelengkapan Koleksi Seri
             </h2>
             <p className="text-xs text-editorial-muted mt-0.5">
-              Pantau nomor jilid yang telah rilis resmi, volume yang belum Anda miliki, dan rilis berikutnya.
+              Cek nomor volume yang sudah terbit dan lengkapi koleksimu.
             </p>
           </div>
           <Link
@@ -324,7 +329,7 @@ export function HomeFeedClient({
           <div className="flex items-center gap-2">
             <Building2 className="w-4 h-4 text-editorial-muted" />
             <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
-              Penerbit Resmi Indonesia
+              Penerbit Buku & Komik
             </h2>
           </div>
           <Link
@@ -348,7 +353,7 @@ export function HomeFeedClient({
               <h3 className="text-xs font-semibold text-editorial-title group-hover:text-gold transition-colors line-clamp-1">
                 {pub.name}
               </h3>
-              <span className="text-[10px] text-editorial-faint font-mono">Terverifikasi</span>
+              <span className="text-[10px] text-editorial-faint font-mono">Resmi</span>
             </Link>
           ))}
         </div>

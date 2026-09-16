@@ -190,7 +190,7 @@ export function Sidebar() {
       {/* Minimal Footer Status - Discreet & Quiet */}
       <div className={`pt-4 border-t border-border-subtle w-full ${sidebarCollapsed ? 'flex justify-center' : ''}`}>
         {sidebarCollapsed ? (
-          <Tooltip content="Data terverifikasi penerbit resmi (WIB)" side="right">
+          <Tooltip content="Jadwal resmi terbitan Indonesia (WIB)" side="right">
             <div className="p-2 text-editorial-faint hover:text-gold transition-colors">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
             </div>
@@ -200,12 +200,12 @@ export function Sidebar() {
             <div className="flex items-center justify-between">
               <span className="text-editorial-muted font-medium flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Data Terverifikasi
+                Jadwal Resmi
               </span>
               <span className="font-mono text-[10px]">WIB</span>
             </div>
             <p className="text-[10px] text-editorial-faint line-clamp-1">
-              Agregasi etis penerbit Indonesia
+              Penerbit buku & manga Indonesia
             </p>
           </div>
         )}

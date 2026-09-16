@@ -75,13 +75,13 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
       <div className="space-y-2">
         <div className="inline-flex items-center gap-2 text-xs font-mono text-gold uppercase tracking-wider">
           <Sparkles className="w-3.5 h-3.5" />
-          PUSAT EKSPLORASI TERBITAN INDONESIA
+          Eksplorasi Katalog
         </div>
         <h1 className="font-editorial text-2xl sm:text-3xl lg:text-4xl font-extrabold text-editorial-title">
           Discover
         </h1>
-        <p className="text-xs sm:text-sm text-editorial-muted max-w-2xl leading-relaxed">
-          Eksplorasi rilisan baru, seri populer, direktori penerbit terverifikasi, dan genre buku favorit Anda di satu tempat.
+        <p className="text-xs sm:text-sm text-editorial-muted max-w-xl leading-relaxed">
+          Jelajahi rilisan terbaru, kelanjutan seri, genre favorit, dan profil penerbit.
         </p>
       </div>
 
@@ -240,7 +240,7 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
                         {p.name[0]}
                       </div>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        Terverifikasi
+                        Resmi
                       </span>
                     </div>
                     <div>

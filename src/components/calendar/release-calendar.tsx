@@ -146,13 +146,13 @@ export function ReleaseCalendar({ publications }: ReleaseCalendarProps) {
         <div>
           <div className="inline-flex items-center gap-2 text-xs font-mono text-gold uppercase tracking-wider mb-1">
             <CalendarIcon className="w-3.5 h-3.5" />
-            JADWAL RILIS ASIA/JAKARTA (WIB)
+            KALENDER RILIS • WIB
           </div>
           <h1 className="font-editorial text-2xl sm:text-3xl lg:text-4xl font-extrabold text-editorial-title">
             {monthNames[currentMonth]} {currentYear}
           </h1>
           <p className="text-xs text-editorial-muted mt-0.5">
-            Jadwal rilis terverifikasi buku cetak, komik, dan light novel di Indonesia
+            Jadwal terbit buku cetak, manga, dan novel di Indonesia
           </p>
         </div>
 
@@ -372,7 +372,7 @@ export function ReleaseCalendar({ publications }: ReleaseCalendarProps) {
               <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
                 <div>
                   <span className="text-[11px] font-mono text-gold uppercase tracking-wider block">
-                    Jadwal Terbit Terverifikasi
+                    Rilis Buku & Manga
                   </span>
                   <h2 className="font-editorial text-xl font-bold text-editorial-title">
                     {selectedDay} {monthNames[currentMonth]} {currentYear}

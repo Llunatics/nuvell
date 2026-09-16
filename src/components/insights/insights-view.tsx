@@ -128,13 +128,13 @@ export function InsightsView({ publications, publishers, sources }: InsightsView
       <div className="space-y-2">
         <div className="inline-flex items-center gap-2 text-xs font-mono text-gold uppercase tracking-wider">
           <LineChartIcon className="w-3.5 h-3.5" />
-          PASAR & INTELIJEN TERBITAN BUKU INDONESIA
+          Statistik & Tren Buku
         </div>
         <h1 className="font-editorial text-2xl sm:text-3xl lg:text-4xl font-extrabold text-editorial-title">
           Insights
         </h1>
-        <p className="text-xs sm:text-sm text-editorial-muted max-w-2xl leading-relaxed">
-          Analisis editorial dan tren agregasi resmi penerbit: distribusi format, dinamika harga ritel, pergeseran tanggal edar, dan aktivitas terverifikasi.
+        <p className="text-xs sm:text-sm text-editorial-muted max-w-xl leading-relaxed">
+          Statistik penerbitan buku di Indonesia: sebaran format, rata-rata harga, dan tren rilis mingguan.
         </p>
       </div>
 
