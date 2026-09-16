@@ -10,15 +10,27 @@ export const metadata: Metadata = {
 };
 
 export default function InsightsPage() {
-  const publications = dataService.getAllPublications();
+  const rawPublications = dataService.getAllPublications();
   const publishers = dataService.getAllPublishers();
   const sources = dataService.getAllSources();
+
+  // Lightweight projection with only data required for charts and trend statistics
+  const publications = rawPublications.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    publisherId: p.publisherId,
+    publisherName: p.publisherName,
+    format: p.format,
+    currentPrice: p.currentPrice,
+    changes: p.changes || [],
+  }));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
       <Suspense fallback={<div className="py-20 text-center text-xs text-editorial-faint">Memuat Insights...</div>}>
         <InsightsView
-          publications={publications}
+          publications={publications as any}
           publishers={publishers}
           sources={sources}
         />

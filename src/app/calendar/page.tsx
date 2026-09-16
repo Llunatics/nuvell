@@ -10,25 +10,28 @@ export const metadata: Metadata = {
 };
 
 export default function CalendarPage() {
-  // Pass lightweight publications to eliminate multi-megabyte nested arrays (priceHistory, sources, changes)
-  const publications = dataService.getAllPublications().map((p) => ({
-    id: p.id,
-    slug: p.slug,
-    title: p.title,
-    volume: p.volume,
-    coverImage: p.coverImage,
-    releaseDate: p.releaseDate,
-    status: p.status,
-    format: p.format,
-    genres: p.genres,
-    currentPrice: p.currentPrice,
-    publisherName: p.publisherName,
-    language: p.language,
-    authors: p.authors,
-    sources: [],
-    priceHistory: [],
-    changes: [],
-  }));
+  // Pass lightweight publications with valid release dates for the calendar
+  const publications = dataService
+    .getAllPublications()
+    .filter((p) => p.releaseDate && p.releaseDate >= '2025-01-01' && p.releaseDate <= '2027-12-31')
+    .map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      title: p.title,
+      volume: p.volume,
+      coverImage: p.coverImage,
+      releaseDate: p.releaseDate,
+      status: p.status,
+      format: p.format,
+      genres: p.genres,
+      currentPrice: p.currentPrice,
+      publisherName: p.publisherName,
+      language: p.language,
+      authors: p.authors,
+      sources: [],
+      priceHistory: [],
+      changes: [],
+    }));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12">

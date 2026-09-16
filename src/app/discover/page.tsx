@@ -12,9 +12,10 @@ export const metadata: Metadata = {
 export default function DiscoverPage() {
   const allPublications = dataService.getAllPublications();
   const publishers = dataService.getAllPublishers();
-  const series = dataService.getAllSeries();
+  const allSeries = dataService.getAllSeries();
 
-  const publications = allPublications.map((p) => ({
+  // Curate latest and upcoming publications for feed (400 items covers 16+ pages of feed results)
+  const publications = allPublications.slice(0, 400).map((p) => ({
     id: p.id,
     slug: p.slug,
     title: p.title,
@@ -35,6 +36,11 @@ export default function DiscoverPage() {
     priceHistory: [],
     changes: [],
   }));
+
+  // Curate active series with covers or multi-volumes (120 series)
+  const series = allSeries
+    .filter((s) => s.coverUrl || (s.totalVolumes && s.totalVolumes > 1))
+    .slice(0, 120);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12">

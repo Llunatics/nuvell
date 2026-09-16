@@ -12,11 +12,11 @@ export const metadata: Metadata = {
 export default function HomePage() {
   const allPublications = dataService.getAllPublications();
   const publishers = dataService.getAllPublishers();
-  const series = dataService.getAllSeries();
+  const allSeries = dataService.getAllSeries();
   const announcements = dataService.getAllAnnouncements();
 
-  // Pass lightweight publications to avoid huge payload overhead
-  const publications = allPublications.map((p) => ({
+  // Curate active publications for home showcase (top 250 items covering today, upcoming, and fresh releases)
+  const publications = allPublications.slice(0, 250).map((p) => ({
     id: p.id,
     slug: p.slug,
     title: p.title,
@@ -38,6 +38,9 @@ export default function HomePage() {
     priceHistory: [],
     changes: [],
   }));
+
+  // Curate featured series with covers (30 series)
+  const series = allSeries.filter((s) => s.coverUrl).slice(0, 30);
 
   return (
     <HomeFeedClient
