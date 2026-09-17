@@ -72,27 +72,27 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
   return (
     <div className="space-y-8">
       {/* Editorial Page Header */}
-      <div className="space-y-2">
-        <div className="inline-flex items-center gap-2 text-xs font-mono text-gold uppercase tracking-wider">
+      <div className="space-y-1.5">
+        <div className="inline-flex items-center gap-1.5 text-[11px] font-mono text-gold uppercase tracking-wider">
           <Sparkles className="w-3.5 h-3.5" />
-          Eksplorasi Katalog
+          <span>Eksplorasi Katalog</span>
         </div>
-        <h1 className="font-editorial text-2xl sm:text-3xl lg:text-4xl font-extrabold text-editorial-title">
-          Discover
+        <h1 className="font-editorial text-2xl sm:text-3xl lg:text-4xl font-extrabold text-editorial-title tracking-tight">
+          DISCOVER
         </h1>
         <p className="text-xs sm:text-sm text-editorial-muted max-w-xl leading-relaxed">
-          Jelajahi rilisan terbaru, kelanjutan seri, genre favorit, dan profil penerbit.
+          Eksplorasi rilisan baru, seri komik, profil penerbit, dan jadwal rilis mendatang.
         </p>
       </div>
 
-      {/* Tabs Navigation Segmented Bar */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-surface-raised rounded-2xl border border-border-subtle overflow-x-auto no-scrollbar shadow-sm">
+      {/* Tabs Navigation: Horizontal Scrollable Strip */}
+      <div className="flex items-center gap-1.5 p-1 bg-surface-raised rounded-2xl border border-border-subtle overflow-x-auto no-scrollbar shadow-xs -mx-1 px-1">
         {[
-          { id: 'latest', label: 'Rilisan Terbaru', icon: Flame },
-          { id: 'upcoming', label: 'Akan Datang', icon: Clock },
-          { id: 'series', label: `Seri & Komik (${series.length})`, icon: Layers },
-          { id: 'publishers', label: `Penerbit (${publishers.length})`, icon: Building2 },
-          { id: 'genres', label: 'Genre & Kategori', icon: Tag },
+          { id: 'latest', label: 'Terbaru', fullLabel: 'Rilisan Terbaru', icon: Flame },
+          { id: 'upcoming', label: 'Akan Datang', fullLabel: 'Akan Datang', icon: Clock },
+          { id: 'series', label: 'Seri', fullLabel: `Seri (${series.length})`, icon: Layers },
+          { id: 'publishers', label: 'Penerbit', fullLabel: `Penerbit (${publishers.length})`, icon: Building2 },
+          { id: 'genres', label: 'Genre', fullLabel: 'Genre & Kategori', icon: Tag },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -101,14 +101,15 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as DiscoverTab)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-all shrink-0 ${
+              className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-medium transition-all shrink-0 active:scale-95 ${
                 isActive
-                  ? 'bg-surface text-editorial-title font-semibold shadow-sm border border-border-subtle'
+                  ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-border-subtle'
                   : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
               }`}
             >
               <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-gold' : 'text-editorial-faint'}`} />
-              <span>{tab.label}</span>
+              <span className="sm:hidden">{tab.label}</span>
+              <span className="hidden sm:inline">{tab.fullLabel}</span>
             </button>
           );
         })}

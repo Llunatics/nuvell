@@ -11,6 +11,7 @@ import {
   X,
   Sparkles,
   ArrowRight,
+  ArrowLeft,
   Globe,
   BookOpen,
   Feather,
@@ -211,13 +212,13 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-medium hover:border-gold/50 text-editorial-muted hover:text-editorial-title transition-all text-xs sm:text-sm group shadow-sm focus:outline-none focus:ring-1 focus:ring-gold"
+        className="w-full flex items-center justify-between px-3.5 py-2.5 sm:py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-medium hover:border-gold/50 text-editorial-muted hover:text-editorial-title transition-all text-xs sm:text-sm group shadow-sm focus:outline-none focus:ring-1 focus:ring-gold"
         aria-label="Cari buku, manga, komik, atau penerbit (Cmd+K)"
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          <Search className="w-3.5 h-3.5 text-editorial-muted group-hover:text-gold transition-colors shrink-0" />
+          <Search className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-editorial-muted group-hover:text-gold transition-colors shrink-0" />
           <span className="truncate text-editorial-muted group-hover:text-editorial-body text-xs font-normal">
-            Cari judul buku, manga, ISBN, penerbit...
+            Cari judul, manga, ISBN, penerbit...
           </span>
         </div>
         <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 text-[10px] font-mono font-medium text-editorial-faint bg-surface-raised rounded-md border border-border-medium shrink-0">
@@ -231,19 +232,29 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="search-modal-title"
-          className="modal-overlay-scrim flex items-start justify-center pt-16 sm:pt-24 p-4 transition-all animate-in fade-in duration-150"
+          className="modal-overlay-scrim flex items-stretch sm:items-start justify-center p-0 sm:p-4 sm:pt-20 transition-all animate-in fade-in duration-150"
           onClick={() => setIsOpen(false)}
         >
           <div
-            className="w-full max-w-2xl bg-surface border border-border-bold dark:border-border-medium rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150"
+            className="w-full h-full sm:h-auto sm:max-h-[85vh] sm:max-w-2xl bg-surface sm:border sm:border-border-bold dark:sm:border-border-medium sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in duration-150 pt-safe pb-safe sm:pt-0 sm:pb-0"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Input Header */}
-            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-border-medium bg-surface">
+            <div className="flex items-center gap-2.5 px-3 sm:px-4 py-3 sm:py-3.5 border-b border-border-medium bg-surface shrink-0">
+              {/* Mobile Back Button */}
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="sm:hidden p-2 -ml-1 text-editorial-muted hover:text-editorial-title rounded-lg active:scale-95 transition-all"
+                aria-label="Tutup pencarian"
+              >
+                <ArrowLeft className="w-5 h-5 text-editorial-title" />
+              </button>
+
               {isLoading ? (
-                <Loader2 className="w-4 h-4 text-gold animate-spin shrink-0" />
+                <Loader2 className="w-4 h-4 text-gold animate-spin shrink-0 hidden sm:block" />
               ) : (
-                <Search className="w-4 h-4 text-gold shrink-0" />
+                <Search className="w-4 h-4 text-gold shrink-0 hidden sm:block" />
               )}
               <input
                 ref={inputRef}
@@ -254,13 +265,13 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
                   setSelectedIndex(0);
                 }}
                 onKeyDown={handleInputKeyDown}
-                placeholder="Ketik judul buku, manga, volume, ISBN, atau nama penulis..."
-                className="w-full bg-transparent text-editorial-title placeholder:text-editorial-faint text-base sm:text-lg focus:outline-none font-medium"
+                placeholder="Cari judul, manga, ISBN, penerbit..."
+                className="w-full bg-transparent text-editorial-title placeholder:text-editorial-faint text-base focus:outline-none font-medium"
               />
               {isLoading && (
-                <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium text-gold bg-gold/10 border border-gold/30 shrink-0">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium text-gold bg-gold/10 border border-gold/30 shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-                  Mengindeks
+                  <span className="hidden sm:inline">Mengindeks</span>
                 </span>
               )}
               {query && (
@@ -270,7 +281,8 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
                     setQuery('');
                     setSelectedIndex(0);
                   }}
-                  className="p-1 rounded-lg hover:bg-surface-raised text-editorial-muted hover:text-editorial-title transition-colors"
+                  className="p-2 rounded-lg hover:bg-surface-raised text-editorial-muted hover:text-editorial-title transition-colors"
+                  aria-label="Bersihkan input"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -317,7 +329,7 @@ export function SearchDialog({ initialQuery }: SearchDialogProps = {}) {
             </div>
 
             {/* Results Canvas */}
-            <div ref={resultsContainerRef} className="max-h-[60vh] overflow-y-auto p-3 space-y-4 bg-surface">
+            <div ref={resultsContainerRef} className="flex-1 sm:max-h-[60vh] overflow-y-auto p-3 sm:p-4 space-y-4 bg-surface">
               {/* Professional Indexing Telemetry State */}
               {isLoading && totalResults === 0 && (
                 <div className="py-6 px-3 space-y-4 animate-in fade-in duration-200">

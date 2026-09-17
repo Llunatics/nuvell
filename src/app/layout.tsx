@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
@@ -6,6 +6,17 @@ import { MobileNav } from '@/components/layout/mobile-nav';
 import { DisplaySettingsProvider } from '@/hooks/use-display-settings';
 import { ToastProvider } from '@/hooks/use-toast';
 import Link from 'next/link';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F7F8FA' },
+    { media: '(prefers-color-scheme: dark)', color: '#090B0E' },
+  ],
+};
 
 export const metadata: Metadata = {
   title: 'nuvell — Indonesia Book Release Tracker',
@@ -45,7 +56,7 @@ export default function RootLayout({
               <Sidebar />
 
               {/* Main App Content Canvas */}
-              <div className="flex-1 flex flex-col min-w-0 pb-16 lg:pb-0">
+              <div className="flex-1 flex flex-col min-w-0 pb-20 lg:pb-0">
                 <Header />
                 <main className="flex-1">
                   {children}

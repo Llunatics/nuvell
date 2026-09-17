@@ -150,99 +150,171 @@ export function ReleaseFeed({
   const visibleItems = filteredItems.slice(0, displayLimit);
 
   return (
-    <section className="space-y-6">
-      {/* Feed Control Bar: Minimal & Intentional */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="font-editorial text-xl sm:text-2xl font-bold text-editorial-title">
-            {title}
-          </h2>
-          <p className="text-xs text-editorial-muted mt-0.5">
-            {description} • {filteredItems.length} judul
-          </p>
-        </div>
-
-        {/* Action Controls: Sort, Filter Drawer Trigger, Grid/List Toggle */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          {/* Sort Dropdown */}
-          <div className="flex items-center gap-1.5 bg-surface px-3 py-1.5 rounded-xl border border-border-subtle text-xs text-editorial-body shadow-sm">
-            <ArrowUpDown className="w-3.5 h-3.5 text-gold" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="bg-transparent focus:outline-none cursor-pointer text-xs"
-              aria-label="Urutkan publikasi"
-            >
-              <option value="NEWEST_RELEASE" className="bg-surface">Rilis Terbaru</option>
-              <option value="OLDEST_RELEASE" className="bg-surface">Rilis Terlama</option>
-              <option value="RECENTLY_UPDATED" className="bg-surface">Baru Diperbarui</option>
-              <option value="PRICE_ASC" className="bg-surface">Harga Terendah</option>
-              <option value="PRICE_DESC" className="bg-surface">Harga Tertinggi</option>
-              <option value="TITLE_ASC" className="bg-surface">Judul (A-Z)</option>
-            </select>
+    <section className="space-y-5 sm:space-y-6">
+      {/* Feed Control Bar: Clean & Responsive */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-editorial text-lg sm:text-2xl font-bold text-editorial-title">
+              {title}
+            </h2>
+            <p className="text-[11px] sm:text-xs text-editorial-muted mt-0.5">
+              {description} • {filteredItems.length} judul
+            </p>
           </div>
 
-          {/* Filter Drawer Trigger Button */}
-          <button
-            type="button"
-            onClick={() => setIsFilterDrawerOpen(true)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all shadow-sm ${
-              activeFiltersCount > 0
-                ? 'bg-gold/15 text-gold border-gold/40'
-                : 'bg-surface border-border-subtle text-editorial-muted hover:text-editorial-title hover:bg-surface-raised'
-            }`}
-          >
-            <Filter className="w-3.5 h-3.5" />
-            <span>Filter</span>
-            {activeFiltersCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-gold text-background text-[10px] font-bold flex items-center justify-center font-mono">
-                {activeFiltersCount}
-              </span>
-            )}
-          </button>
-
-          {/* View Mode Toggle Segmented Control with Tooltip */}
-          <div className="flex items-center bg-surface p-1 rounded-xl border border-border-subtle shadow-sm">
-            <Tooltip content="Tampilan Kisi (Grid)">
-              <button
-                type="button"
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-all ${
-                  viewMode === 'grid'
-                    ? 'bg-surface-raised text-gold shadow-sm border border-border-subtle'
-                    : 'text-editorial-faint hover:text-editorial-title'
-                }`}
-                aria-label="Tampilan Kisi"
+          {/* Desktop Controls (hidden on mobile) */}
+          <div className="hidden sm:flex items-center gap-2.5">
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-1.5 bg-surface px-3 py-1.5 rounded-xl border border-border-subtle text-xs text-editorial-body shadow-xs">
+              <ArrowUpDown className="w-3.5 h-3.5 text-gold" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="bg-transparent focus:outline-none cursor-pointer text-xs"
+                aria-label="Urutkan publikasi"
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
-              </button>
-            </Tooltip>
+                <option value="NEWEST_RELEASE" className="bg-surface">Rilis Terbaru</option>
+                <option value="OLDEST_RELEASE" className="bg-surface">Rilis Terlama</option>
+                <option value="RECENTLY_UPDATED" className="bg-surface">Baru Diperbarui</option>
+                <option value="PRICE_ASC" className="bg-surface">Harga Terendah</option>
+                <option value="PRICE_DESC" className="bg-surface">Harga Tertinggi</option>
+                <option value="TITLE_ASC" className="bg-surface">Judul (A-Z)</option>
+              </select>
+            </div>
 
-            <Tooltip content="Tampilan Daftar (List)">
-              <button
-                type="button"
-                onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded-lg transition-all ${
-                  viewMode === 'list'
-                    ? 'bg-surface-raised text-gold shadow-sm border border-border-subtle'
-                    : 'text-editorial-faint hover:text-editorial-title'
-                }`}
-                aria-label="Tampilan Daftar"
+            {/* Filter Drawer Trigger Button */}
+            <button
+              type="button"
+              onClick={() => setIsFilterDrawerOpen(true)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all shadow-xs ${
+                activeFiltersCount > 0
+                  ? 'bg-gold/15 text-gold border-gold/40 font-semibold'
+                  : 'bg-surface border-border-subtle text-editorial-muted hover:text-editorial-title hover:bg-surface-raised'
+              }`}
+            >
+              <Filter className="w-3.5 h-3.5" />
+              <span>Filter</span>
+              {activeFiltersCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-gold text-background text-[10px] font-bold flex items-center justify-center font-mono">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
+
+            {/* View Mode Toggle Segmented Control with Tooltip */}
+            <div className="flex items-center bg-surface p-1 rounded-xl border border-border-subtle shadow-xs">
+              <Tooltip content="Tampilan Kisi (Grid)">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('grid')}
+                  className={`p-1.5 rounded-lg transition-all ${
+                    viewMode === 'grid'
+                      ? 'bg-surface-raised text-gold shadow-xs border border-border-subtle'
+                      : 'text-editorial-faint hover:text-editorial-title'
+                  }`}
+                  aria-label="Tampilan Kisi"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </button>
+              </Tooltip>
+
+              <Tooltip content="Tampilan Daftar (List)">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('list')}
+                  className={`p-1.5 rounded-lg transition-all ${
+                    viewMode === 'list'
+                      ? 'bg-surface-raised text-gold shadow-xs border border-border-subtle'
+                      : 'text-editorial-faint hover:text-editorial-title'
+                  }`}
+                  aria-label="Tampilan Daftar"
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+              </Tooltip>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Action Controls: Compact [ Sort ] [ Filter ] on left, View Toggle on right */}
+        <div className="flex sm:hidden items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            {/* Mobile Sort Dropdown */}
+            <div className="relative flex items-center bg-surface px-2.5 py-1.5 rounded-xl border border-border-subtle text-xs text-editorial-title shadow-xs">
+              <ArrowUpDown className="w-3.5 h-3.5 text-gold mr-1.5 shrink-0" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="bg-transparent focus:outline-none cursor-pointer text-xs font-medium pr-1"
+                aria-label="Urutkan publikasi"
               >
-                <List className="w-3.5 h-3.5" />
-              </button>
-            </Tooltip>
+                <option value="NEWEST_RELEASE" className="bg-surface">Rilis Terbaru</option>
+                <option value="OLDEST_RELEASE" className="bg-surface">Rilis Terlama</option>
+                <option value="RECENTLY_UPDATED" className="bg-surface">Baru Diperbarui</option>
+                <option value="PRICE_ASC" className="bg-surface">Termurah</option>
+                <option value="PRICE_DESC" className="bg-surface">Termahal</option>
+                <option value="TITLE_ASC" className="bg-surface">A-Z</option>
+              </select>
+            </div>
+
+            {/* Mobile Filter Sheet Button */}
+            <button
+              type="button"
+              onClick={() => setIsFilterDrawerOpen(true)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all shadow-xs active:scale-95 ${
+                activeFiltersCount > 0
+                  ? 'bg-gold/15 text-gold border-gold/40 font-semibold'
+                  : 'bg-surface border-border-subtle text-editorial-muted hover:text-editorial-title'
+              }`}
+            >
+              <Filter className="w-3.5 h-3.5" />
+              <span>Filter</span>
+              {activeFiltersCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-gold text-background text-[10px] font-bold flex items-center justify-center font-mono">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* View Mode Toggle on Mobile */}
+          <div className="flex items-center bg-surface p-1 rounded-xl border border-border-subtle shadow-xs">
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className={`p-1.5 rounded-lg transition-all ${
+                viewMode === 'grid'
+                  ? 'bg-surface-raised text-gold shadow-xs border border-border-subtle'
+                  : 'text-editorial-faint'
+              }`}
+              aria-label="Tampilan Kisi"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-lg transition-all ${
+                viewMode === 'list'
+                  ? 'bg-surface-raised text-gold shadow-xs border border-border-subtle'
+                  : 'text-editorial-faint'
+              }`}
+              aria-label="Tampilan Daftar"
+            >
+              <List className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </div>
 
       {/* Quick Category Chips Strip */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 text-xs">
         {[
-          { id: 'ALL', label: 'Semua Rilisan' },
+          { id: 'ALL', label: 'Semua' },
           { id: 'NEW', label: 'Baru Rilis' },
           { id: 'UPCOMING', label: 'Akan Datang' },
-          { id: 'MANGA', label: 'Manga & Komik' },
+          { id: 'MANGA', label: 'Manga' },
           { id: 'LIGHT_NOVEL', label: 'Light Novel' },
           { id: 'NOVEL', label: 'Novel' },
         ].map((item) => {
@@ -252,9 +324,9 @@ export function ReleaseFeed({
               key={item.id}
               type="button"
               onClick={() => setQuickCategory(item.id as QuickCategory)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all shrink-0 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all shrink-0 active:scale-95 ${
                 isActive
-                  ? 'bg-editorial-title text-background font-semibold shadow-sm border border-editorial-title'
+                  ? 'bg-editorial-title text-background font-semibold shadow-xs border border-editorial-title'
                   : 'bg-surface border border-border-subtle text-editorial-muted hover:text-editorial-title hover:bg-surface-raised'
               }`}
             >
@@ -262,19 +334,78 @@ export function ReleaseFeed({
             </button>
           );
         })}
+      </div>
 
-        {/* Active Filter Chips indicator */}
-        {activeFiltersCount > 0 && (
+      {/* Active Filter Chips: Horizontal scrolling strip (Requirement 10) */}
+      {(quickCategory !== 'ALL' || activeFiltersCount > 0) && (
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 text-xs">
+          {quickCategory !== 'ALL' && (
+            <button
+              type="button"
+              onClick={() => setQuickCategory('ALL')}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface border border-gold/40 text-gold text-[11px] font-medium shrink-0 active:scale-95"
+            >
+              <span>{quickCategory}</span>
+              <X className="w-3 h-3 text-gold/80" />
+            </button>
+          )}
+
+          {selectedPublisher !== 'ALL' && (
+            <button
+              type="button"
+              onClick={() => setSelectedPublisher('ALL')}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface border border-gold/40 text-gold text-[11px] font-medium shrink-0 active:scale-95"
+            >
+              <span className="truncate max-w-[130px]">
+                {publishers.find((p) => p.id === selectedPublisher)?.name || 'Penerbit'}
+              </span>
+              <X className="w-3 h-3 text-gold/80" />
+            </button>
+          )}
+
+          {selectedFormat !== 'ALL' && (
+            <button
+              type="button"
+              onClick={() => setSelectedFormat('ALL')}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface border border-gold/40 text-gold text-[11px] font-medium shrink-0 active:scale-95"
+            >
+              <span>{selectedFormat}</span>
+              <X className="w-3 h-3 text-gold/80" />
+            </button>
+          )}
+
+          {priceMax < 500000 && (
+            <button
+              type="button"
+              onClick={() => setPriceMax(500000)}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface border border-gold/40 text-gold text-[11px] font-medium shrink-0 active:scale-95"
+            >
+              <span>≤ Rp {priceMax.toLocaleString('id-ID')}</span>
+              <X className="w-3 h-3 text-gold/80" />
+            </button>
+          )}
+
+          {onlyAvailable && (
+            <button
+              type="button"
+              onClick={() => setOnlyAvailable(false)}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface border border-emerald-500/40 text-emerald-400 text-[11px] font-medium shrink-0 active:scale-95"
+            >
+              <span>Sudah Rilis</span>
+              <X className="w-3 h-3 text-emerald-400/80" />
+            </button>
+          )}
+
           <button
             type="button"
             onClick={clearAllFilters}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-colors shrink-0"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-colors shrink-0 font-medium"
           >
             <RotateCcw className="w-3 h-3" />
-            <span>Reset ({activeFiltersCount})</span>
+            <span>Reset</span>
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Publications Canvas */}
       {visibleItems.length === 0 ? (
@@ -301,7 +432,7 @@ export function ReleaseFeed({
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {visibleItems.map((pub) => (
             <ReleaseCard key={pub.id} publication={pub} layout="grid" />
           ))}
@@ -310,42 +441,46 @@ export function ReleaseFeed({
 
       {/* Pagination / Load More Button */}
       {displayLimit < filteredItems.length && (
-        <div className="text-center pt-6">
+        <div className="text-center pt-4">
           <button
             type="button"
             onClick={() => setDisplayLimit((prev) => prev + 24)}
-            className="px-6 py-2.5 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle hover:border-gold/40 text-xs font-medium text-editorial-title transition-all shadow-sm"
+            className="w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle hover:border-gold/40 text-xs font-medium text-editorial-title transition-all shadow-xs"
           >
             Muat Lebih Banyak ({filteredItems.length - displayLimit} tersisa)
           </button>
         </div>
       )}
 
-      {/* Advanced Filter Slide-Over Drawer - Portaled to document.body */}
+      {/* Advanced Filter: Responsive Bottom Sheet on Mobile / Slide-Over on Desktop */}
       {isFilterDrawerOpen && mounted && createPortal(
         <div
           role="dialog"
           aria-modal="true"
-          className="modal-overlay-scrim flex justify-end transition-all animate-in fade-in duration-200"
+          className="modal-overlay-scrim flex items-end md:items-stretch md:justify-end transition-all animate-in fade-in duration-200"
           onClick={() => setIsFilterDrawerOpen(false)}
         >
           <div
-            className="w-full max-w-md h-full bg-surface-raised border-l border-border-medium shadow-2xl p-6 flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-250"
+            className="w-full md:max-w-md max-h-[85vh] md:max-h-full h-auto md:h-full bg-surface-raised border-t md:border-t-0 md:border-l border-border-medium rounded-t-3xl md:rounded-none shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-bottom md:slide-in-from-right duration-250"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="space-y-6">
+            {/* Draggable Feel Touch Bar (Mobile) */}
+            <div className="w-12 h-1.5 rounded-full bg-border-bold/50 mx-auto mt-3 mb-1 md:hidden" />
+
+            <div className="space-y-5 p-5 sm:p-6 overflow-y-auto flex-1">
               {/* Drawer Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
+              <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal className="w-4 h-4 text-gold" />
-                  <h3 className="font-editorial text-lg font-bold text-editorial-title">
+                  <h3 className="font-editorial text-base sm:text-lg font-bold text-editorial-title">
                     Filter Lanjutan
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsFilterDrawerOpen(false)}
-                  className="p-1 rounded-lg text-editorial-faint hover:text-editorial-title hover:bg-surface"
+                  className="p-2 rounded-lg text-editorial-faint hover:text-editorial-title hover:bg-surface active:scale-95"
+                  aria-label="Tutup filter"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -359,7 +494,7 @@ export function ReleaseFeed({
                 <select
                   value={selectedPublisher}
                   onChange={(e) => setSelectedPublisher(e.target.value)}
-                  className="w-full bg-surface px-3 py-2 rounded-xl border border-border-subtle text-xs text-editorial-title focus:outline-none focus:ring-1 focus:ring-gold"
+                  className="w-full bg-surface px-3 py-2.5 rounded-xl border border-border-subtle text-xs text-editorial-title focus:outline-none focus:ring-1 focus:ring-gold font-medium"
                 >
                   <option value="ALL">Semua Penerbit</option>
                   {publishers.map((p) => (
@@ -378,7 +513,7 @@ export function ReleaseFeed({
                 <select
                   value={selectedFormat}
                   onChange={(e) => setSelectedFormat(e.target.value)}
-                  className="w-full bg-surface px-3 py-2 rounded-xl border border-border-subtle text-xs text-editorial-title focus:outline-none focus:ring-1 focus:ring-gold"
+                  className="w-full bg-surface px-3 py-2.5 rounded-xl border border-border-subtle text-xs text-editorial-title focus:outline-none focus:ring-1 focus:ring-gold font-medium"
                 >
                   <option value="ALL">Semua Format</option>
                   <option value="TANKOBON">Manga Tankobon</option>
@@ -389,7 +524,7 @@ export function ReleaseFeed({
               </div>
 
               {/* Filter 3: Maximum Price Range */}
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <div className="flex items-center justify-between text-xs">
                   <label className="font-mono text-editorial-faint uppercase tracking-wider">
                     Batas Harga Maksimal
@@ -405,37 +540,37 @@ export function ReleaseFeed({
                   step="5000"
                   value={priceMax}
                   onChange={(e) => setPriceMax(Number(e.target.value))}
-                  className="w-full accent-gold bg-surface-sunken rounded-lg h-2"
+                  className="w-full accent-gold bg-surface-sunken rounded-lg h-2.5 cursor-pointer"
                 />
               </div>
 
               {/* Filter 4: Available Only Toggle */}
               <div className="pt-2 border-t border-border-subtle">
-                <label className="flex items-center gap-3 cursor-pointer text-xs text-editorial-body hover:text-editorial-title">
+                <label className="flex items-center gap-3 cursor-pointer py-1.5 text-xs text-editorial-body hover:text-editorial-title">
                   <input
                     type="checkbox"
                     checked={onlyAvailable}
                     onChange={(e) => setOnlyAvailable(e.target.checked)}
-                    className="rounded border-border-subtle text-gold accent-gold w-4 h-4"
+                    className="rounded border-border-subtle text-gold accent-gold w-4 h-4 cursor-pointer"
                   />
                   <span>Hanya tampilkan buku yang sudah resmi rilis di toko</span>
                 </label>
               </div>
             </div>
 
-            {/* Drawer Bottom Actions */}
-            <div className="pt-6 border-t border-border-subtle flex items-center gap-3">
+            {/* Drawer Bottom Actions: Safe-area aware */}
+            <div className="p-4 sm:p-6 border-t border-border-subtle bg-surface-raised flex items-center gap-3 pb-[max(1rem,env(safe-area-inset-bottom,0px))]">
               <button
                 type="button"
                 onClick={clearAllFilters}
-                className="flex-1 py-2.5 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-muted hover:text-editorial-title transition-colors"
+                className="flex-1 py-3 sm:py-2.5 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-muted hover:text-editorial-title transition-colors active:scale-95"
               >
                 Reset Filter
               </button>
               <button
                 type="button"
                 onClick={() => setIsFilterDrawerOpen(false)}
-                className="flex-1 py-2.5 rounded-xl bg-gold text-background text-xs font-semibold hover:bg-gold-400 transition-colors shadow-sm"
+                className="flex-1 py-3 sm:py-2.5 rounded-xl bg-gold text-background text-xs font-semibold hover:bg-gold-400 transition-colors shadow-xs active:scale-95"
               >
                 Terapkan ({filteredItems.length})
               </button>

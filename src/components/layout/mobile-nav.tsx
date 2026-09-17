@@ -17,7 +17,7 @@ export function MobileNav() {
 
   return (
     <nav
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/90 backdrop-blur-xl border-t border-border-subtle px-2 py-1.5 flex items-center justify-around safe-bottom"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/92 backdrop-blur-xl border-t border-border-subtle px-3 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] flex items-center justify-around"
       aria-label="Navigasi Bawah Mobile"
     >
       {MOBILE_TABS.map((tab) => {
@@ -28,18 +28,18 @@ export function MobileNav() {
           <Link
             key={tab.href}
             href={tab.href}
-            className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[10px] font-medium transition-all ${
+            className={`flex flex-col items-center justify-center min-w-[64px] min-h-[46px] py-1 px-2.5 rounded-xl text-[10px] font-medium transition-all ${
               isActive
-                ? 'text-gold font-semibold'
-                : 'text-editorial-muted hover:text-editorial-title'
+                ? 'text-gold font-semibold bg-gold/10'
+                : 'text-editorial-muted hover:text-editorial-title active:scale-95'
             }`}
           >
             <Icon
-              className={`w-5 h-5 mb-1 transition-colors ${
-                isActive ? 'text-gold scale-105' : 'text-editorial-faint'
+              className={`w-4 h-4 mb-1 transition-transform ${
+                isActive ? 'text-gold scale-110 stroke-[2.2]' : 'text-editorial-faint stroke-[1.8]'
               }`}
             />
-            <span>{tab.label}</span>
+            <span className="leading-tight tracking-tight">{tab.label}</span>
           </Link>
         );
       })}

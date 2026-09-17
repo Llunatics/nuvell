@@ -18,6 +18,8 @@ import {
   History,
   Tag,
   Info,
+  ChevronDown,
+  Plus,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { Publication } from '@/types';
@@ -55,6 +57,18 @@ export function BookDetailClient({
   const { addRecentItem } = useRecentlyViewed();
   const { toast } = useToast();
 
+  const [openSections, setOpenSections] = React.useState({
+    description: true,
+    sources: true,
+    metadata: false,
+    priceHistory: false,
+    changes: false,
+  });
+
+  const toggleSection = (key: keyof typeof openSections) => {
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const isFollowed = isWatchlisted('BOOK', publication.id);
   const collectionStatus = getItemStatus(publication.id);
   const countdown = getReleaseCountdown(publication.releaseDate);
@@ -86,14 +100,27 @@ export function BookDetailClient({
     }
   };
 
+  const handleCollectionToggle = () => {
+    const nextStatus = collectionStatus === 'OWNED' ? null : 'OWNED';
+    setItemStatus(publication.id, nextStatus, {
+      seriesId: publication.seriesId || undefined,
+      volume: publication.volume || undefined,
+    });
+    if (nextStatus === 'OWNED') {
+      toast({ title: 'Ditandai sebagai Dimiliki', description: publication.title, variant: 'success' });
+    } else {
+      toast({ title: 'Dihapus dari Koleksi', description: publication.title });
+    }
+  };
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 sm:space-y-10 pb-28 md:pb-0">
       {/* 1. Main Hero Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
-        {/* Left Column: Book Cover & Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 lg:gap-12">
+        {/* Left Column: Book Cover & Desktop Actions */}
         <div className="md:col-span-5 lg:col-span-4 space-y-4">
-          <div className="glass-panel p-3 rounded-2xl overflow-hidden shadow-2xl relative">
-            <div className="aspect-[3/4] w-full bg-surface-overlay rounded-xl overflow-hidden relative">
+          <div className="glass-panel p-2.5 sm:p-3 rounded-2xl overflow-hidden shadow-xl relative max-w-[240px] sm:max-w-none mx-auto">
+            <div className="aspect-[3/4] w-full bg-surface-overlay rounded-xl overflow-hidden relative shadow-inner">
               {publication.coverImage ? (
                 <img
                   src={publication.coverImage}
@@ -101,15 +128,15 @@ export function BookDetailClient({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-editorial-faint text-sm">
+                <div className="w-full h-full flex items-center justify-center text-editorial-faint text-sm bg-surface-sunken">
                   Tidak ada sampul
                 </div>
               )}
 
               {/* Status Overlay */}
-              <div className="absolute top-3 left-3 flex items-center gap-1.5">
+              <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
                 <span
-                  className={`px-2.5 py-1 text-xs font-mono font-bold uppercase rounded-md backdrop-blur-md border ${
+                  className={`px-2 py-0.5 text-[11px] font-mono font-bold uppercase rounded-md backdrop-blur-md border ${
                     publication.status === 'RELEASED'
                       ? 'bg-black/85 text-emerald-400 border-emerald-500/40'
                       : publication.status === 'PREORDER'
@@ -120,7 +147,7 @@ export function BookDetailClient({
                   {publication.status}
                 </span>
                 {isImport && (
-                  <span className="px-2 py-1 text-xs font-mono font-bold uppercase rounded-md backdrop-blur-md border bg-cyan-950/85 text-cyan-300 border-cyan-600/40">
+                  <span className="px-2 py-0.5 text-[11px] font-mono font-bold uppercase rounded-md backdrop-blur-md border bg-cyan-950/85 text-cyan-300 border-cyan-600/40">
                     IMPORT
                   </span>
                 )}
@@ -128,8 +155,8 @@ export function BookDetailClient({
             </div>
           </div>
 
-          {/* Action Buttons: Watchlist & Collection */}
-          <div className="space-y-2">
+          {/* Desktop Action Buttons: Watchlist & Collection (hidden on mobile, served by sticky bar) */}
+          <div className="hidden md:block space-y-2">
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -355,101 +382,177 @@ export function BookDetailClient({
             </div>
           )}
 
-          {/* Description */}
+          {/* Description (Collapsible on Mobile) */}
           {publication.description && (
-            <div className="space-y-2">
-              <h3 className="font-editorial text-sm font-bold text-editorial-title">
-                Sinopsis & Ringkasan Publikasi
-              </h3>
-              <p className="text-xs sm:text-sm text-editorial-muted leading-relaxed whitespace-pre-line font-serif">
-                {publication.description}
-              </p>
+            <div className="space-y-2 pt-2 border-t border-border-subtle/70 md:border-t-0">
+              <button
+                type="button"
+                onClick={() => toggleSection('description')}
+                className="w-full md:cursor-default flex items-center justify-between text-left py-1"
+              >
+                <h3 className="font-editorial text-sm sm:text-base font-bold text-editorial-title">
+                  Sinopsis & Ringkasan Publikasi
+                </h3>
+                <ChevronDown className={`w-4 h-4 text-gold transition-transform md:hidden ${openSections.description ? 'rotate-180' : ''}`} />
+              </button>
+              <div className={`${openSections.description ? 'block' : 'hidden md:block'} transition-all`}>
+                <p className="text-xs sm:text-sm text-editorial-muted leading-relaxed whitespace-pre-line font-serif">
+                  {publication.description}
+                </p>
+              </div>
             </div>
           )}
 
-          {/* Multi-Source Comparison Table (Section 25) */}
+          {/* Multi-Source Comparison (Section 25 - Collapsible on Mobile) */}
           <div className="space-y-3 pt-4 border-t border-border-subtle">
-            <div className="flex items-center justify-between">
-              <h3 className="font-editorial text-base font-bold text-editorial-title flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => toggleSection('sources')}
+              className="w-full md:cursor-default flex items-center justify-between text-left py-1"
+            >
+              <div className="flex items-center gap-2">
                 <Tag className="w-4 h-4 text-gold" />
-                Perbandingan Ketersediaan & Sumber Resmi
-              </h3>
-              <span className="text-xs text-editorial-faint font-mono">
-                {publication.sources.length} Sumber Terverifikasi
-              </span>
-            </div>
+                <h3 className="font-editorial text-sm sm:text-base font-bold text-editorial-title">
+                  Perbandingan Ketersediaan & Sumber Resmi
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-editorial-faint font-mono hidden sm:inline">
+                  {publication.sources.length} Sumber Terverifikasi
+                </span>
+                <ChevronDown className={`w-4 h-4 text-gold transition-transform md:hidden ${openSections.sources ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-border-subtle text-editorial-faint font-mono uppercase text-[10px]">
-                    <th className="py-2.5 px-3">Sumber Pelacak</th>
-                    <th className="py-2.5 px-3">Status Ketersediaan</th>
-                    <th className="py-2.5 px-3">Harga Teramati</th>
-                    <th className="py-2.5 px-3 text-right">Tindakan</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-subtle">
-                  {publication.sources.map((src) => (
-                    <tr key={src.id} className="hover:bg-surface/50 transition-colors">
-                      <td className="py-3 px-3 font-medium text-editorial-title flex items-center gap-1.5">
+            <div className={`${openSections.sources ? 'block' : 'hidden md:block'} space-y-3`}>
+              {/* Mobile Card Layout for Sources */}
+              <div className="sm:hidden space-y-2">
+                {publication.sources.map((src) => (
+                  <div key={src.id} className="glass-card p-3 rounded-xl space-y-2 border border-border-subtle">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 font-medium text-xs text-editorial-title">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         <span>{src.sourceName}</span>
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-surface-overlay text-editorial-body border border-border-subtle">
-                          {src.availability}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 font-mono font-semibold text-editorial-title">
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-surface-overlay text-editorial-body border border-border-subtle">
+                        {src.availability}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-border-subtle/60">
+                      <span className="font-mono font-bold text-xs text-editorial-title">
                         {formatIDR(publication.currentPrice)}
-                      </td>
-                      <td className="py-3 px-3 text-right">
-                        <a
-                          href={src.sourceUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface hover:bg-surface-raised border border-border-subtle text-gold hover:text-gold-300 transition-colors text-[11px]"
-                        >
-                          <span>Kunjungi Sumber</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="text-[11px] text-editorial-faint italic">
-              Catatan Provenance: Platform ini tidak memproses transaksi pembayaran (non-e-commerce). Kami hanya mengarahkan pembaca ke katalog dan toko resmi penerbit.
-            </p>
-          </div>
-
-          {/* Price Tracking Chart (Section 24) */}
-          {chartData.length > 0 && (
-            <div className="space-y-3 pt-4 border-t border-border-subtle">
-              <div className="flex items-center justify-between">
-                <h3 className="font-editorial text-base font-bold text-editorial-title flex items-center gap-2">
-                  <TrendingDown className="w-4 h-4 text-emerald-400" />
-                  Riwayat & Fluktuasi Harga
-                </h3>
-                <div className="text-xs text-editorial-faint font-mono">
-                  <span>Terendah: {formatIDR(publication.lowestObservedPrice)}</span>
-                </div>
+                      </span>
+                      <a
+                        href={src.sourceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-raised border border-border-subtle text-gold text-xs font-medium transition-colors"
+                      >
+                        <span>Kunjungi Sumber</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <PriceHistoryChart data={chartData} />
+              {/* Desktop Table for Sources */}
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-border-subtle text-editorial-faint font-mono uppercase text-[10px]">
+                      <th className="py-2.5 px-3">Sumber Pelacak</th>
+                      <th className="py-2.5 px-3">Status Ketersediaan</th>
+                      <th className="py-2.5 px-3">Harga Teramati</th>
+                      <th className="py-2.5 px-3 text-right">Tindakan</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-subtle">
+                    {publication.sources.map((src) => (
+                      <tr key={src.id} className="hover:bg-surface/50 transition-colors">
+                        <td className="py-3 px-3 font-medium text-editorial-title flex items-center gap-1.5">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span>{src.sourceName}</span>
+                        </td>
+                        <td className="py-3 px-3">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-surface-overlay text-editorial-body border border-border-subtle">
+                            {src.availability}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 font-mono font-semibold text-editorial-title">
+                          {formatIDR(publication.currentPrice)}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <a
+                            href={src.sourceUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface hover:bg-surface-raised border border-border-subtle text-gold hover:text-gold-300 transition-colors text-[11px]"
+                          >
+                            <span>Kunjungi Sumber</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-[11px] text-editorial-faint italic">
+                Catatan Provenance: Platform ini tidak memproses transaksi pembayaran (non-e-commerce). Kami hanya mengarahkan pembaca ke katalog dan toko resmi penerbit.
+              </p>
+            </div>
+          </div>
+
+          {/* Price Tracking Chart (Collapsible on Mobile) */}
+          {chartData.length > 0 && (
+            <div className="space-y-3 pt-4 border-t border-border-subtle">
+              <button
+                type="button"
+                onClick={() => toggleSection('priceHistory')}
+                className="w-full md:cursor-default flex items-center justify-between text-left py-1"
+              >
+                <div className="flex items-center gap-2">
+                  <TrendingDown className="w-4 h-4 text-emerald-400" />
+                  <h3 className="font-editorial text-sm sm:text-base font-bold text-editorial-title">
+                    Riwayat & Fluktuasi Harga
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-editorial-faint font-mono hidden sm:inline">
+                    Terendah: {formatIDR(publication.lowestObservedPrice)}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-gold transition-transform md:hidden ${openSections.priceHistory ? 'rotate-180' : ''}`} />
+                </div>
+              </button>
+
+              <div className={`${openSections.priceHistory ? 'block' : 'hidden md:block'} space-y-3`}>
+                <div className="sm:hidden text-xs text-editorial-faint font-mono">
+                  Terendah teramati: <span className="text-gold font-bold">{formatIDR(publication.lowestObservedPrice)}</span>
+                </div>
+                <PriceHistoryChart data={chartData} />
+              </div>
             </div>
           )}
 
-          {/* Change Detection Audit Trail (Section 12) */}
+          {/* Change Detection Audit Trail (Collapsible on Mobile) */}
           {publication.changes.length > 0 && (
             <div className="space-y-3 pt-4 border-t border-border-subtle">
-              <h3 className="font-editorial text-base font-bold text-editorial-title flex items-center gap-2">
-                <History className="w-4 h-4 text-gold" />
-                Log Deteksi Perubahan Crawler
-              </h3>
-              <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => toggleSection('changes')}
+                className="w-full md:cursor-default flex items-center justify-between text-left py-1"
+              >
+                <div className="flex items-center gap-2">
+                  <History className="w-4 h-4 text-gold" />
+                  <h3 className="font-editorial text-sm sm:text-base font-bold text-editorial-title">
+                    Log Deteksi Perubahan Crawler
+                  </h3>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-gold transition-transform md:hidden ${openSections.changes ? 'rotate-180' : ''}`} />
+              </button>
+
+              <div className={`${openSections.changes ? 'block' : 'hidden md:block'} space-y-2`}>
                 {publication.changes.map((ch) => (
                   <div
                     key={ch.id}
@@ -472,46 +575,56 @@ export function BookDetailClient({
             </div>
           )}
 
-          {/* Bibliographic Specifications */}
+          {/* Bibliographic Specifications (Collapsible on Mobile) */}
           <div className="pt-4 border-t border-border-subtle space-y-3">
-            <h3 className="font-editorial text-base font-bold text-editorial-title">
-              Spesifikasi Bibliografi Resmi
-            </h3>
-            <dl className="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-4 text-xs">
-              <div>
-                <dt className="text-editorial-faint font-mono uppercase text-[10px]">ISBN-13</dt>
-                <dd className="font-mono text-editorial-title font-medium">{publication.isbn13 || 'TBA'}</dd>
-              </div>
-              <div>
-                <dt className="text-editorial-faint font-mono uppercase text-[10px]">Format Buku</dt>
-                <dd className="font-mono text-editorial-title">
-                  {publication.format === 'HARDCOVER' ? 'Hard Cover' : publication.format}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-editorial-faint font-mono uppercase text-[10px]">Bahasa & Negara</dt>
-                <dd className="text-editorial-title">
-                  {publication.language === 'en'
-                    ? 'English (Buku Import)'
-                    : publication.language === 'ja'
-                    ? 'Jepang'
-                    : 'Bahasa Indonesia'}{' '}
-                  ({publication.country || 'Indonesia'})
-                </dd>
-              </div>
-              <div>
-                <dt className="text-editorial-faint font-mono uppercase text-[10px]">Jumlah Halaman</dt>
-                <dd className="font-mono text-editorial-title">{publication.pageCount ? `${publication.pageCount} Halaman` : 'TBA'}</dd>
-              </div>
-              <div>
-                <dt className="text-editorial-faint font-mono uppercase text-[10px]">Dimensi & Berat</dt>
-                <dd className="text-editorial-title">{publication.dimensions || '-'} • {publication.weight ? `${publication.weight}g` : '-'}</dd>
-              </div>
-              <div>
-                <dt className="text-editorial-faint font-mono uppercase text-[10px]">Batas Usia</dt>
-                <dd className="font-mono text-editorial-title">{publication.ageRating || 'Umum'}</dd>
-              </div>
-            </dl>
+            <button
+              type="button"
+              onClick={() => toggleSection('metadata')}
+              className="w-full md:cursor-default flex items-center justify-between text-left py-1"
+            >
+              <h3 className="font-editorial text-sm sm:text-base font-bold text-editorial-title">
+                Spesifikasi Bibliografi Resmi
+              </h3>
+              <ChevronDown className={`w-4 h-4 text-gold transition-transform md:hidden ${openSections.metadata ? 'rotate-180' : ''}`} />
+            </button>
+
+            <div className={`${openSections.metadata ? 'block' : 'hidden md:block'}`}>
+              <dl className="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-4 text-xs">
+                <div>
+                  <dt className="text-editorial-faint font-mono uppercase text-[10px]">ISBN-13</dt>
+                  <dd className="font-mono text-editorial-title font-medium">{publication.isbn13 || 'TBA'}</dd>
+                </div>
+                <div>
+                  <dt className="text-editorial-faint font-mono uppercase text-[10px]">Format Buku</dt>
+                  <dd className="font-mono text-editorial-title">
+                    {publication.format === 'HARDCOVER' ? 'Hard Cover' : publication.format}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-editorial-faint font-mono uppercase text-[10px]">Bahasa & Negara</dt>
+                  <dd className="text-editorial-title">
+                    {publication.language === 'en'
+                      ? 'English (Buku Import)'
+                      : publication.language === 'ja'
+                      ? 'Jepang'
+                      : 'Bahasa Indonesia'}{' '}
+                    ({publication.country || 'Indonesia'})
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-editorial-faint font-mono uppercase text-[10px]">Jumlah Halaman</dt>
+                  <dd className="font-mono text-editorial-title">{publication.pageCount ? `${publication.pageCount} Halaman` : 'TBA'}</dd>
+                </div>
+                <div>
+                  <dt className="text-editorial-faint font-mono uppercase text-[10px]">Dimensi & Berat</dt>
+                  <dd className="text-editorial-title">{publication.dimensions || '-'} • {publication.weight ? `${publication.weight}g` : '-'}</dd>
+                </div>
+                <div>
+                  <dt className="text-editorial-faint font-mono uppercase text-[10px]">Batas Usia</dt>
+                  <dd className="font-mono text-editorial-title">{publication.ageRating || 'Umum'}</dd>
+                </div>
+              </dl>
+            </div>
           </div>
         </div>
       </div>
@@ -519,15 +632,15 @@ export function BookDetailClient({
       {/* Related Releases in Same Series or Publisher */}
       {relatedPublications.length > 0 && (
         <section className="space-y-4 pt-8 border-t border-border-subtle">
-          <h2 className="font-editorial text-xl font-bold text-editorial-title">
+          <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
             Rilisan Terkait yang Mungkin Anda Sukai
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {relatedPublications.map((rel) => (
               <Link
                 key={rel.id}
                 href={`/books/${rel.slug}`}
-                className="glass-card rounded-xl p-3 flex flex-col justify-between group"
+                className="glass-card rounded-xl p-3 flex flex-col justify-between group hover:border-gold/40 transition-all"
               >
                 <div className="aspect-[3/4] w-full bg-surface-overlay rounded-lg overflow-hidden mb-2">
                   {rel.coverImage && (
@@ -547,6 +660,52 @@ export function BookDetailClient({
           </div>
         </section>
       )}
+
+      {/* Sticky Mobile Bottom Action Bar (Requirement 16 & 17) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-xl border-t border-border-subtle p-3 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] flex items-center gap-2.5 shadow-2xl">
+        <button
+          type="button"
+          onClick={handleCollectionToggle}
+          className={`flex-1 h-11 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xs ${
+            collectionStatus === 'OWNED'
+              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+              : 'bg-gold text-background hover:bg-gold-400'
+          }`}
+        >
+          <Check className="w-4 h-4" />
+          <span>{collectionStatus === 'OWNED' ? '✓ Dalam Koleksi' : '+ Koleksi'}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            toggleWatchlist('BOOK', publication.id, publication.title, publication.slug);
+            if (!isFollowed) {
+              toast({ title: 'Ditambahkan ke Watchlist', description: publication.title, variant: 'success' });
+            } else {
+              toast({ title: 'Dihapus dari Watchlist', description: publication.title });
+            }
+          }}
+          className={`h-11 px-3.5 rounded-xl text-xs font-medium border flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
+            isFollowed
+              ? 'bg-gold/15 text-gold border-gold/40 font-semibold'
+              : 'bg-surface border-border-subtle text-editorial-body hover:text-editorial-title'
+          }`}
+          aria-label="Toggle Watchlist"
+        >
+          <Bookmark className="w-4 h-4" fill={isFollowed ? 'currentColor' : 'none'} />
+          <span>Watchlist</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleShare}
+          className="h-11 w-11 rounded-xl bg-surface border border-border-subtle text-editorial-muted hover:text-editorial-title flex items-center justify-center transition-colors active:scale-95 shrink-0"
+          aria-label="Bagikan buku"
+        >
+          <Share2 className="w-4 h-4" />
+        </button>
+      </div>
     </div>
   );
 }

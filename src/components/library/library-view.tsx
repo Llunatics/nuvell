@@ -18,12 +18,14 @@ import {
   ExternalLink,
   Plus,
   BookOpen,
+  SlidersHorizontal,
 } from 'lucide-react';
-import { Publication, Series } from '@/types';
+import { Publication, Series, UserCollectionItem } from '@/types';
 import { ReleaseCard } from '@/components/books/release-card';
 import { useWatchlist } from '@/hooks/use-watchlist';
 import { useCollection } from '@/hooks/use-collection';
 import { useRecentlyViewed } from '@/hooks/use-recently-viewed';
+import { useDisplaySettings } from '@/hooks/use-display-settings';
 import { formatIDR, formatShortDate } from '@/lib/formatters';
 import { useToast } from '@/hooks/use-toast';
 
@@ -61,6 +63,7 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
     setItemStatus,
   } = useCollection();
   const { items: recentItems, clearRecentItems } = useRecentlyViewed();
+  const { density, setDensity, motion, setMotion } = useDisplaySettings();
   const { toast } = useToast();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -77,10 +80,39 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
   }, [watchlistItems, publications]);
 
   // Collection breakdown
+  type CollectionStatusFilter = 'ALL' | 'OWNED' | 'WISHLIST' | 'PREORDERED' | 'MISSING';
+  const [collectionFilter, setCollectionFilter] = useState<CollectionStatusFilter>('ALL');
+
   const collectionItems = Array.from(collection.values());
   const ownedCount = collectionItems.filter((i) => i.status === 'OWNED').length;
   const wishlistCount = collectionItems.filter((i) => i.status === 'WISHLIST').length;
   const preorderedCount = collectionItems.filter((i) => i.status === 'PREORDERED').length;
+
+  // Match collected publications from user collection
+  const collectedBooks = useMemo(() => {
+    return publications
+      .map((pub) => {
+        const item = collection.get(pub.id);
+        return item ? { pub, item } : null;
+      })
+      .filter(Boolean) as { pub: Publication; item: UserCollectionItem }[];
+  }, [publications, collection]);
+
+  // Series with missing volumes
+  const missingSeries = useMemo(() => {
+    return featuredSeries.filter((s) => {
+      const prog = getSeriesProgress(s.id, s.totalVolumes);
+      return prog.owned < prog.total;
+    });
+  }, [featuredSeries, getSeriesProgress]);
+
+  const filteredCollectedBooks = useMemo(() => {
+    if (collectionFilter === 'ALL') return collectedBooks;
+    if (['OWNED', 'WISHLIST', 'PREORDERED'].includes(collectionFilter)) {
+      return collectedBooks.filter((b) => b.item.status === collectionFilter);
+    }
+    return [];
+  }, [collectedBooks, collectionFilter]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -253,10 +285,33 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
 
       {/* TAB 2: COLLECTION */}
       {activeTab === 'collection' && (
-        <div className="space-y-8">
-          {/* Collection Metrics & Backup Strip */}
-          <div className="p-6 rounded-2xl bg-surface/70 border border-border-subtle backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="flex items-center gap-6 divide-x divide-border-subtle text-xs">
+        <div className="space-y-6 sm:space-y-8">
+          {/* Collection Metrics & Backup Strip (Responsive) */}
+          <div className="p-4 sm:p-6 rounded-2xl bg-surface/70 border border-border-subtle backdrop-blur-md space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-6">
+            {/* Mobile 3-Column Metrics Bar */}
+            <div className="grid grid-cols-3 gap-2 text-center sm:hidden">
+              <div className="p-2 rounded-xl bg-surface/50 border border-border-subtle">
+                <span className="font-mono text-lg font-bold text-emerald-400 block">
+                  {ownedCount}
+                </span>
+                <span className="text-[10px] text-editorial-faint">Dimiliki</span>
+              </div>
+              <div className="p-2 rounded-xl bg-surface/50 border border-border-subtle">
+                <span className="font-mono text-lg font-bold text-amber-400 block">
+                  {wishlistCount}
+                </span>
+                <span className="text-[10px] text-editorial-faint">Wishlist</span>
+              </div>
+              <div className="p-2 rounded-xl bg-surface/50 border border-border-subtle">
+                <span className="font-mono text-lg font-bold text-burgundy-400 block">
+                  {preorderedCount}
+                </span>
+                <span className="text-[10px] text-editorial-faint">Pre-order</span>
+              </div>
+            </div>
+
+            {/* Desktop Metrics Bar */}
+            <div className="hidden sm:flex items-center gap-6 divide-x divide-border-subtle text-xs">
               <div>
                 <span className="font-mono text-xl font-bold text-emerald-400 block">
                   {ownedCount}
@@ -278,7 +333,7 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
             </div>
 
             {/* Export / Import Controls */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-border-subtle">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -289,7 +344,7 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-1.5 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title flex items-center gap-1.5 transition-colors"
+                className="flex-1 sm:flex-initial min-h-[44px] px-3.5 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title flex items-center justify-center gap-2 transition-colors active:scale-95"
                 title="Impor backup JSON koleksi"
               >
                 <Upload className="w-3.5 h-3.5 text-editorial-faint" />
@@ -298,7 +353,7 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
               <button
                 type="button"
                 onClick={exportCollectionJson}
-                className="px-3 py-1.5 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title flex items-center gap-1.5 transition-colors"
+                className="flex-1 sm:flex-initial min-h-[44px] px-3.5 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title flex items-center justify-center gap-2 transition-colors active:scale-95"
                 title="Unduh cadangan JSON koleksi"
               >
                 <Download className="w-3.5 h-3.5 text-gold" />
@@ -307,74 +362,144 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
             </div>
           </div>
 
-          {/* Series Completion Tracker */}
-          <div className="space-y-4">
-            <div>
-              <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
-                Pelacak Kelengkapan Seri Populer
-              </h2>
-              <p className="text-xs text-editorial-muted mt-0.5">
-                Periksa nomor volume yang telah Anda kumpulkan untuk setiap seri
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              {featuredSeries.map((s) => {
-                const progress = getSeriesProgress(s.id, s.totalVolumes);
+          {/* Horizontal Scroll Status Filter Chips */}
+          <div className="space-y-2">
+            <span className="text-[10px] font-mono text-editorial-faint uppercase tracking-wider block">
+              Filter Status Koleksi:
+            </span>
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+              {[
+                { id: 'ALL', label: 'Semua', count: collectionTotal },
+                { id: 'OWNED', label: 'Dimiliki', count: ownedCount },
+                { id: 'WISHLIST', label: 'Wishlist', count: wishlistCount },
+                { id: 'PREORDERED', label: 'Pre-order', count: preorderedCount },
+                { id: 'MISSING', label: 'Belum Lengkap', count: missingSeries.length },
+              ].map((f) => {
+                const isActive = collectionFilter === f.id;
                 return (
-                  <div
-                    key={s.id}
-                    className="glass-card rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setCollectionFilter(f.id as CollectionStatusFilter)}
+                    className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-medium shrink-0 transition-all border ${
+                      isActive
+                        ? 'bg-gold text-background border-gold font-semibold shadow-sm'
+                        : 'bg-surface border-border-subtle text-editorial-muted hover:text-editorial-title hover:bg-surface-raised'
+                    }`}
                   >
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="w-12 h-16 bg-surface rounded-lg overflow-hidden shrink-0 border border-border-subtle">
-                        {s.coverUrl ? (
-                          <img src={s.coverUrl} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-editorial-faint text-[10px]">
-                            Cover
-                          </div>
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <span className="text-[10px] font-mono text-editorial-faint block uppercase">
-                          {s.publisherName}
-                        </span>
-                        <h3 className="font-editorial text-sm sm:text-base font-bold text-editorial-title truncate">
-                          {s.name}
-                        </h3>
-                        <p className="text-xs text-editorial-muted mt-0.5">
-                          {progress.owned} dari {progress.total} volume dimiliki ({progress.percentage}%)
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar & Actions */}
-                    <div className="flex items-center gap-4 sm:w-64">
-                      <div className="flex-1 space-y-1">
-                        <div className="w-full h-2 bg-surface rounded-full overflow-hidden border border-border-subtle">
-                          <div
-                            className="h-full bg-gradient-to-r from-emerald-500 to-gold rounded-full transition-all duration-500"
-                            style={{ width: `${progress.percentage}%` }}
-                          />
-                        </div>
-                        <div className="flex justify-between text-[10px] font-mono text-editorial-faint">
-                          <span>{progress.owned} Owned</span>
-                          <span>{progress.total - progress.owned} Missing</span>
-                        </div>
-                      </div>
-                      <Link
-                        href={`/series/${s.slug}`}
-                        className="px-3 py-1.5 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title hover:text-gold transition-colors shrink-0"
-                      >
-                        Kelola
-                      </Link>
-                    </div>
-                  </div>
+                    {f.label} ({f.count})
+                  </button>
                 );
               })}
             </div>
           </div>
+
+          {/* Collected Books Feed (when not filtering by MISSING only) */}
+          {collectionFilter !== 'MISSING' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
+                    Daftar Buku Koleksi ({filteredCollectedBooks.length})
+                  </h2>
+                  <p className="text-xs text-editorial-muted mt-0.5">
+                    Publikasi yang Anda tandai dalam koleksi personal
+                  </p>
+                </div>
+              </div>
+
+              {filteredCollectedBooks.length === 0 ? (
+                <div className="p-10 text-center bg-surface/30 rounded-2xl border border-border-subtle space-y-2">
+                  <BookmarkCheck className="w-8 h-8 text-editorial-faint mx-auto" />
+                  <p className="text-xs font-medium text-editorial-title">
+                    Belum ada buku dengan status ini.
+                  </p>
+                  <p className="text-[11px] text-editorial-muted max-w-sm mx-auto">
+                    Buka katalog atau halaman buku dan tekan tombol &quot;+ Koleksi&quot; untuk menambahkan ke koleksi Anda.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+                  {filteredCollectedBooks.map(({ pub }) => (
+                    <ReleaseCard key={pub.id} publication={pub} layout="grid" />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Series Completion Tracker (when ALL or MISSING) */}
+          {(collectionFilter === 'ALL' || collectionFilter === 'MISSING') && (
+            <div className="space-y-4 pt-2">
+              <div>
+                <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
+                  {collectionFilter === 'MISSING'
+                    ? `Seri Belum Lengkap (${missingSeries.length})`
+                    : 'Pelacak Kelengkapan Seri Populer'}
+                </h2>
+                <p className="text-xs text-editorial-muted mt-0.5">
+                  Periksa nomor volume yang telah Anda kumpulkan untuk setiap seri
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {(collectionFilter === 'MISSING' ? missingSeries : featuredSeries).map((s) => {
+                  const progress = getSeriesProgress(s.id, s.totalVolumes);
+                  return (
+                    <div
+                      key={s.id}
+                      className="glass-card rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    >
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className="w-12 h-16 bg-surface rounded-lg overflow-hidden shrink-0 border border-border-subtle">
+                          {s.coverUrl ? (
+                            <img src={s.coverUrl} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-editorial-faint text-[10px]">
+                              Cover
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <span className="text-[10px] font-mono text-editorial-faint block uppercase">
+                            {s.publisherName}
+                          </span>
+                          <h3 className="font-editorial text-sm sm:text-base font-bold text-editorial-title truncate">
+                            {s.name}
+                          </h3>
+                          <p className="text-xs text-editorial-muted mt-0.5">
+                            {progress.owned} dari {progress.total} volume dimiliki ({progress.percentage}%)
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar & Actions */}
+                      <div className="flex items-center gap-4 sm:w-64">
+                        <div className="flex-1 space-y-1">
+                          <div className="w-full h-2 bg-surface rounded-full overflow-hidden border border-border-subtle">
+                            <div
+                              className="h-full bg-gradient-to-r from-emerald-500 to-gold rounded-full transition-all duration-500"
+                              style={{ width: `${progress.percentage}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-[10px] font-mono text-editorial-faint">
+                            <span>{progress.owned} Dimiliki</span>
+                            <span>{progress.total - progress.owned} Kurang</span>
+                          </div>
+                        </div>
+                        <Link
+                          href={`/series/${s.slug}`}
+                          className="min-h-[40px] px-3 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title hover:text-gold transition-colors shrink-0 flex items-center justify-center"
+                        >
+                          Kelola
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -440,6 +565,83 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
           )}
         </div>
       )}
+
+      {/* Secondary Settings: Density & Motion Preferences (Mobile & Desktop) */}
+      <div className="pt-6 border-t border-border-subtle">
+        <div className="p-4 sm:p-5 rounded-2xl bg-surface/50 border border-border-subtle space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="w-4 h-4 text-gold" />
+              <h3 className="font-editorial text-sm font-semibold text-editorial-title">
+                Preferensi Tampilan & Kenyamanan Baca
+              </h3>
+            </div>
+            <span className="text-[10px] font-mono text-editorial-faint">
+              Lokal Perangkat
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            {/* Density */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] text-editorial-muted font-medium">Kerapatan Tampilan (Density)</span>
+              <div className="flex items-center gap-1.5 p-1 bg-surface rounded-xl border border-border-subtle">
+                <button
+                  type="button"
+                  onClick={() => setDensity('comfortable')}
+                  className={`flex-1 min-h-[40px] py-2 rounded-lg text-xs font-medium transition-all ${
+                    density === 'comfortable'
+                      ? 'bg-surface-raised text-gold font-semibold shadow-sm'
+                      : 'text-editorial-muted hover:text-editorial-title'
+                  }`}
+                >
+                  Nyaman (Comfortable)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDensity('compact')}
+                  className={`flex-1 min-h-[40px] py-2 rounded-lg text-xs font-medium transition-all ${
+                    density === 'compact'
+                      ? 'bg-surface-raised text-gold font-semibold shadow-sm'
+                      : 'text-editorial-muted hover:text-editorial-title'
+                  }`}
+                >
+                  Kompak (Compact)
+                </button>
+              </div>
+            </div>
+
+            {/* Motion */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] text-editorial-muted font-medium">Efek Animasi (Motion)</span>
+              <div className="flex items-center gap-1.5 p-1 bg-surface rounded-xl border border-border-subtle">
+                <button
+                  type="button"
+                  onClick={() => setMotion('full')}
+                  className={`flex-1 min-h-[40px] py-2 rounded-lg text-xs font-medium transition-all ${
+                    motion === 'full'
+                      ? 'bg-surface-raised text-gold font-semibold shadow-sm'
+                      : 'text-editorial-muted hover:text-editorial-title'
+                  }`}
+                >
+                  Penuh (Full)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMotion('reduced')}
+                  className={`flex-1 min-h-[40px] py-2 rounded-lg text-xs font-medium transition-all ${
+                    motion === 'reduced'
+                      ? 'bg-surface-raised text-gold font-semibold shadow-sm'
+                      : 'text-editorial-muted hover:text-editorial-title'
+                  }`}
+                >
+                  Minimal (Reduced)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
