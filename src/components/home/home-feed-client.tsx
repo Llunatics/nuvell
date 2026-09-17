@@ -368,9 +368,9 @@ export function HomeFeedClient({
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
-          {publishers.map((pub) => (
+          {publishers.slice(0, 10).map((pub) => (
             <Link
-              key={pub.id}
+              key={`${pub.id}-${pub.slug}`}
               href={`/publishers/${pub.slug}`}
               className="glass-card rounded-xl p-3 text-center flex flex-col items-center justify-center space-y-1.5 group"
             >

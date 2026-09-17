@@ -38,22 +38,33 @@ describe('Search & Discovery for Indonesian Releases', () => {
     expect(grasindo).toBeDefined();
   });
 
-  it('guarantees unique publisher slugs and canonical identity for Anak Hebat Indonesia', () => {
+  it('guarantees unique publisher IDs, slugs, and canonical identity for Anak Hebat Indonesia & Katalog Gramedia', () => {
     const publishers = dataService.getAllPublishers();
+    const idSet = new Set<string>();
+    const duplicateIds: string[] = [];
     const slugSet = new Set<string>();
     const duplicateSlugs: string[] = [];
 
     for (const pub of publishers) {
+      if (idSet.has(pub.id)) {
+        duplicateIds.push(pub.id);
+      }
+      idSet.add(pub.id);
+
       if (slugSet.has(pub.slug)) {
         duplicateSlugs.push(pub.slug);
       }
       slugSet.add(pub.slug);
     }
 
+    expect(duplicateIds).toEqual([]);
     expect(duplicateSlugs).toEqual([]);
 
     const anakHebat = publishers.filter((p) => p.slug === 'anak-hebat-indonesia');
     expect(anakHebat.length).toBe(1);
+
+    const gramediaCatalog = publishers.filter((p) => p.id === 'pub_gramedia_catalog');
+    expect(gramediaCatalog.length).toBe(1);
 
     const anakHebatPub = dataService.getPublisherBySlug('anak-hebat-indonesia');
     expect(anakHebatPub).toBeDefined();

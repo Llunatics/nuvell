@@ -233,7 +233,7 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
               const pubBooks = publications.filter((b) => b.publisherId === p.id);
               return (
                 <Link
-                  key={p.id}
+                  key={`${p.id}-${p.slug}`}
                   href={`/publishers/${p.slug}`}
                   className="glass-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between space-y-4 group hover:border-gold/40 transition-all"
                 >

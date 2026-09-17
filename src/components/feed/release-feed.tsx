@@ -502,7 +502,7 @@ export function ReleaseFeed({
                 >
                   <option value="ALL">Semua Penerbit</option>
                   {publishers.map((p) => (
-                    <option key={p.id} value={p.id}>
+                    <option key={`${p.id}-${p.slug}`} value={p.id}>
                       {p.name}
                     </option>
                   ))}

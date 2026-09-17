@@ -36,7 +36,7 @@ export default function PublishersDirectoryPage() {
 
           return (
             <div
-              key={pub.id}
+              key={`${pub.id}-${pub.slug}`}
               className="glass-card rounded-2xl p-6 flex flex-col justify-between space-y-4 group"
             >
               <div className="space-y-3">

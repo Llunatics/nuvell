@@ -449,6 +449,7 @@ export const PUBLISHER_CANONICAL_MAP: Record<string, string> = {
 };
 
 export const PUBLISHER_SLUG_ALIAS: Record<string, string> = {
+  'gramedia-catalog': 'katalog-gramedia',
   'bhuana-ilmu-populer': 'bip',
   'kepustakaan-populer-gramedia': 'kpg',
   'noura-books': 'noura',
@@ -493,15 +494,16 @@ class DataService {
       .slice(0, limit);
   }
 
-  // Publishers (Guaranteed unique canonical entities without key/slug collisions)
+  // Publishers (Guaranteed 100% unique canonical entities without key or slug collisions)
   public getAllPublishers(): Publisher[] {
-    const slugMap = new Map<string, Publisher>();
+    const knownIds = new Map<string, Publisher>();
+    const knownSlugs = new Map<string, Publisher>();
 
     for (const p of this.publishers) {
       const canonicalId = PUBLISHER_CANONICAL_MAP[p.id] || p.id;
       const canonicalSlug = PUBLISHER_SLUG_ALIAS[p.slug] || p.slug.toLowerCase().replace(/_/g, '-');
 
-      const existing = slugMap.get(canonicalSlug);
+      const existing = knownIds.get(canonicalId) || knownSlugs.get(canonicalSlug);
       if (existing) {
         if (p.country === 'Indonesia' && existing.country !== 'Indonesia') {
           existing.country = 'Indonesia';
@@ -512,33 +514,47 @@ class DataService {
         if ((p.description?.length || 0) > (existing.description?.length || 0)) {
           existing.description = p.description;
         }
+        knownIds.set(canonicalId, existing);
+        knownSlugs.set(canonicalSlug, existing);
       } else {
-        slugMap.set(canonicalSlug, {
+        const canonicalPub: Publisher = {
           ...p,
           id: canonicalId,
           slug: canonicalSlug,
-        });
+        };
+        knownIds.set(canonicalId, canonicalPub);
+        knownSlugs.set(canonicalSlug, canonicalPub);
       }
     }
 
     for (const pub of this.publications) {
       if (pub.publisherId && pub.publisherName) {
         const canonicalId = PUBLISHER_CANONICAL_MAP[pub.publisherId] || pub.publisherId;
-        const slug = PUBLISHER_SLUG_ALIAS[canonicalId.replace(/^pub_/, '').replace(/_/g, '-')] || canonicalId.replace(/^pub_/, '').replace(/_/g, '-');
-        if (!slugMap.has(slug)) {
-          slugMap.set(slug, {
-            id: canonicalId,
-            name: pub.publisherName,
-            slug,
-            country: pub.country || (pub.language === 'en' ? 'Import / International' : 'Indonesia'),
-            isOfficial: true,
-            description: `Penerbit resmi ${pub.publisherName}.`,
-          });
+        if (knownIds.has(canonicalId)) {
+          continue;
         }
+
+        const rawSlug = canonicalId.replace(/^pub_/, '').replace(/_/g, '-');
+        const slug = PUBLISHER_SLUG_ALIAS[rawSlug] || rawSlug;
+
+        if (knownSlugs.has(slug)) {
+          continue;
+        }
+
+        const fallbackPub: Publisher = {
+          id: canonicalId,
+          name: pub.publisherName,
+          slug,
+          country: pub.country || (pub.language === 'en' ? 'Import / International' : 'Indonesia'),
+          isOfficial: true,
+          description: `Penerbit resmi ${pub.publisherName}.`,
+        };
+        knownIds.set(canonicalId, fallbackPub);
+        knownSlugs.set(slug, fallbackPub);
       }
     }
 
-    return Array.from(slugMap.values());
+    return Array.from(new Set(knownIds.values()));
   }
 
   public getPublisherBySlug(slug: string): Publisher | undefined {
