@@ -103,13 +103,13 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as DiscoverTab)}
-              className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-medium transition-all shrink-0 active:scale-95 ${
+              className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 active:scale-95 ${
                 isActive
                   ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-border-subtle'
                   : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-gold' : 'text-editorial-faint'}`} />
+              <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-gold' : 'text-editorial-faint'}`} />
               <span className="sm:hidden">{tab.label}</span>
               <span className="hidden sm:inline">{tab.fullLabel}</span>
             </button>
@@ -144,23 +144,23 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="font-editorial text-xl font-bold text-editorial-title">
+              <h2 className="font-editorial text-xl sm:text-2xl md:text-3xl font-bold text-editorial-title">
                 Katalog Seri & Waralaba
               </h2>
-              <p className="text-xs text-editorial-muted mt-0.5">
+              <p className="text-xs sm:text-sm text-editorial-muted mt-0.5">
                 Lacak nomor volume komik, light novel, dan seri berkelanjutan
               </p>
             </div>
 
             {/* Search Bar */}
-            <div className="relative w-full sm:w-72">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-editorial-faint" />
+            <div className="relative w-full sm:w-80">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-editorial-faint" />
               <input
                 type="text"
                 value={seriesSearch}
                 onChange={(e) => setSeriesSearch(e.target.value)}
                 placeholder="Cari nama seri atau penerbit..."
-                className="w-full bg-surface pl-9 pr-3 py-1.5 rounded-xl border border-border-subtle text-xs text-editorial-title placeholder:text-editorial-faint focus:outline-none focus:ring-1 focus:ring-gold"
+                className="w-full bg-surface pl-10 pr-3.5 py-2 sm:py-2.5 rounded-xl border border-border-subtle text-xs sm:text-sm text-editorial-title placeholder:text-editorial-faint focus:outline-none focus:ring-1 focus:ring-gold shadow-xs"
               />
             </div>
           </div>
@@ -170,9 +170,9 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
               <Link
                 key={s.id}
                 href={`/series/${s.slug}`}
-                className="glass-card rounded-2xl p-4 flex items-center gap-4 group hover:border-gold/40 transition-all"
+                className="glass-card rounded-2xl p-4 sm:p-5 flex items-center gap-4 group hover:border-gold/40 transition-all"
               >
-                <div className="w-16 h-22 bg-surface rounded-xl overflow-hidden shrink-0 border border-border-subtle">
+                <div className="w-16 h-22 sm:w-18 sm:h-24 bg-surface rounded-xl overflow-hidden shrink-0 border border-border-subtle">
                   {s.coverUrl ? (
                     <img src={s.coverUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   ) : (
@@ -182,17 +182,17 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
                   )}
                 </div>
                 <div className="min-w-0 flex-1 space-y-1">
-                  <span className="text-[10px] font-mono text-editorial-faint block uppercase truncate">
+                  <span className="text-[10px] sm:text-xs font-mono text-editorial-faint block uppercase truncate">
                     {s.publisherName}
                   </span>
-                  <h3 className="font-editorial text-sm sm:text-base font-bold text-editorial-title group-hover:text-gold transition-colors truncate">
+                  <h3 className="font-editorial text-sm sm:text-base lg:text-lg font-bold text-editorial-title group-hover:text-gold transition-colors truncate">
                     {s.name}
                   </h3>
                   <div className="pt-1 flex items-center justify-between">
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-surface border border-border-subtle text-editorial-muted">
+                    <span className="text-[11px] sm:text-xs font-mono px-2.5 py-0.5 rounded-md bg-surface border border-border-subtle text-editorial-muted">
                       {s.totalVolumes ? `${s.totalVolumes} Volume` : 'Ongoing'}
                     </span>
-                    <span className="text-xs text-gold flex items-center gap-0.5 font-medium group-hover:translate-x-1 transition-transform">
+                    <span className="text-xs sm:text-sm text-gold flex items-center gap-0.5 font-medium group-hover:translate-x-1 transition-transform">
                       Detail →
                     </span>
                   </div>
@@ -208,57 +208,57 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="font-editorial text-xl font-bold text-editorial-title">
+              <h2 className="font-editorial text-xl sm:text-2xl md:text-3xl font-bold text-editorial-title">
                 Direktori Penerbit Resmi
               </h2>
-              <p className="text-xs text-editorial-muted mt-0.5">
+              <p className="text-xs sm:text-sm text-editorial-muted mt-0.5">
                 Daftar penerbit buku dan komik resmi di Indonesia yang dipantau nuvell
               </p>
             </div>
 
-            <div className="relative w-full sm:w-72">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-editorial-faint" />
+            <div className="relative w-full sm:w-80">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-editorial-faint" />
               <input
                 type="text"
                 value={publisherSearch}
                 onChange={(e) => setPublisherSearch(e.target.value)}
                 placeholder="Cari penerbit..."
-                className="w-full bg-surface pl-9 pr-3 py-1.5 rounded-xl border border-border-subtle text-xs text-editorial-title placeholder:text-editorial-faint focus:outline-none focus:ring-1 focus:ring-gold"
+                className="w-full bg-surface pl-10 pr-3.5 py-2 sm:py-2.5 rounded-xl border border-border-subtle text-xs sm:text-sm text-editorial-title placeholder:text-editorial-faint focus:outline-none focus:ring-1 focus:ring-gold shadow-xs"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {filteredPublishers.map((p) => {
               const pubBooks = publications.filter((b) => b.publisherId === p.id);
               return (
                 <Link
                   key={p.id}
                   href={`/publishers/${p.slug}`}
-                  className="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4 group hover:border-gold/40 transition-all"
+                  className="glass-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between space-y-4 group hover:border-gold/40 transition-all"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="w-10 h-10 rounded-xl bg-surface border border-border-subtle flex items-center justify-center text-gold font-bold font-editorial text-lg group-hover:border-gold/50 transition-colors">
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-surface border border-border-subtle flex items-center justify-center text-gold font-bold font-editorial text-lg sm:text-xl group-hover:border-gold/50 transition-colors">
                         {p.name[0]}
                       </div>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <span className="text-[10px] sm:text-xs font-mono px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
                         Resmi
                       </span>
                     </div>
                     <div>
-                      <h3 className="font-editorial text-base font-bold text-editorial-title group-hover:text-gold transition-colors">
+                      <h3 className="font-editorial text-base sm:text-lg font-bold text-editorial-title group-hover:text-gold transition-colors">
                         {p.name}
                       </h3>
                       {p.description && (
-                        <p className="text-xs text-editorial-muted mt-1 line-clamp-2 leading-relaxed">
+                        <p className="text-xs sm:text-sm text-editorial-muted mt-1.5 line-clamp-2 leading-relaxed">
                           {p.description}
                         </p>
                       )}
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-border-subtle flex items-center justify-between text-xs">
+                  <div className="pt-3 border-t border-border-subtle flex items-center justify-between text-xs sm:text-sm">
                     <span className="font-mono text-editorial-faint">
                       {pubBooks.length} judul terindeks
                     </span>
@@ -277,10 +277,10 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
       {activeTab === 'genres' && (
         <div className="space-y-6">
           <div>
-            <h2 className="font-editorial text-xl font-bold text-editorial-title">
+            <h2 className="font-editorial text-xl sm:text-2xl md:text-3xl font-bold text-editorial-title">
               Jelajahi Berdasarkan Genre
             </h2>
-            <p className="text-xs text-editorial-muted mt-0.5">
+            <p className="text-xs sm:text-sm text-editorial-muted mt-0.5">
               Pilih genre untuk melihat daftar buku terkait
             </p>
           </div>
@@ -294,14 +294,14 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
                   key={genre}
                   type="button"
                   onClick={() => setSelectedGenre(isSelected ? null : genre)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                  className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
                     isSelected
                       ? 'bg-gold text-background font-semibold shadow-sm'
                       : 'bg-surface hover:bg-surface-raised border border-border-subtle text-editorial-body hover:text-editorial-title'
                   }`}
                 >
                   <span>{genre}</span>
-                  <span className={`ml-1.5 font-mono text-[10px] ${isSelected ? 'opacity-80' : 'text-editorial-faint'}`}>
+                  <span className={`ml-1.5 font-mono text-[10px] sm:text-xs ${isSelected ? 'opacity-80' : 'text-editorial-faint'}`}>
                     ({count})
                   </span>
                 </button>

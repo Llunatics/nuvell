@@ -159,10 +159,10 @@ export function ReleaseFeed({
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-editorial text-lg sm:text-2xl font-bold text-editorial-title">
+            <h2 className="font-editorial text-lg sm:text-2xl md:text-3xl font-bold text-editorial-title">
               {title}
             </h2>
-            <p className="text-[11px] sm:text-xs text-editorial-muted mt-0.5">
+            <p className="text-[11px] sm:text-sm text-editorial-muted mt-0.5">
               {description} • {filteredItems.length} judul
             </p>
           </div>
@@ -170,12 +170,12 @@ export function ReleaseFeed({
           {/* Desktop Controls (hidden on mobile) */}
           <div className="hidden sm:flex items-center gap-2.5">
             {/* Sort Dropdown */}
-            <div className="flex items-center gap-1.5 bg-surface px-3 py-1.5 rounded-xl border border-border-subtle text-xs text-editorial-body shadow-xs">
-              <ArrowUpDown className="w-3.5 h-3.5 text-gold" />
+            <div className="flex items-center gap-1.5 bg-surface px-3.5 py-2 rounded-xl border border-border-subtle text-xs sm:text-sm text-editorial-body shadow-xs">
+              <ArrowUpDown className="w-4 h-4 text-gold shrink-0" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="bg-transparent focus:outline-none cursor-pointer text-xs"
+                className="bg-transparent focus:outline-none cursor-pointer text-xs sm:text-sm font-medium"
                 aria-label="Urutkan publikasi"
               >
                 <option value="NEWEST_RELEASE" className="bg-surface">Rilis Terbaru</option>
@@ -191,35 +191,35 @@ export function ReleaseFeed({
             <button
               type="button"
               onClick={() => setIsFilterDrawerOpen(true)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all shadow-xs ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-medium transition-all shadow-xs ${
                 activeFiltersCount > 0
                   ? 'bg-gold/15 text-gold border-gold/40 font-semibold'
                   : 'bg-surface border-border-subtle text-editorial-muted hover:text-editorial-title hover:bg-surface-raised'
               }`}
             >
-              <Filter className="w-3.5 h-3.5" />
+              <Filter className="w-4 h-4 text-gold" />
               <span>Filter</span>
               {activeFiltersCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-gold text-background text-[10px] font-bold flex items-center justify-center font-mono">
+                <span className="w-4.5 h-4.5 rounded-full bg-gold text-background text-[10px] sm:text-xs font-bold flex items-center justify-center font-mono">
                   {activeFiltersCount}
                 </span>
               )}
             </button>
 
             {/* View Mode Toggle Segmented Control with Tooltip */}
-            <div className="flex items-center bg-surface p-1 rounded-xl border border-border-subtle shadow-xs">
+            <div className="flex items-center bg-surface p-1 sm:p-1.5 rounded-xl border border-border-subtle shadow-xs">
               <Tooltip content="Tampilan Kisi (Grid)">
                 <button
                   type="button"
                   onClick={() => setViewMode('grid')}
-                  className={`p-1.5 rounded-lg transition-all ${
+                  className={`p-1.5 sm:p-2 rounded-lg transition-all ${
                     viewMode === 'grid'
                       ? 'bg-surface-raised text-gold shadow-xs border border-border-subtle'
                       : 'text-editorial-faint hover:text-editorial-title'
                   }`}
                   aria-label="Tampilan Kisi"
                 >
-                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <LayoutGrid className="w-4 h-4" />
                 </button>
               </Tooltip>
 
@@ -227,14 +227,14 @@ export function ReleaseFeed({
                 <button
                   type="button"
                   onClick={() => setViewMode('list')}
-                  className={`p-1.5 rounded-lg transition-all ${
+                  className={`p-1.5 sm:p-2 rounded-lg transition-all ${
                     viewMode === 'list'
                       ? 'bg-surface-raised text-gold shadow-xs border border-border-subtle'
                       : 'text-editorial-faint hover:text-editorial-title'
                   }`}
                   aria-label="Tampilan Daftar"
                 >
-                  <List className="w-3.5 h-3.5" />
+                  <List className="w-4 h-4" />
                 </button>
               </Tooltip>
             </div>
@@ -328,7 +328,7 @@ export function ReleaseFeed({
               key={item.id}
               type="button"
               onClick={() => setQuickCategory(item.id as QuickCategory)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all shrink-0 active:scale-95 ${
+              className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 active:scale-95 ${
                 isActive
                   ? 'bg-editorial-title text-background font-semibold shadow-xs border border-editorial-title'
                   : 'bg-surface border border-border-subtle text-editorial-muted hover:text-editorial-title hover:bg-surface-raised'
@@ -449,7 +449,7 @@ export function ReleaseFeed({
           <button
             type="button"
             onClick={() => setDisplayLimit((prev) => prev + 24)}
-            className="w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle hover:border-gold/40 text-xs font-medium text-editorial-title transition-all shadow-xs"
+            className="w-full sm:w-auto px-6 py-3 sm:py-3 sm:px-8 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle hover:border-gold/40 text-xs sm:text-sm font-semibold text-editorial-title transition-all shadow-xs"
           >
             Muat Lebih Banyak ({filteredItems.length - displayLimit} tersisa)
           </button>

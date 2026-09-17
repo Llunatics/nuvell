@@ -196,14 +196,14 @@ export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) 
         <div className="absolute top-2 left-2 right-2 flex items-center justify-between gap-1.5 pointer-events-none">
           {publication.recentChangeBadge ? (
             <span
-              className={`text-[9px] font-mono font-bold tracking-wider uppercase px-2 py-0.5 rounded shadow-sm border backdrop-blur-md ${getBadgeStyle(
+              className={`text-[9px] sm:text-[10px] md:text-xs font-mono font-bold tracking-wider uppercase px-2 py-0.5 sm:px-2.5 sm:py-1 rounded shadow-sm border backdrop-blur-md ${getBadgeStyle(
                 publication.recentChangeBadge
               )}`}
             >
               {publication.recentChangeBadge}
             </span>
           ) : (
-            <span className="text-[9px] font-mono font-medium px-1.5 py-0.5 rounded bg-surface/85 text-editorial-muted backdrop-blur-md border border-border-subtle">
+            <span className="text-[9px] sm:text-[10px] md:text-xs font-mono font-medium px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded bg-surface/85 text-editorial-muted backdrop-blur-md border border-border-subtle">
               {publication.format}
             </span>
           )}
@@ -211,23 +211,23 @@ export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) 
           <button
             type="button"
             onClick={handleWatchlistToggle}
-            className={`pointer-events-auto p-2 sm:p-2 rounded-full backdrop-blur-md border transition-all active:scale-90 ${
+            className={`pointer-events-auto p-2 sm:p-2 md:p-2.5 rounded-full backdrop-blur-md border transition-all active:scale-90 ${
               isFollowed
                 ? 'bg-gold text-background border-gold shadow-md'
                 : 'bg-surface/85 text-editorial-title border-border-subtle hover:bg-surface hover:text-gold'
             }`}
             aria-label={isFollowed ? 'Hapus dari Watchlist' : 'Tambah ke Watchlist'}
           >
-            <Bookmark className="w-3.5 h-3.5" fill={isFollowed ? 'currentColor' : 'none'} />
+            <Bookmark className="w-3.5 h-3.5 md:w-4 md:h-4" fill={isFollowed ? 'currentColor' : 'none'} />
           </button>
         </div>
       </div>
 
       {/* Card Content Body */}
-      <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-2 sm:space-y-2.5">
-        <div className="space-y-1">
+      <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-2 sm:space-y-3">
+        <div className="space-y-1 sm:space-y-1.5">
           {/* Eyebrow: Publisher & Volume */}
-          <div className="flex items-center justify-between text-[11px] text-editorial-faint font-mono">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs text-editorial-faint font-mono">
             <span className="truncate">{publication.publisherName}</span>
             {publication.volume && (
               <span className="text-gold shrink-0 font-semibold ml-1">Vol. {publication.volume}</span>
@@ -236,32 +236,32 @@ export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) 
 
           {/* Title: 2 lines clamp */}
           <Link href={`/books/${publication.slug}`} className="block group-hover:text-gold transition-colors">
-            <h3 className="font-editorial text-xs sm:text-sm font-bold text-editorial-title leading-snug line-clamp-2">
+            <h3 className="font-editorial text-xs sm:text-sm md:text-base font-bold text-editorial-title leading-snug line-clamp-2">
               {publication.title}
             </h3>
           </Link>
         </div>
 
         {/* Release Date info */}
-        <div className="pt-1.5 border-t border-border-subtle/80 flex items-center justify-between text-[11px]">
-          <div className="flex items-center gap-1 text-editorial-muted min-w-0">
-            <Calendar className="w-3 h-3 text-gold shrink-0" />
-            <span className={`truncate ${countdown.isToday ? 'text-gold font-bold' : 'text-editorial-muted'}`}>
+        <div className="pt-2 border-t border-border-subtle/80 flex items-center justify-between text-[11px] sm:text-xs">
+          <div className="flex items-center gap-1.5 text-editorial-muted min-w-0">
+            <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gold shrink-0" />
+            <span className={`truncate ${countdown.isToday ? 'text-emerald-400 font-bold' : 'text-editorial-muted'}`}>
               {countdown.label}
             </span>
           </div>
-          <span className="font-mono text-[10px] text-editorial-faint shrink-0 ml-1">
+          <span className="font-mono text-[10px] sm:text-xs text-editorial-faint shrink-0 ml-1">
             {formatShortDate(publication.releaseDate)}
           </span>
         </div>
 
         {/* Price & Collection CTA */}
-        <div className="pt-1.5 border-t border-border-subtle/80 flex items-center justify-between gap-1.5">
+        <div className="pt-2 border-t border-border-subtle/80 flex items-center justify-between gap-2">
           <div>
-            <span className="text-[9px] text-editorial-faint uppercase font-mono block leading-none">
+            <span className="text-[9px] sm:text-[10px] text-editorial-faint uppercase font-mono block leading-none">
               Harga
             </span>
-            <span className="text-xs sm:text-sm font-bold text-editorial-title font-mono">
+            <span className="text-xs sm:text-sm md:text-base font-bold text-editorial-title font-mono">
               {formatIDR(publication.currentPrice)}
             </span>
           </div>
@@ -270,7 +270,7 @@ export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) 
           <button
             type="button"
             onClick={handleCollectionToggle}
-            className={`h-7 sm:h-7 px-2 sm:px-2.5 rounded-lg text-[11px] font-medium border flex items-center gap-1 transition-all active:scale-95 ${
+            className={`h-7 sm:h-7 md:h-8 px-2 sm:px-2.5 md:px-3 rounded-lg text-[11px] sm:text-[11px] md:text-xs font-medium border flex items-center gap-1.5 transition-all active:scale-95 ${
               collectionStatus === 'OWNED'
                 ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 font-semibold'
                 : 'bg-surface hover:bg-surface-raised border-border-subtle text-editorial-muted hover:text-editorial-title'
@@ -279,13 +279,13 @@ export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) 
           >
             {collectionStatus === 'OWNED' ? (
               <>
-                <Check className="w-3 h-3 text-emerald-400" />
-                <span className="text-[10px] sm:text-[11px]">Dimiliki</span>
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Dimiliki</span>
               </>
             ) : (
               <>
-                <Plus className="w-3 h-3 text-editorial-faint" />
-                <span className="text-[10px] sm:text-[11px]">+ Koleksi</span>
+                <Plus className="w-3.5 h-3.5 text-editorial-faint" />
+                <span>+ Koleksi</span>
               </>
             )}
           </button>

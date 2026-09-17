@@ -106,42 +106,53 @@ export function HomeFeedClient({
         </div>
 
         {/* Today's Digest Banner Strip */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-surface/70 border border-border-subtle backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-6 divide-x divide-border-subtle text-xs">
+        <div className="p-4 sm:p-5 md:p-6 rounded-2xl bg-surface/70 border border-border-subtle backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-6 sm:gap-8 divide-x divide-border-subtle text-xs sm:text-sm">
             <div>
-              <span className="font-mono text-lg font-bold text-editorial-title block">
-                {todayReleases.length}
-              </span>
-              <span className="text-editorial-faint">Rilis Hari Ini</span>
+              {todayReleases.length > 0 ? (
+                <>
+                  <span className="font-mono text-lg sm:text-xl md:text-2xl font-bold text-emerald-400 block">
+                    {todayReleases.length}
+                  </span>
+                  <span className="text-editorial-faint sm:text-xs">Rilis Hari Ini</span>
+                </>
+              ) : (
+                <>
+                  <span className="font-mono text-lg sm:text-xl md:text-2xl font-bold text-editorial-title block">
+                    {freshReleases.length}
+                  </span>
+                  <span className="text-editorial-faint sm:text-xs">Rilis Pekan Ini</span>
+                </>
+              )}
             </div>
-            <div className="pl-6">
-              <span className="font-mono text-lg font-bold text-gold block">
+            <div className="pl-6 sm:pl-8">
+              <span className="font-mono text-lg sm:text-xl md:text-2xl font-bold text-gold block">
                 {upcomingReleases.length}+
               </span>
-              <span className="text-editorial-faint">Segera Terbit</span>
+              <span className="text-editorial-faint sm:text-xs">Segera Terbit</span>
             </div>
-            <div className="pl-6">
-              <span className="font-mono text-lg font-bold text-emerald-400 block">
+            <div className="pl-6 sm:pl-8">
+              <span className="font-mono text-lg sm:text-xl md:text-2xl font-bold text-editorial-title block">
                 {publishers.length}
               </span>
-              <span className="text-editorial-faint">Penerbit Resmi</span>
+              <span className="text-editorial-faint sm:text-xs">Penerbit Resmi</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <Link
               href="/calendar"
-              className="px-3.5 py-1.5 rounded-xl bg-surface-raised hover:bg-surface border border-border-subtle hover:border-gold/40 text-xs font-medium text-editorial-title hover:text-gold transition-all flex items-center gap-1.5"
+              className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-surface-raised hover:bg-surface border border-border-subtle hover:border-gold/40 text-xs sm:text-sm font-medium text-editorial-title hover:text-gold transition-all flex items-center gap-2"
             >
-              <Calendar className="w-3.5 h-3.5 text-gold" />
+              <Calendar className="w-4 h-4 text-gold" />
               <span>Kalender Rilis</span>
             </Link>
             <Link
               href="/discover"
-              className="px-3.5 py-1.5 rounded-xl bg-gold text-background text-xs font-semibold hover:bg-gold-400 transition-colors flex items-center gap-1"
+              className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gold text-background text-xs sm:text-sm font-semibold hover:bg-gold-400 transition-colors flex items-center gap-1.5"
             >
               <span>Explore</span>
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
@@ -149,28 +160,28 @@ export function HomeFeedClient({
 
       {/* 2. Personalized "From Your Watchlist" (if followed items exist) */}
       {watchlistMatches.length > 0 && (
-        <section className="space-y-4">
+        <section className="space-y-4 sm:space-y-5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Bookmark className="w-4 h-4 text-gold" />
+            <div className="flex items-center gap-2.5">
+              <Bookmark className="w-4 h-4 sm:w-5 sm:h-5 text-gold" />
               <div>
-                <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
+                <h2 className="font-editorial text-lg sm:text-xl md:text-2xl font-bold text-editorial-title">
                   Watchlist Kamu
                 </h2>
-                <p className="text-xs text-editorial-muted">
+                <p className="text-xs sm:text-sm text-editorial-muted">
                   Judul dan penerbit yang kamu ikuti
                 </p>
               </div>
             </div>
             <Link
               href="/library?tab=watchlist"
-              className="text-xs text-gold hover:underline flex items-center gap-1 font-medium"
+              className="text-xs sm:text-sm text-gold hover:underline flex items-center gap-1 font-medium"
             >
-              Lihat Semua ({watchlistItems.length}) <ArrowRight className="w-3 h-3" />
+              Lihat Semua ({watchlistItems.length}) <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {watchlistMatches.map((pub) => (
               <ReleaseCard key={pub.id} publication={pub} layout="grid" />
             ))}
@@ -178,29 +189,29 @@ export function HomeFeedClient({
         </section>
       )}
 
-      {/* 3. Fresh Releases (Newest September 2026) */}
-      <section className="space-y-4">
+      {/* 3. Fresh Releases (Authentic Newest September 2026 Batch) */}
+      <section className="space-y-4 sm:space-y-5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Flame className="w-4 h-4 text-emerald-400" />
+          <div className="flex items-center gap-2.5">
+            <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
             <div>
-              <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
+              <h2 className="font-editorial text-lg sm:text-xl md:text-2xl font-bold text-editorial-title">
                 Baru Terbit
               </h2>
-              <p className="text-xs text-editorial-muted">
-                Sudah beredar di toko buku pekan ini
+              <p className="text-xs sm:text-sm text-editorial-muted">
+                Buku dan manga edisi terbaru yang beredar resmi di toko buku pekan ini
               </p>
             </div>
           </div>
           <Link
             href="/discover?tab=latest"
-            className="text-xs text-gold hover:underline flex items-center gap-1 font-medium"
+            className="text-xs sm:text-sm text-gold hover:underline flex items-center gap-1 font-medium"
           >
-            Katalog Lengkap <ArrowRight className="w-3 h-3" />
+            Katalog Lengkap <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
           {freshReleases.map((pub) => (
             <ReleaseCard key={pub.id} publication={pub} layout="grid" />
           ))}
@@ -208,28 +219,28 @@ export function HomeFeedClient({
       </section>
 
       {/* 4. Coming Soon & Pre-orders */}
-      <section className="space-y-4">
+      <section className="space-y-4 sm:space-y-5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-burgundy-400" />
+          <div className="flex items-center gap-2.5">
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-burgundy-400" />
             <div>
-              <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
+              <h2 className="font-editorial text-lg sm:text-xl md:text-2xl font-bold text-editorial-title">
                 Segera Hadir
               </h2>
-              <p className="text-xs text-editorial-muted">
-                Jadwal rilis dan pre-order mendatang
+              <p className="text-xs sm:text-sm text-editorial-muted">
+                Jadwal rilis dan pre-order kloter mendatang
               </p>
             </div>
           </div>
           <Link
             href="/calendar"
-            className="text-xs text-gold hover:underline flex items-center gap-1 font-medium"
+            className="text-xs sm:text-sm text-gold hover:underline flex items-center gap-1 font-medium"
           >
-            Jadwal Rilis <ArrowRight className="w-3 h-3" />
+            Jadwal Rilis <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
           {upcomingReleases.map((pub) => (
             <ReleaseCard key={pub.id} publication={pub} layout="grid" />
           ))}
