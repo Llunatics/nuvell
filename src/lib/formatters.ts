@@ -49,6 +49,29 @@ export function formatShortDate(dateInput: string | Date | null | undefined): st
 }
 
 /**
+ * Get current date string (YYYY-MM-DD) in Asia/Jakarta (WIB)
+ */
+export function getTodayDateWIB(nowInput?: Date): string {
+  const now = nowInput || new Date();
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  return formatter.format(now);
+}
+
+/**
+ * Get a past date string (YYYY-MM-DD) in Asia/Jakarta (WIB) relative to today
+ */
+export function getRollingPastDateWIB(daysAgo = 14, nowInput?: Date): string {
+  const now = nowInput || new Date();
+  const past = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+  return getTodayDateWIB(past);
+}
+
+/**
  * Precise Release Countdown relative to Asia/Jakarta current time
  */
 export function getReleaseCountdown(releaseDateInput: string | Date | null | undefined, nowInput?: Date): {

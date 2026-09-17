@@ -82,9 +82,23 @@ export function DisplaySettingsProvider({ children }: { children: React.ReactNod
       setResolvedDark(isDark);
       if (isDark) {
         root.classList.add('dark');
+        root.style.colorScheme = 'dark';
       } else {
         root.classList.remove('dark');
+        root.style.colorScheme = 'light';
       }
+
+      // Dynamically sync theme-color meta tag for mobile browser address bars & safe areas
+      try {
+        const themeHex = isDark ? '#090B0E' : '#F7F8FA';
+        let meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.name = 'theme-color';
+          document.head.appendChild(meta);
+        }
+        meta.content = themeHex;
+      } catch {}
     };
 
     applyTheme();

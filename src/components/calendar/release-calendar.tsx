@@ -16,7 +16,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { Publication } from '@/types';
-import { formatIDR, getReleaseCountdown, formatShortDate } from '@/lib/formatters';
+import { formatIDR, getReleaseCountdown, formatShortDate, getTodayDateWIB } from '@/lib/formatters';
 import { ReleaseCard } from '@/components/books/release-card';
 import { useModalOverlay } from '@/hooks/use-modal-overlay';
 
@@ -27,10 +27,12 @@ interface ReleaseCalendarProps {
 type CalendarViewMode = 'month' | 'week' | 'upcoming';
 
 export function ReleaseCalendar({ publications }: ReleaseCalendarProps) {
+  const now = useMemo(() => new Date(), []);
+  const todayStr = useMemo(() => getTodayDateWIB(), []);
   const [viewMode, setViewMode] = useState<CalendarViewMode>('month');
-  const [currentYear, setCurrentYear] = useState(2026);
-  const [currentMonth, setCurrentMonth] = useState(8); // 8 is September
-  const [selectedDay, setSelectedDay] = useState<number | null>(15);
+  const [currentYear, setCurrentYear] = useState(now.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(now.getMonth());
+  const [selectedDay, setSelectedDay] = useState<number | null>(() => now.getDate());
   const [isDayDrawerOpen, setIsDayDrawerOpen] = useState(false);
   const mounted = useModalOverlay(isDayDrawerOpen);
   const [formatFilter, setFormatFilter] = useState<string>('ALL');
@@ -101,7 +103,7 @@ export function ReleaseCalendar({ publications }: ReleaseCalendarProps) {
       const dayNames = ['MIN', 'SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB'];
       const dayName = dayNames[dateObj.getDay()];
       const releases = pubsByDay.get(day) || [];
-      const isToday = currentMonth === 8 && day === 15 && currentYear === 2026;
+      const isToday = currentMonth === now.getMonth() && day === now.getDate() && currentYear === now.getFullYear();
       return {
         day,
         dayName,
@@ -109,14 +111,14 @@ export function ReleaseCalendar({ publications }: ReleaseCalendarProps) {
         isToday,
       };
     });
-  }, [daysInMonth, currentYear, currentMonth, pubsByDay]);
+  }, [daysInMonth, currentYear, currentMonth, pubsByDay, now]);
 
   // Upcoming publications sorted by date
   const upcomingTimeline = useMemo(() => {
     return publications
-      .filter((p) => p.releaseDate && p.releaseDate >= '2026-09-15')
+      .filter((p) => p.releaseDate && p.releaseDate >= todayStr)
       .sort((a, b) => (a.releaseDate || '').localeCompare(b.releaseDate || ''));
-  }, [publications]);
+  }, [publications, todayStr]);
 
   const upcomingByDate = useMemo(() => {
     const groups = new Map<string, Publication[]>();
@@ -270,7 +272,7 @@ export function ReleaseCalendar({ publications }: ReleaseCalendarProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-mono text-gold uppercase tracking-wider block">
-                    {selectedDay === 15 && currentMonth === 8 && currentYear === 2026
+                    {selectedDay === now.getDate() && currentMonth === now.getMonth() && currentYear === now.getFullYear()
                       ? 'HARI INI • JADWAL RILIS'
                       : 'JADWAL RILIS'}
                   </span>
@@ -418,7 +420,7 @@ export function ReleaseCalendar({ publications }: ReleaseCalendarProps) {
               const day = i + 1;
               const releases = pubsByDay.get(day) || [];
               const hasReleases = releases.length > 0;
-              const isToday = currentMonth === 8 && day === 15 && currentYear === 2026;
+              const isToday = currentMonth === now.getMonth() && day === now.getDate() && currentYear === now.getFullYear();
               const isSelected = selectedDay === day;
 
               return (
@@ -473,12 +475,12 @@ export function ReleaseCalendar({ publications }: ReleaseCalendarProps) {
       {viewMode === 'week' && (
         <div className="space-y-4">
           <p className="text-xs text-editorial-muted font-mono">
-            Rilis Pekan Berjalan (14 - 20 September 2026)
+            Rilis Pekan Berjalan ({monthNames[currentMonth]} {currentYear})
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-7 gap-3">
             {[14, 15, 16, 17, 18, 19, 20].map((day) => {
               const releases = pubsByDay.get(day) || [];
-              const isToday = day === 15;
+              const isToday = day === now.getDate() && currentMonth === now.getMonth() && currentYear === now.getFullYear();
               return (
                 <div
                   key={`week-${day}`}

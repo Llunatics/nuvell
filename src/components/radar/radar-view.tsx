@@ -18,6 +18,7 @@ import {
 import { useWatchlist } from '@/hooks/use-watchlist';
 import { Publication } from '@/types';
 import { ReleaseCard } from '@/components/books/release-card';
+import { getTodayDateWIB, getRollingPastDateWIB } from '@/lib/formatters';
 
 interface RadarViewProps {
   publications: Publication[];
@@ -35,8 +36,10 @@ const QUICK_TARGETS = [
 
 export function RadarView({ publications }: RadarViewProps) {
   const { items, toggleWatchlist } = useWatchlist();
+  const todayStr = useMemo(() => getTodayDateWIB(), []);
+  const rollingPastStr = useMemo(() => getRollingPastDateWIB(14), []);
 
-  // Find matched publications based on user's watchlist targets from all 5,500+ books
+  // Filter publications based on followed entities
   const radarMatches = useMemo(() => {
     if (items.length === 0) return [];
     return publications.filter((pub) => {
@@ -50,15 +53,15 @@ export function RadarView({ publications }: RadarViewProps) {
 
   const newThisMonth = useMemo(() => {
     return radarMatches
-      .filter((p) => p.releaseDate && p.releaseDate >= '2026-09-01' && p.releaseDate <= '2026-09-15')
+      .filter((p) => p.releaseDate && p.releaseDate >= rollingPastStr && p.releaseDate <= todayStr)
       .sort((a, b) => (b.releaseDate || '').localeCompare(a.releaseDate || ''));
-  }, [radarMatches]);
+  }, [radarMatches, rollingPastStr, todayStr]);
 
   const upcoming = useMemo(() => {
     return radarMatches
-      .filter((p) => (p.releaseDate && p.releaseDate > '2026-09-15') || p.status === 'PREORDER' || p.status === 'ANNOUNCED')
+      .filter((p) => (p.releaseDate && p.releaseDate > todayStr) || p.status === 'PREORDER' || p.status === 'ANNOUNCED')
       .sort((a, b) => (a.releaseDate || '2099-12-31').localeCompare(b.releaseDate || '2099-12-31'));
-  }, [radarMatches]);
+  }, [radarMatches, todayStr]);
 
   const priceChanges = useMemo(() => {
     return radarMatches.filter((p) => p.recentChangeBadge === 'PRICE DROP');

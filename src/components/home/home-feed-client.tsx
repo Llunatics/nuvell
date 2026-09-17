@@ -18,7 +18,7 @@ import { Publication, Publisher, Series, Announcement } from '@/types';
 import { ReleaseCard } from '@/components/books/release-card';
 import { useWatchlist } from '@/hooks/use-watchlist';
 import { useCollection } from '@/hooks/use-collection';
-import { formatShortDate } from '@/lib/formatters';
+import { formatShortDate, getTodayDateWIB, getRollingPastDateWIB } from '@/lib/formatters';
 
 interface HomeFeedClientProps {
   publications: Publication[];
@@ -36,22 +36,38 @@ export function HomeFeedClient({
   const { items: watchlistItems } = useWatchlist();
   const { collection } = useCollection();
 
-  // Today & Recent counts (aligned with 2026-09-15)
+  const todayStr = useMemo(() => getTodayDateWIB(), []);
+  const rollingPastStr = useMemo(() => getRollingPastDateWIB(14), []);
+
+  // Today releases (dynamic WIB date, with fallback to latest batch if today has no drops)
   const todayReleases = useMemo(() => {
-    return publications.filter((p) => p.releaseDate === '2026-09-15');
-  }, [publications]);
+    const exactToday = publications.filter((p) => p.releaseDate === todayStr);
+    if (exactToday.length > 0) return exactToday;
+    // Fallback to the latest observed release batch
+    const sorted = [...publications]
+      .filter((p) => p.releaseDate && p.releaseDate <= todayStr)
+      .sort((a, b) => (b.releaseDate || '').localeCompare(a.releaseDate || ''));
+    const latestDate = sorted[0]?.releaseDate;
+    return latestDate ? sorted.filter((p) => p.releaseDate === latestDate) : [];
+  }, [publications, todayStr]);
 
   const upcomingReleases = useMemo(() => {
     return publications
-      .filter((p) => (p.releaseDate && p.releaseDate > '2026-09-15') || p.status === 'PREORDER')
+      .filter((p) => (p.releaseDate && p.releaseDate > todayStr) || p.status === 'PREORDER')
       .slice(0, 8);
-  }, [publications]);
+  }, [publications, todayStr]);
 
   const freshReleases = useMemo(() => {
-    return publications
-      .filter((p) => p.releaseDate && p.releaseDate >= '2026-09-01' && p.releaseDate <= '2026-09-15')
+    const recents = publications
+      .filter((p) => p.releaseDate && p.releaseDate >= rollingPastStr && p.releaseDate <= todayStr)
+      .sort((a, b) => (b.releaseDate || '').localeCompare(a.releaseDate || ''));
+    if (recents.length > 0) return recents.slice(0, 8);
+    // If empty window, return newest released books
+    return [...publications]
+      .filter((p) => p.releaseDate && p.releaseDate <= todayStr)
+      .sort((a, b) => (b.releaseDate || '').localeCompare(a.releaseDate || ''))
       .slice(0, 8);
-  }, [publications]);
+  }, [publications, rollingPastStr, todayStr]);
 
   // Personalized "From Your Watchlist" items
   const watchlistMatches = useMemo(() => {

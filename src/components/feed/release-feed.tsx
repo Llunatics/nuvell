@@ -19,6 +19,7 @@ import { ReleaseCard } from '../books/release-card';
 import { useDisplaySettings } from '@/hooks/use-display-settings';
 import { Tooltip } from '@/components/ui/tooltip';
 import { useModalOverlay } from '@/hooks/use-modal-overlay';
+import { getTodayDateWIB, getRollingPastDateWIB } from '@/lib/formatters';
 
 interface ReleaseFeedProps {
   initialPublications: Publication[];
@@ -72,6 +73,9 @@ export function ReleaseFeed({
   };
 
   // Filter and sort items
+  const todayStr = useMemo(() => getTodayDateWIB(), []);
+  const rollingPastStr = useMemo(() => getRollingPastDateWIB(14), []);
+
   const filteredItems = useMemo(() => {
     let list = [...initialPublications];
 
@@ -81,9 +85,9 @@ export function ReleaseFeed({
         const d = p.releaseDate || '';
         switch (quickCategory) {
           case 'NEW':
-            return p.recentChangeBadge === 'NEW' || (d >= '2026-09-01' && d <= '2026-09-15');
+            return p.recentChangeBadge === 'NEW' || (d >= rollingPastStr && d <= todayStr);
           case 'UPCOMING':
-            return p.status === 'PREORDER' || p.status === 'ANNOUNCED' || d > '2026-09-15';
+            return p.status === 'PREORDER' || p.status === 'ANNOUNCED' || d > todayStr;
           case 'MANGA':
             return (
               (p.genres?.includes('Manga') || p.genres?.includes('Manhwa') || p.genres?.includes('Komik')) &&

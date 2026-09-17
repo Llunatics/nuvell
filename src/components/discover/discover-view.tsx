@@ -16,6 +16,7 @@ import {
 import { Publication, Publisher, Series } from '@/types';
 import { ReleaseFeed } from '@/components/feed/release-feed';
 import { ReleaseCard } from '@/components/books/release-card';
+import { getTodayDateWIB } from '@/lib/formatters';
 
 interface DiscoverViewProps {
   publications: Publication[];
@@ -28,6 +29,7 @@ type DiscoverTab = 'latest' | 'upcoming' | 'series' | 'publishers' | 'genres';
 export function DiscoverView({ publications, publishers, series }: DiscoverViewProps) {
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as DiscoverTab) || 'latest';
+  const todayStr = useMemo(() => getTodayDateWIB(), []);
   const [activeTab, setActiveTab] = useState<DiscoverTab>(
     ['latest', 'upcoming', 'series', 'publishers', 'genres'].includes(initialTab) ? initialTab : 'latest'
   );
@@ -129,11 +131,11 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
       {activeTab === 'upcoming' && (
         <ReleaseFeed
           initialPublications={publications.filter(
-            (p) => (p.releaseDate && p.releaseDate > '2026-09-15') || p.status === 'PREORDER' || p.status === 'ANNOUNCED'
+            (p) => (p.releaseDate && p.releaseDate > todayStr) || p.status === 'PREORDER' || p.status === 'ANNOUNCED'
           )}
           publishers={publishers}
           title="Jadwal Rilis Mendatang & Pre-order"
-          description="Buku dan komik dengan jadwal rilis akhir September hingga Oktober 2026"
+          description="Buku dan komik dengan jadwal rilis mendatang dan pre-order resmi"
         />
       )}
 

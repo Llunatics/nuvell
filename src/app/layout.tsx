@@ -56,7 +56,7 @@ export default function RootLayout({
               <Sidebar />
 
               {/* Main App Content Canvas */}
-              <div className="flex-1 flex flex-col min-w-0 pb-20 lg:pb-0">
+              <div className="flex-1 flex flex-col min-w-0 pb-[max(6.5rem,calc(5rem+env(safe-area-inset-bottom,24px)))] lg:pb-0">
                 <Header />
                 <main className="flex-1">
                   {children}

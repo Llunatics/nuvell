@@ -17,7 +17,7 @@ export function MobileNav() {
 
   return (
     <nav
-      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/92 backdrop-blur-xl border-t border-border-subtle px-3 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] flex items-center justify-around"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface border-t border-border-subtle px-3 pt-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom,16px))] flex items-center justify-around shadow-lg"
       aria-label="Navigasi Bawah Mobile"
     >
       {MOBILE_TABS.map((tab) => {
