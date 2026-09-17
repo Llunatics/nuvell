@@ -45,9 +45,9 @@
   --surface-raised: #161A22;
   --surface-sunken: #060709;
   --surface-overlay: #1B202A;
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-medium: rgba(255, 255, 255, 0.16);
-  --border-bold: rgba(255, 255, 255, 0.28);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-medium: rgba(255, 255, 255, 0.10);
+  --border-bold: rgba(255, 255, 255, 0.18);
   --editorial-title: #F9FAFB;
   --editorial-body: #E5E7EB;
   --editorial-muted: #9CA3AF;
@@ -59,7 +59,7 @@
 
   --glass-bg: rgba(17, 20, 26, 0.78);
   --glass-card-bg: rgba(22, 26, 34, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.05);
 }
 
 html {

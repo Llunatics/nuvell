@@ -430,6 +430,33 @@ export const INITIAL_CRAWL_LOGS: CrawlLog[] = [
   },
 ];
 
+// Canonical publisher alias & normalization mappings
+export const PUBLISHER_CANONICAL_MAP: Record<string, string> = {
+  'pub_anak-hebat-indonesia': 'pub_anak_hebat_indonesia',
+  'pub_knopf-doubleday': 'pub_knopf_doubleday',
+  'pub_gramedia-widiasarana-indonesia': 'pub_gramedia_widiasarana_indonesia',
+  'pub_psikologi-corner': 'pub_psikologi_corner',
+  'pub_brilliant-books': 'pub_brilliant_books',
+  'pub_kawan-pustaka': 'pub_kawan_pustaka',
+  'pub_niaga-swadaya': 'pub_niaga_swadaya',
+  'pub_akad-x-skuad': 'pub_akad_x_skuad',
+  'pub_bhuana-ilmu-populer': 'pub_bip',
+  'pub_kepustakaan-populer-gramedia': 'pub_kpg',
+  'pub_noura_books': 'pub_noura',
+  'pub_media_kita': 'pub_mediakita',
+  'pub_penerbit_mcm_mkids': 'pub_mcm_mkids',
+  'pub_penerbit_toro': 'pub_toro',
+};
+
+export const PUBLISHER_SLUG_ALIAS: Record<string, string> = {
+  'bhuana-ilmu-populer': 'bip',
+  'kepustakaan-populer-gramedia': 'kpg',
+  'noura-books': 'noura',
+  'media-kita': 'mediakita',
+  'penerbit-mcm-mkids': 'mcm-mkids',
+  'penerbit-toro': 'toro',
+};
+
 // Data Repository Class providing high-performance query methods
 class DataService {
   private sources: Source[] = [...INITIAL_SOURCES];
@@ -466,41 +493,76 @@ class DataService {
       .slice(0, limit);
   }
 
-  // Publishers
+  // Publishers (Guaranteed unique canonical entities without key/slug collisions)
   public getAllPublishers(): Publisher[] {
-    const pubMap = new Map<string, Publisher>();
+    const slugMap = new Map<string, Publisher>();
+
     for (const p of this.publishers) {
-      pubMap.set(p.id, p);
-    }
-    for (const pub of this.publications) {
-      if (pub.publisherId && pub.publisherName && !pubMap.has(pub.publisherId)) {
-        pubMap.set(pub.publisherId, {
-          id: pub.publisherId,
-          name: pub.publisherName,
-          slug: pub.publisherId.replace(/^pub_/, '').replace(/_/g, '-'),
-          country: pub.country || (pub.language === 'en' ? 'Import / International' : 'Indonesia'),
-          isOfficial: true,
-          description: `Penerbit resmi ${pub.publisherName}.`,
+      const canonicalId = PUBLISHER_CANONICAL_MAP[p.id] || p.id;
+      const canonicalSlug = PUBLISHER_SLUG_ALIAS[p.slug] || p.slug.toLowerCase().replace(/_/g, '-');
+
+      const existing = slugMap.get(canonicalSlug);
+      if (existing) {
+        if (p.country === 'Indonesia' && existing.country !== 'Indonesia') {
+          existing.country = 'Indonesia';
+        }
+        if ((p.imprints?.length || 0) > (existing.imprints?.length || 0)) {
+          existing.imprints = p.imprints;
+        }
+        if ((p.description?.length || 0) > (existing.description?.length || 0)) {
+          existing.description = p.description;
+        }
+      } else {
+        slugMap.set(canonicalSlug, {
+          ...p,
+          id: canonicalId,
+          slug: canonicalSlug,
         });
       }
     }
-    return Array.from(pubMap.values());
+
+    for (const pub of this.publications) {
+      if (pub.publisherId && pub.publisherName) {
+        const canonicalId = PUBLISHER_CANONICAL_MAP[pub.publisherId] || pub.publisherId;
+        const slug = PUBLISHER_SLUG_ALIAS[canonicalId.replace(/^pub_/, '').replace(/_/g, '-')] || canonicalId.replace(/^pub_/, '').replace(/_/g, '-');
+        if (!slugMap.has(slug)) {
+          slugMap.set(slug, {
+            id: canonicalId,
+            name: pub.publisherName,
+            slug,
+            country: pub.country || (pub.language === 'en' ? 'Import / International' : 'Indonesia'),
+            isOfficial: true,
+            description: `Penerbit resmi ${pub.publisherName}.`,
+          });
+        }
+      }
+    }
+
+    return Array.from(slugMap.values());
   }
 
   public getPublisherBySlug(slug: string): Publisher | undefined {
     const all = this.getAllPublishers();
-    const cleanS = slug.replace(/^pub_/, '').replace(/_/g, '-');
+    const cleanS = slug.replace(/^pub_/, '').replace(/_/g, '-').toLowerCase();
+    const aliasS = PUBLISHER_SLUG_ALIAS[cleanS] || cleanS;
+
     return all.find(
       (p) =>
-        p.slug === slug ||
-        p.slug === cleanS ||
+        p.slug.toLowerCase() === slug.toLowerCase() ||
+        p.slug.toLowerCase() === cleanS ||
+        p.slug.toLowerCase() === aliasS ||
         p.id === slug ||
-        p.id === `pub_${slug.replace(/-/g, '_')}`
+        p.id === `pub_${slug.replace(/-/g, '_')}` ||
+        (PUBLISHER_CANONICAL_MAP[slug] && p.id === PUBLISHER_CANONICAL_MAP[slug])
     );
   }
 
   public getPublicationsByPublisher(publisherId: string): Publication[] {
-    return this.publications.filter((p) => p.publisherId === publisherId);
+    const canonicalId = PUBLISHER_CANONICAL_MAP[publisherId] || publisherId;
+    return this.publications.filter((p) => {
+      const pCanon = PUBLISHER_CANONICAL_MAP[p.publisherId] || p.publisherId;
+      return pCanon === canonicalId || p.publisherId === publisherId || p.publisherId === canonicalId;
+    });
   }
 
   // Series

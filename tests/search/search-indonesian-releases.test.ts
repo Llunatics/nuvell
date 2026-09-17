@@ -37,4 +37,28 @@ describe('Search & Discovery for Indonesian Releases', () => {
     expect(mnc).toBeDefined();
     expect(grasindo).toBeDefined();
   });
+
+  it('guarantees unique publisher slugs and canonical identity for Anak Hebat Indonesia', () => {
+    const publishers = dataService.getAllPublishers();
+    const slugSet = new Set<string>();
+    const duplicateSlugs: string[] = [];
+
+    for (const pub of publishers) {
+      if (slugSet.has(pub.slug)) {
+        duplicateSlugs.push(pub.slug);
+      }
+      slugSet.add(pub.slug);
+    }
+
+    expect(duplicateSlugs).toEqual([]);
+
+    const anakHebat = publishers.filter((p) => p.slug === 'anak-hebat-indonesia');
+    expect(anakHebat.length).toBe(1);
+
+    const anakHebatPub = dataService.getPublisherBySlug('anak-hebat-indonesia');
+    expect(anakHebatPub).toBeDefined();
+
+    const books = dataService.getPublicationsByPublisher(anakHebatPub!.id);
+    expect(books.length).toBeGreaterThanOrEqual(25);
+  });
 });

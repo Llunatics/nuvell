@@ -185,8 +185,8 @@ Drama Queen Vol. 3 (Comic)`);
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto py-16 px-4">
-        <div className="glass-panel p-8 rounded-3xl border border-border-medium text-center space-y-6 shadow-2xl">
-          <div className="w-14 h-14 rounded-2xl bg-surface-overlay border border-border-subtle flex items-center justify-center text-gold mx-auto shadow-lg">
+        <div className="glass-panel p-8 rounded-3xl border border-white/[0.08] text-center space-y-6 shadow-2xl">
+          <div className="w-14 h-14 rounded-2xl bg-surface-overlay border border-white/[0.06] flex items-center justify-center text-gold mx-auto shadow-lg">
             <Lock className="w-6 h-6" />
           </div>
 
@@ -205,7 +205,7 @@ Drama Queen Vol. 3 (Comic)`);
               value={secretInput}
               onChange={(e) => setSecretInput(e.target.value)}
               placeholder="Kunci Rahasia Admin..."
-              className="w-full px-4 py-2.5 rounded-xl bg-surface border border-border-subtle text-xs text-editorial-title placeholder-editorial-faint focus:outline-none focus:border-gold"
+              className="w-full px-4 py-2.5 rounded-xl bg-surface border border-white/[0.06] text-xs text-editorial-title placeholder-editorial-faint focus:outline-none focus:border-gold"
             />
             <button
               type="submit"
@@ -225,7 +225,7 @@ Drama Queen Vol. 3 (Comic)`);
   return (
     <div className="space-y-8">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border-subtle">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/[0.06]">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-gold uppercase tracking-wider">
             <Terminal className="w-3.5 h-3.5" />
@@ -240,13 +240,13 @@ Drama Queen Vol. 3 (Comic)`);
         </div>
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-1.5 p-1 bg-surface-raised rounded-2xl border border-border-subtle overflow-x-auto no-scrollbar shadow-xs">
+        <div className="flex items-center gap-1.5 p-1 bg-surface-raised rounded-2xl border border-white/[0.06] overflow-x-auto no-scrollbar shadow-xs">
           <button
             type="button"
             onClick={() => setActiveTab('SOURCES')}
             className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
               activeTab === 'SOURCES'
-                ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-border-subtle'
+                ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
                 : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
             }`}
           >
@@ -257,7 +257,7 @@ Drama Queen Vol. 3 (Comic)`);
             onClick={() => setActiveTab('LOGS')}
             className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
               activeTab === 'LOGS'
-                ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-border-subtle'
+                ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
                 : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
             }`}
           >
@@ -268,7 +268,7 @@ Drama Queen Vol. 3 (Comic)`);
             onClick={() => setActiveTab('REVIEW')}
             className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
               activeTab === 'REVIEW'
-                ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-border-subtle'
+                ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
                 : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
             }`}
           >
@@ -279,7 +279,7 @@ Drama Queen Vol. 3 (Comic)`);
             onClick={() => setActiveTab('TRANSCRIBER')}
             className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
               activeTab === 'TRANSCRIBER'
-                ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-border-subtle'
+                ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
                 : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
             }`}
           >
@@ -292,10 +292,10 @@ Drama Queen Vol. 3 (Comic)`);
       {activeTab === 'SOURCES' && (
         <section className="space-y-6">
           {/* Master Ingestion & Metrics Overview */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-surface/80 border border-border-subtle shadow-sm space-y-5">
+          <div className="p-5 sm:p-6 rounded-2xl bg-surface/70 border border-white/[0.06] shadow-sm space-y-5">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="space-y-1.5 max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-surface-raised border border-border-subtle text-editorial-muted text-xs font-mono">
+                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-surface-raised border border-white/[0.06] text-editorial-muted text-xs font-mono">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span>Omni-Catalog Master Ingestion</span>
                   <span className="text-editorial-faint">•</span>
@@ -328,21 +328,21 @@ Drama Queen Vol. 3 (Comic)`);
               </button>
             </div>
 
-            {/* Clean KPI Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-border-subtle/80">
-              <div className="p-4 rounded-xl bg-surface-raised/50 border border-border-subtle/60">
+            {/* Clean Matching KPI Cards (No harsh white outlines, subtle keabuan divider) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/[0.06]">
+              <div className="p-4 rounded-xl bg-surface-raised/40 hover:bg-surface-raised/60 transition-colors border border-white/[0.04]">
                 <span className="text-xs text-editorial-faint block font-mono">Penerbit Tercover</span>
                 <span className="font-mono text-xl sm:text-2xl font-bold text-gold">254 Penerbit</span>
               </div>
-              <div className="p-4 rounded-xl bg-surface-raised/50 border border-border-subtle/60">
+              <div className="p-4 rounded-xl bg-surface-raised/40 hover:bg-surface-raised/60 transition-colors border border-white/[0.04]">
                 <span className="text-xs text-editorial-faint block font-mono">Pipeline Aktif</span>
                 <span className="font-mono text-xl sm:text-2xl font-bold text-emerald-400">{sources.length} Sumber</span>
               </div>
-              <div className="p-4 rounded-xl bg-surface-raised/50 border border-border-subtle/60">
+              <div className="p-4 rounded-xl bg-surface-raised/40 hover:bg-surface-raised/60 transition-colors border border-white/[0.04]">
                 <span className="text-xs text-editorial-faint block font-mono">Katalog Terpantau</span>
                 <span className="font-mono text-xl sm:text-2xl font-bold text-editorial-title">8.075+ Judul</span>
               </div>
-              <div className="p-4 rounded-xl bg-surface-raised/50 border border-border-subtle/60">
+              <div className="p-4 rounded-xl bg-surface-raised/40 hover:bg-surface-raised/60 transition-colors border border-white/[0.04]">
                 <span className="text-xs text-editorial-faint block font-mono">Validasi Status</span>
                 <span className="font-mono text-xl sm:text-2xl font-bold text-cyan-400">Live Ingestion</span>
               </div>
@@ -358,13 +358,13 @@ Drama Queen Vol. 3 (Comic)`);
 
           {/* Sources Filter Controls */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 p-1 bg-surface-raised rounded-xl border border-border-subtle text-xs sm:text-sm">
+            <div className="flex items-center gap-1.5 p-1 bg-surface-raised rounded-xl border border-white/[0.06] text-xs sm:text-sm">
               <button
                 type="button"
                 onClick={() => setSourceCategoryFilter('ALL')}
                 className={`px-3 sm:px-4 py-1.5 rounded-lg transition-all ${
                   sourceCategoryFilter === 'ALL'
-                    ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-border-subtle'
+                    ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
                     : 'text-editorial-muted hover:text-editorial-title'
                 }`}
               >
@@ -375,7 +375,7 @@ Drama Queen Vol. 3 (Comic)`);
                 onClick={() => setSourceCategoryFilter('STOREFRONT')}
                 className={`px-3 sm:px-4 py-1.5 rounded-lg transition-all ${
                   sourceCategoryFilter === 'STOREFRONT'
-                    ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-border-subtle'
+                    ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
                     : 'text-editorial-muted hover:text-editorial-title'
                 }`}
               >
@@ -386,7 +386,7 @@ Drama Queen Vol. 3 (Comic)`);
                 onClick={() => setSourceCategoryFilter('PUBLISHER')}
                 className={`px-3 sm:px-4 py-1.5 rounded-lg transition-all ${
                   sourceCategoryFilter === 'PUBLISHER'
-                    ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-border-subtle'
+                    ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
                     : 'text-editorial-muted hover:text-editorial-title'
                 }`}
               >
@@ -407,12 +407,12 @@ Drama Queen Vol. 3 (Comic)`);
             </span>
           </div>
 
-          {/* Sources Table */}
-          <div className="glass-panel rounded-2xl overflow-hidden shadow-sm border border-border-subtle">
+          {/* Sources Table (Muted Gray Dividers) */}
+          <div className="rounded-2xl overflow-hidden shadow-sm bg-surface/60 border border-white/[0.06]">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
-                  <tr className="border-b border-border-subtle bg-surface/80 text-editorial-faint font-mono uppercase text-xs">
+                  <tr className="border-b border-white/[0.06] bg-surface/80 text-editorial-faint font-mono uppercase text-xs">
                     <th className="py-3.5 px-5">Nama Sumber & Cakupan</th>
                     <th className="py-3.5 px-4">Tipe</th>
                     <th className="py-3.5 px-4">Status</th>
@@ -421,7 +421,7 @@ Drama Queen Vol. 3 (Comic)`);
                     <th className="py-3.5 px-5 text-right">Aksi Terkontrol</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-subtle/70">
+                <tbody className="divide-y divide-white/[0.05]">
                   {sources
                     .filter((s) => {
                       if (sourceCategoryFilter === 'STOREFRONT') return s.type === 'BOOKSTORE' || s.type === 'CATALOG';
@@ -448,7 +448,7 @@ Drama Queen Vol. 3 (Comic)`);
                             </div>
                           </td>
                           <td className="py-4 px-4">
-                            <span className="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-surface-overlay text-editorial-muted border border-border-subtle">
+                            <span className="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-surface-overlay text-editorial-muted border border-white/[0.06]">
                               {src.type}
                             </span>
                           </td>
@@ -457,7 +457,7 @@ Drama Queen Vol. 3 (Comic)`);
                               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold border ${
                                 src.status === 'HEALTHY'
                                   ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                  : 'bg-surface-overlay text-editorial-muted border-border-subtle'
+                                  : 'bg-surface-overlay text-editorial-muted border-white/[0.06]'
                               }`}
                             >
                               <span className={`w-1.5 h-1.5 rounded-full ${src.status === 'HEALTHY' ? 'bg-emerald-400 animate-pulse' : 'bg-editorial-faint'}`} />
@@ -480,7 +480,7 @@ Drama Queen Vol. 3 (Comic)`);
                             <button
                               type="button"
                               onClick={() => toggleSourceEnabled(src.id)}
-                              className="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-raised border border-border-subtle text-editorial-muted hover:text-editorial-title text-xs transition-colors"
+                              className="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-raised border border-white/[0.06] text-editorial-muted hover:text-editorial-title text-xs transition-colors"
                             >
                               {src.enabled ? 'Nonaktifkan' : 'Aktifkan'}
                             </button>
@@ -511,11 +511,11 @@ Drama Queen Vol. 3 (Comic)`);
       {/* Tab Content: LOGS */}
       {activeTab === 'LOGS' && (
         <section className="space-y-4">
-          <div className="glass-panel rounded-2xl overflow-hidden shadow-sm border border-border-subtle">
+          <div className="rounded-2xl overflow-hidden shadow-sm bg-surface/60 border border-white/[0.06]">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
-                  <tr className="border-b border-border-subtle bg-surface/80 text-editorial-faint font-mono uppercase text-xs">
+                  <tr className="border-b border-white/[0.06] bg-surface/80 text-editorial-faint font-mono uppercase text-xs">
                     <th className="py-3.5 px-4">Sumber</th>
                     <th className="py-3.5 px-4">Waktu Mulai</th>
                     <th className="py-3.5 px-4">Durasi</th>
@@ -526,7 +526,7 @@ Drama Queen Vol. 3 (Comic)`);
                     <th className="py-3.5 px-4">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-subtle/70 font-mono text-xs sm:text-sm">
+                <tbody className="divide-y divide-white/[0.05] font-mono text-xs sm:text-sm">
                   {logs.map((log) => (
                     <tr key={log.id} className="hover:bg-surface/50 transition-colors">
                       <td className="py-3.5 px-4 font-sans font-medium text-editorial-title">
@@ -568,14 +568,14 @@ Drama Queen Vol. 3 (Comic)`);
       {/* Tab Content: REVIEW QUEUE */}
       {activeTab === 'REVIEW' && (
         <section className="space-y-4">
-          <div className="glass-panel p-6 rounded-2xl space-y-3 border border-border-subtle shadow-sm">
+          <div className="p-6 rounded-2xl space-y-3 bg-surface/60 border border-white/[0.06] shadow-sm">
             <h3 className="font-editorial text-lg font-bold text-editorial-title">
               Antrean Verifikasi Duplikasi Ambiguitas (Confidence &lt; 0.85)
             </h3>
             <p className="text-xs sm:text-sm text-editorial-muted leading-relaxed">
               Kandidat hasil perayapan yang memiliki kemiripan judul parsial namun tidak memenuhi batas confidence otomatis (0.85) dikarantina di sini agar tidak terjadi penggabungan data yang keliru.
             </p>
-            <div className="py-12 text-center text-xs sm:text-sm text-editorial-faint border border-dashed border-border-subtle rounded-xl bg-surface/30">
+            <div className="py-12 text-center text-xs sm:text-sm text-editorial-faint border border-dashed border-white/[0.08] rounded-xl bg-surface/30">
               Antrean bersih. Seluruh data rilisan saat ini memiliki confidence skor &gt; 0.90 atau berstatus entitas unik.
             </div>
           </div>
@@ -585,8 +585,8 @@ Drama Queen Vol. 3 (Comic)`);
       {/* Tab Content: SOCIAL FLYER TRANSCRIBER */}
       {activeTab === 'TRANSCRIBER' && (
         <section className="space-y-6">
-          <div className="glass-panel p-6 rounded-2xl space-y-5 border border-border-subtle shadow-sm">
-            <div className="flex items-center justify-between flex-wrap gap-3 pb-4 border-b border-border-subtle">
+          <div className="p-6 rounded-2xl space-y-5 bg-surface/60 border border-white/[0.06] shadow-sm">
+            <div className="flex items-center justify-between flex-wrap gap-3 pb-4 border-b border-white/[0.06]">
               <div>
                 <h3 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title flex items-center gap-2">
                   <Camera className="w-5 h-5 text-gold" />
@@ -618,7 +618,7 @@ Blue Lock Vol. 32 (Comic) [POST CARD]
 Witch Watch Vol. 10 (Comic)
 Drama Queen Vol. 3 (Comic)`);
                 }}
-                className="px-3 py-1.5 rounded-lg text-xs sm:text-sm bg-surface hover:bg-surface-raised border border-border-subtle text-editorial-body hover:text-gold transition-colors font-mono"
+                className="px-3 py-1.5 rounded-lg text-xs sm:text-sm bg-surface hover:bg-surface-raised border border-white/[0.06] text-editorial-body hover:text-gold transition-colors font-mono"
               >
                 Phoenix Gramedia (9 Sep)
               </button>
@@ -636,7 +636,7 @@ Mashle Vol. 16
 Black Butler Vol. 35
 Sakamoto Days Vol. 23`);
                 }}
-                className="px-3 py-1.5 rounded-lg text-xs sm:text-sm bg-surface hover:bg-surface-raised border border-border-subtle text-editorial-body hover:text-gold transition-colors font-mono"
+                className="px-3 py-1.5 rounded-lg text-xs sm:text-sm bg-surface hover:bg-surface-raised border border-white/[0.06] text-editorial-body hover:text-gold transition-colors font-mono"
               >
                 Elex Media (Rabu)
               </button>
@@ -652,7 +652,7 @@ Akasha: Dead Mount Death Play Vol. 16
 Oshi no Ko Vol. 12
 Frieren: Beyond Journey's End Vol. 11`);
                 }}
-                className="px-3 py-1.5 rounded-lg text-xs sm:text-sm bg-surface hover:bg-surface-raised border border-border-subtle text-editorial-body hover:text-gold transition-colors font-mono"
+                className="px-3 py-1.5 rounded-lg text-xs sm:text-sm bg-surface hover:bg-surface-raised border border-white/[0.06] text-editorial-body hover:text-gold transition-colors font-mono"
               >
                 m&c! Akasha (Rabu)
               </button>
@@ -669,10 +669,10 @@ Frieren: Beyond Journey's End Vol. 11`);
                     type="text"
                     value={posterPublisher}
                     onChange={(e) => setPosterPublisher(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border-subtle text-xs sm:text-sm text-editorial-title focus:outline-none focus:border-gold"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-white/[0.06] text-xs sm:text-sm text-editorial-title focus:outline-none focus:border-gold"
                   />
                 </div>
-                <div className="p-4 rounded-xl bg-surface/50 border border-border-subtle text-xs sm:text-sm space-y-1.5 text-editorial-muted">
+                <div className="p-4 rounded-xl bg-surface/50 border border-white/[0.06] text-xs sm:text-sm space-y-1.5 text-editorial-muted">
                   <p className="font-semibold text-editorial-title">Fitur Parser:</p>
                   <p>• Ekstraksi tanggal rilis otomatis</p>
                   <p>• Deteksi nomor volume (Vol. X)</p>
@@ -698,7 +698,7 @@ Frieren: Beyond Journey's End Vol. 11`);
                   value={posterText}
                   onChange={(e) => setPosterText(e.target.value)}
                   placeholder="Tempel teks pengumuman dari postingan media sosial di sini..."
-                  className="w-full px-4 py-3 rounded-xl bg-surface border border-border-subtle text-xs sm:text-sm font-mono text-editorial-title placeholder-editorial-faint focus:outline-none focus:border-gold leading-relaxed"
+                  className="w-full px-4 py-3 rounded-xl bg-surface border border-white/[0.06] text-xs sm:text-sm font-mono text-editorial-title placeholder-editorial-faint focus:outline-none focus:border-gold leading-relaxed"
                 />
               </div>
             </div>
@@ -706,8 +706,8 @@ Frieren: Beyond Journey's End Vol. 11`);
 
           {/* Results Display */}
           {transcriptionResult && (
-            <div className="glass-panel p-6 rounded-2xl space-y-4 border border-border-subtle shadow-sm">
-              <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+            <div className="p-6 rounded-2xl space-y-4 bg-surface/60 border border-white/[0.06] shadow-sm">
+              <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
                 <div>
                   <span className="text-xs font-mono text-gold uppercase font-semibold">Hasil Transkripsi Sukses</span>
                   <h4 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
@@ -725,7 +725,7 @@ Frieren: Beyond Journey's End Vol. 11`);
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs sm:text-sm">
                   <thead>
-                    <tr className="border-b border-border-subtle bg-surface/60 text-editorial-faint font-mono uppercase text-xs">
+                    <tr className="border-b border-white/[0.06] bg-surface/60 text-editorial-faint font-mono uppercase text-xs">
                       <th className="py-3 px-3">#</th>
                       <th className="py-3 px-3">Judul Bersih (Clean Title)</th>
                       <th className="py-3 px-3">Nama Seri</th>
@@ -734,7 +734,7 @@ Frieren: Beyond Journey's End Vol. 11`);
                       <th className="py-3 px-3">Badges Terdeteksi</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border-subtle/70">
+                  <tbody className="divide-y divide-white/[0.05]">
                     {transcriptionResult.items.map((item, idx) => (
                       <tr key={idx} className="hover:bg-surface/50 transition-colors">
                         <td className="py-3 px-3 font-mono text-gold font-bold">{idx + 1}</td>
@@ -748,7 +748,7 @@ Frieren: Beyond Journey's End Vol. 11`);
                           {item.volume ? `Vol. ${item.volume}` : '-'}
                         </td>
                         <td className="py-3 px-3">
-                          <span className="px-2.5 py-1 rounded-md text-xs font-mono bg-surface-overlay text-editorial-muted border border-border-subtle">
+                          <span className="px-2.5 py-1 rounded-md text-xs font-mono bg-surface-overlay text-editorial-muted border border-white/[0.06]">
                             {item.format}
                           </span>
                         </td>

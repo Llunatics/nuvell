@@ -90,14 +90,30 @@ export function InsightsView({ publications, publishers, sources }: InsightsView
     return allChanges.filter((c) => c.field === 'RELEASE_DATE');
   }, [allChanges]);
 
-  // Publisher chart data
+  // Publisher chart data (Aggregated by unique canonical slug to prevent duplicate keys and duplicate bars)
   const pubCounts = useMemo(() => {
-    return publishers.map((pub) => ({
-      name: pub.name.replace('Komputindo', '').trim(),
-      fullName: pub.name,
-      slug: pub.slug,
-      count: publications.filter((p) => p.publisherId === pub.id).length,
-    })).sort((a, b) => b.count - a.count);
+    const map = new Map<string, { name: string; fullName: string; slug: string; count: number }>();
+
+    for (const pub of publishers) {
+      const canonicalSlug = pub.slug.toLowerCase().replace(/_/g, '-');
+      const bookCount = publications.filter(
+        (p) => p.publisherId === pub.id || p.publisherName?.toLowerCase() === pub.name.toLowerCase()
+      ).length;
+
+      const existing = map.get(canonicalSlug);
+      if (existing) {
+        existing.count += bookCount;
+      } else {
+        map.set(canonicalSlug, {
+          name: pub.name.replace('Komputindo', '').trim(),
+          fullName: pub.name,
+          slug: canonicalSlug,
+          count: bookCount,
+        });
+      }
+    }
+
+    return Array.from(map.values()).sort((a, b) => b.count - a.count);
   }, [publishers, publications]);
 
   // Format data
@@ -264,21 +280,26 @@ export function InsightsView({ publications, publishers, sources }: InsightsView
       {activeTab === 'publishers' && (
         <div className="space-y-6">
           <div className="glass-panel p-5 sm:p-6 rounded-2xl space-y-4">
-            <div>
-              <h3 className="font-editorial text-base font-bold text-editorial-title">
-                Volume Terbitan per Penerbit
-              </h3>
-              <p className="text-xs text-editorial-muted">
-                Jumlah judul resmi yang aktif dipantau dan didistribusikan di jaringan Gramedia
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="font-editorial text-base font-bold text-editorial-title">
+                  Volume Terbitan per Penerbit
+                </h3>
+                <p className="text-xs text-editorial-muted">
+                  Jumlah judul resmi yang aktif dipantau dan didistribusikan di jaringan Gramedia
+                </p>
+              </div>
+              <span className="text-xs font-mono text-gold px-2.5 py-1 rounded-md bg-gold/10 border border-gold/20 self-start sm:self-auto">
+                Top 10 Penerbit Teraktif
+              </span>
             </div>
 
-            <PublisherVolumeBarChart data={pubCounts} />
+            <PublisherVolumeBarChart data={pubCounts.filter((p) => p.count > 0).slice(0, 10)} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {pubCounts.map((p) => (
-              <div key={p.slug} className="glass-card rounded-2xl p-4 flex items-center justify-between">
+              <div key={`${p.slug}-${p.fullName}`} className="glass-card rounded-2xl p-4 flex items-center justify-between">
                 <div>
                   <h4 className="font-editorial text-sm font-bold text-editorial-title">
                     {p.fullName}
