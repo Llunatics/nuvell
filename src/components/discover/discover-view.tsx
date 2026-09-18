@@ -87,34 +87,36 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
         </p>
       </div>
 
-      {/* Tabs Navigation: Horizontal Scrollable Strip */}
-      <div className="flex items-center gap-1.5 p-1 bg-surface-raised rounded-2xl border border-border-subtle overflow-x-auto no-scrollbar shadow-xs -mx-1 px-1">
-        {[
-          { id: 'latest', label: 'Terbaru', fullLabel: 'Rilisan Terbaru', icon: Flame },
-          { id: 'upcoming', label: 'Akan Datang', fullLabel: 'Akan Datang', icon: Clock },
-          { id: 'series', label: 'Seri', fullLabel: `Seri (${series.length})`, icon: Layers },
-          { id: 'publishers', label: 'Penerbit', fullLabel: `Penerbit (${publishers.length})`, icon: Building2 },
-          { id: 'genres', label: 'Genre', fullLabel: 'Genre & Kategori', icon: Tag },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id as DiscoverTab)}
-              className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 active:scale-95 ${
-                isActive
-                  ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-border-subtle'
-                  : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-gold' : 'text-editorial-faint'}`} />
-              <span className="sm:hidden">{tab.label}</span>
-              <span className="hidden sm:inline">{tab.fullLabel}</span>
-            </button>
-          );
-        })}
+      {/* Tabs Navigation: Horizontal Scrollable Strip (Full Width Bar, Centered Inner Content) */}
+      <div className="w-full p-1.5 sm:p-2 bg-surface-raised rounded-2xl border border-border-subtle overflow-x-auto no-scrollbar shadow-sm">
+        <div className="flex items-center justify-start md:justify-center gap-1.5 sm:gap-2.5 min-w-max md:min-w-full">
+          {[
+            { id: 'latest', label: 'Terbaru', fullLabel: 'Rilisan Terbaru', icon: Flame },
+            { id: 'upcoming', label: 'Akan Datang', fullLabel: 'Akan Datang', icon: Clock },
+            { id: 'series', label: 'Seri', fullLabel: `Seri (${series.length})`, icon: Layers },
+            { id: 'publishers', label: 'Penerbit', fullLabel: `Penerbit (${publishers.length})`, icon: Building2 },
+            { id: 'genres', label: 'Genre', fullLabel: 'Genre & Kategori', icon: Tag },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id as DiscoverTab)}
+                className={`flex items-center gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 active:scale-95 ${
+                  isActive
+                    ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-border-subtle'
+                    : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-gold' : 'text-editorial-faint'}`} />
+                <span className="sm:hidden">{tab.label}</span>
+                <span className="hidden sm:inline">{tab.fullLabel}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Tab 1: Latest Releases */}

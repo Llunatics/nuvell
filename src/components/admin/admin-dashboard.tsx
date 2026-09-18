@@ -435,52 +435,54 @@ Drama Queen Vol. 3 (Comic)`);
         </div>
       </div>
 
-        {/* Tab Controls */}
-        <div className="flex items-center gap-1.5 p-1 bg-surface-raised rounded-2xl border border-white/[0.06] overflow-x-auto no-scrollbar shadow-xs">
-          <button
-            type="button"
-            onClick={() => setActiveTab('SOURCES')}
-            className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
-              activeTab === 'SOURCES'
-                ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
-                : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
-            }`}
-          >
-            Sumber ({sources.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('LOGS')}
-            className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
-              activeTab === 'LOGS'
-                ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
-                : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
-            }`}
-          >
-            Riwayat Log ({logs.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('REVIEW')}
-            className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
-              activeTab === 'REVIEW'
-                ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
-                : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
-            }`}
-          >
-            Antrean Review ({reviewQueue.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('TRANSCRIBER')}
-            className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
-              activeTab === 'TRANSCRIBER'
-                ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
-                : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
-            }`}
-          >
-            Social Flyer Transcriber
-          </button>
+        {/* Tab Controls (Full Width Bar, Centered Inner Content) */}
+        <div className="w-full p-1 sm:p-1.5 bg-surface-raised rounded-2xl border border-white/[0.06] overflow-x-auto no-scrollbar shadow-xs">
+          <div className="flex items-center justify-start md:justify-center gap-1.5 sm:gap-2.5 min-w-max md:min-w-full">
+            <button
+              type="button"
+              onClick={() => setActiveTab('SOURCES')}
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
+                activeTab === 'SOURCES'
+                  ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
+                  : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
+              }`}
+            >
+              Sumber ({sources.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('LOGS')}
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
+                activeTab === 'LOGS'
+                  ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
+                  : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
+              }`}
+            >
+              Riwayat Log ({logs.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('REVIEW')}
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
+                activeTab === 'REVIEW'
+                  ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
+                  : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
+              }`}
+            >
+              Antrean Review ({reviewQueue.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('TRANSCRIBER')}
+              className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
+                activeTab === 'TRANSCRIBER'
+                  ? 'bg-surface text-editorial-title font-semibold shadow-xs border border-white/[0.08]'
+                  : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
+              }`}
+            >
+              Social Flyer Transcriber
+            </button>
+          </div>
         </div>
 
       {/* Tab Content: SOURCES */}

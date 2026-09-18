@@ -209,32 +209,34 @@ export function InsightsView({ publications, publishers, sources }: InsightsView
         </div>
       </div>
 
-      {/* Segmented Navigation Tabs */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-surface-raised rounded-2xl border border-border-subtle overflow-x-auto no-scrollbar shadow-sm">
-        {[
-          { id: 'trends', label: 'Tren Pasar & Format', icon: TrendingUp },
-          { id: 'publishers', label: 'Aktivitas Penerbit', icon: Building2 },
-          { id: 'prices', label: `Pergerakan Harga (${priceChanges.length})`, icon: TrendingDown },
-          { id: 'changes', label: `Log Perubahan Jadwal (${dateShifts.length})`, icon: History },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id as InsightsTab)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-all shrink-0 ${
-                isActive
-                  ? 'bg-surface text-editorial-title font-semibold shadow-sm border border-border-subtle'
-                  : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-gold' : 'text-editorial-faint'}`} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
+      {/* Segmented Navigation Tabs (Full Width Bar, Centered Inner Content) */}
+      <div className="w-full p-1.5 sm:p-2 bg-surface-raised rounded-2xl border border-border-subtle overflow-x-auto no-scrollbar shadow-sm">
+        <div className="flex items-center justify-start md:justify-center gap-1.5 sm:gap-2.5 min-w-max md:min-w-full">
+          {[
+            { id: 'trends', label: 'Tren Pasar & Kategori', icon: TrendingUp },
+            { id: 'publishers', label: 'Aktivitas Penerbit', icon: Building2 },
+            { id: 'prices', label: `Pergerakan Harga (${priceChanges.length})`, icon: TrendingDown },
+            { id: 'changes', label: `Log Perubahan Jadwal (${dateShifts.length})`, icon: History },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id as InsightsTab)}
+                className={`flex items-center gap-2 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
+                  isActive
+                    ? 'bg-surface text-editorial-title font-semibold shadow-sm border border-border-subtle'
+                    : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-gold' : 'text-editorial-faint'}`} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* TAB 1: TRENDS */}

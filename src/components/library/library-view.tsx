@@ -216,9 +216,9 @@ export function LibraryView({ publications }: LibraryViewProps) {
         </p>
       </div>
 
-      {/* Primary Tabs Segmented Bar (Centered & Scaled for Desktop) */}
-      <div className="flex items-center justify-center p-1.5 sm:p-2 bg-surface-raised rounded-2xl border border-border-subtle overflow-x-auto no-scrollbar shadow-sm mx-auto w-full max-w-4xl">
-        <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 w-full">
+      {/* Primary Tabs Segmented Bar (Full Width Bar, Centered Inner Content) */}
+      <div className="w-full p-1.5 sm:p-2 bg-surface-raised rounded-2xl border border-border-subtle overflow-x-auto no-scrollbar shadow-sm">
+        <div className="flex items-center justify-start md:justify-center gap-2 sm:gap-3 min-w-max md:min-w-full">
           {[
             { id: 'collection', label: `Koleksi Buku (${allCount})`, icon: BookmarkCheck },
             { id: 'series', label: `Pelacak Seri Saya (${seriesList.length})`, icon: Layers3 },
