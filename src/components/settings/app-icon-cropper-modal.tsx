@@ -415,7 +415,7 @@ export function AppIconCropperModal({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between pt-1 border-t border-border-subtle/60">
+              <div className="flex items-center justify-between pt-1 border-t border-border-subtle">
                 <span className="text-[11px] text-editorial-faint">
                   Drag gambar untuk menggeser posisi
                 </span>

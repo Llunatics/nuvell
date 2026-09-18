@@ -37,7 +37,7 @@ export default async function BookDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const related = dataService.getRelatedPublications(publication, 4);
+  const recommendations = dataService.getRecommendationsForPublication(publication, 4);
 
   // Neighbor volumes in the same series
   let neighborVolumes: Publication[] = [];
@@ -52,7 +52,8 @@ export default async function BookDetailPage({ params }: PageProps) {
     <div className="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
       <BookDetailClient
         publication={publication}
-        relatedPublications={related}
+        relatedPublications={recommendations.items.map((i) => i.publication)}
+        recommendationResult={recommendations}
         neighborVolumes={neighborVolumes}
       />
     </div>

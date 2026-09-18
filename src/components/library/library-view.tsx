@@ -15,10 +15,12 @@ import {
   CheckCircle2,
   Trash2,
   ArrowRight,
-  ExternalLink,
   Plus,
   BookOpen,
   SlidersHorizontal,
+  Search,
+  ArrowUpDown,
+  Layers3,
 } from 'lucide-react';
 import { Publication, Series, UserCollectionItem } from '@/types';
 import { ReleaseCard } from '@/components/books/release-card';
@@ -26,15 +28,19 @@ import { useWatchlist } from '@/hooks/use-watchlist';
 import { useCollection } from '@/hooks/use-collection';
 import { useRecentlyViewed } from '@/hooks/use-recently-viewed';
 import { useDisplaySettings } from '@/hooks/use-display-settings';
-import { formatIDR, formatShortDate } from '@/lib/formatters';
+import { useUserSeries } from '@/hooks/use-user-series';
+import { UserSeriesTracker } from '@/components/series/user-series-tracker';
+import { formatShortDate } from '@/lib/formatters';
 import { useToast } from '@/hooks/use-toast';
 
 interface LibraryViewProps {
   publications: Publication[];
-  featuredSeries: Series[];
+  featuredSeries?: Series[];
 }
 
-type LibraryTab = 'watchlist' | 'collection' | 'history';
+type LibraryTab = 'collection' | 'series' | 'watchlist' | 'history';
+type CollectionStatusFilter = 'ALL' | 'OWNED' | 'WISHLIST' | 'PREORDERED';
+type SortOption = 'recent' | 'title-asc' | 'release-desc' | 'price-asc' | 'price-desc';
 
 const QUICK_TARGETS = [
   { type: 'PUBLISHER' as const, id: 'pub_elex', name: 'Elex Media Komputindo', slug: 'elex-media-komputindo' },
@@ -46,27 +52,123 @@ const QUICK_TARGETS = [
   { type: 'SERIES' as const, id: 'ser_blue_lock', name: 'Blue Lock', slug: 'blue-lock' },
 ];
 
-export function LibraryView({ publications, featuredSeries }: LibraryViewProps) {
+export function LibraryView({ publications }: LibraryViewProps) {
   const searchParams = useSearchParams();
-  const initialTab = (searchParams.get('tab') as LibraryTab) || 'watchlist';
+  const initialTab = (searchParams.get('tab') as LibraryTab) || 'collection';
   const [activeTab, setActiveTab] = useState<LibraryTab>(
-    ['watchlist', 'collection', 'history'].includes(initialTab) ? initialTab : 'watchlist'
+    ['collection', 'series', 'watchlist', 'history'].includes(initialTab) ? initialTab : 'collection'
   );
 
   const { items: watchlistItems, toggleWatchlist } = useWatchlist();
   const {
     collection,
-    totalItems: collectionTotal,
     exportCollectionJson,
     importCollectionJson,
-    getSeriesProgress,
-    setItemStatus,
   } = useCollection();
+  const { seriesList } = useUserSeries();
   const { items: recentItems, clearRecentItems } = useRecentlyViewed();
   const { density, setDensity, motion, setMotion } = useDisplaySettings();
   const { toast } = useToast();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Search & Sort states for collection
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<CollectionStatusFilter>('ALL');
+  const [sortBy, setSortBy] = useState<SortOption>('recent');
+
+  // Single Source of Truth for collection items:
+  // Match user collection IDs strictly against available publications
+  const collectedBooks = useMemo(() => {
+    return publications
+      .map((pub) => {
+        const item = collection.get(pub.id);
+        return item ? { pub, item } : null;
+      })
+      .filter(Boolean) as { pub: Publication; item: UserCollectionItem }[];
+  }, [publications, collection]);
+
+  // Derived counts guaranteed to match the displayed items
+  const ownedCount = useMemo(
+    () => collectedBooks.filter((b) => b.item.status === 'OWNED').length,
+    [collectedBooks]
+  );
+  const wishlistCount = useMemo(
+    () => collectedBooks.filter((b) => b.item.status === 'WISHLIST').length,
+    [collectedBooks]
+  );
+  const preorderedCount = useMemo(
+    () =>
+      collectedBooks.filter(
+        (b) => b.item.status === 'PREORDERED' || (b.item.status as string) === 'PREORDER'
+      ).length,
+    [collectedBooks]
+  );
+  const allCount = collectedBooks.length;
+
+  // Incomplete user series count
+  const incompleteSeriesCount = useMemo(() => {
+    return seriesList.filter((s) => {
+      const owned = s.volumes.filter((v) => v.status === 'OWNED').length;
+      if (s.totalVolumes && s.totalVolumes > 0) {
+        return owned < s.totalVolumes;
+      }
+      return s.volumes.some((v) => v.status === 'MISSING' || v.status === 'WISHLIST');
+    }).length;
+  }, [seriesList]);
+
+  // Filter and Sort
+  const filteredAndSortedBooks = useMemo(() => {
+    let list = collectedBooks;
+
+    // 1. Status Filter
+    if (statusFilter === 'OWNED') {
+      list = list.filter((b) => b.item.status === 'OWNED');
+    } else if (statusFilter === 'WISHLIST') {
+      list = list.filter((b) => b.item.status === 'WISHLIST');
+    } else if (statusFilter === 'PREORDERED') {
+      list = list.filter(
+        (b) => b.item.status === 'PREORDERED' || (b.item.status as string) === 'PREORDER'
+      );
+    }
+
+    // 2. Search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (b) =>
+          b.pub.title.toLowerCase().includes(q) ||
+          b.pub.publisherName?.toLowerCase().includes(q) ||
+          b.pub.authors?.some((a) =>
+            (typeof a === 'string' ? a : a.name || '').toLowerCase().includes(q)
+          )
+      );
+    }
+
+    // 3. Sort
+    return [...list].sort((a, b) => {
+      if (sortBy === 'recent') {
+        const timeA = new Date(a.item.updatedAt || 0).getTime();
+        const timeB = new Date(b.item.updatedAt || 0).getTime();
+        return timeB - timeA;
+      }
+      if (sortBy === 'title-asc') {
+        return a.pub.title.localeCompare(b.pub.title, 'id');
+      }
+      if (sortBy === 'release-desc') {
+        const dateA = a.pub.releaseDate ? new Date(a.pub.releaseDate).getTime() : 0;
+        const dateB = b.pub.releaseDate ? new Date(b.pub.releaseDate).getTime() : 0;
+        return dateB - dateA;
+      }
+      if (sortBy === 'price-asc') {
+        return (a.pub.currentPrice || 0) - (b.pub.currentPrice || 0);
+      }
+      if (sortBy === 'price-desc') {
+        return (b.pub.currentPrice || 0) - (a.pub.currentPrice || 0);
+      }
+      return 0;
+    });
+  }, [collectedBooks, statusFilter, searchQuery, sortBy]);
 
   // Match publications for Watchlist Radar
   const watchlistMatches = useMemo(() => {
@@ -78,41 +180,6 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
       return false;
     });
   }, [watchlistItems, publications]);
-
-  // Collection breakdown
-  type CollectionStatusFilter = 'ALL' | 'OWNED' | 'WISHLIST' | 'PREORDERED' | 'MISSING';
-  const [collectionFilter, setCollectionFilter] = useState<CollectionStatusFilter>('ALL');
-
-  const collectionItems = Array.from(collection.values());
-  const ownedCount = collectionItems.filter((i) => i.status === 'OWNED').length;
-  const wishlistCount = collectionItems.filter((i) => i.status === 'WISHLIST').length;
-  const preorderedCount = collectionItems.filter((i) => i.status === 'PREORDERED').length;
-
-  // Match collected publications from user collection
-  const collectedBooks = useMemo(() => {
-    return publications
-      .map((pub) => {
-        const item = collection.get(pub.id);
-        return item ? { pub, item } : null;
-      })
-      .filter(Boolean) as { pub: Publication; item: UserCollectionItem }[];
-  }, [publications, collection]);
-
-  // Series with missing volumes
-  const missingSeries = useMemo(() => {
-    return featuredSeries.filter((s) => {
-      const prog = getSeriesProgress(s.id, s.totalVolumes);
-      return prog.owned < prog.total;
-    });
-  }, [featuredSeries, getSeriesProgress]);
-
-  const filteredCollectedBooks = useMemo(() => {
-    if (collectionFilter === 'ALL') return collectedBooks;
-    if (['OWNED', 'WISHLIST', 'PREORDERED'].includes(collectionFilter)) {
-      return collectedBooks.filter((b) => b.item.status === collectionFilter);
-    }
-    return [];
-  }, [collectedBooks, collectionFilter]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -144,15 +211,16 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
           Library
         </h1>
         <p className="text-xs sm:text-sm text-editorial-muted max-w-2xl leading-relaxed">
-          Pusat pemantauan personal: pantau jadwal rilis judul yang Anda ikuti, catat progres kelengkapan volume koleksi fisik, dan tinjau riwayat eksplorasi.
+          Koleksi personal dan seri yang sedang kamu ikuti.
         </p>
       </div>
 
       {/* Primary Tabs Segmented Bar */}
       <div className="flex items-center gap-1.5 p-1.5 bg-surface-raised rounded-2xl border border-border-subtle overflow-x-auto no-scrollbar shadow-sm">
         {[
-          { id: 'watchlist', label: `Watchlist (${watchlistItems.length})`, icon: Bookmark },
-          { id: 'collection', label: `Koleksi Volume (${collectionTotal})`, icon: BookmarkCheck },
+          { id: 'collection', label: `Koleksi Buku (${allCount})`, icon: BookmarkCheck },
+          { id: 'series', label: `Pelacak Seri Saya (${seriesList.length})`, icon: Layers3 },
+          { id: 'watchlist', label: `Watchlist Radar (${watchlistItems.length})`, icon: Bookmark },
           { id: 'history', label: `Terakhir Dilihat (${recentItems.length})`, icon: History },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -175,7 +243,274 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
         })}
       </div>
 
-      {/* TAB 1: WATCHLIST */}
+      {/* TAB 1: KOLEKSI BUKU */}
+      {activeTab === 'collection' && (
+        <div className="space-y-6 sm:space-y-8">
+          {/* Stats Overview Bar (Strict 1-to-1 consistency) */}
+          <div className="p-4 sm:p-6 rounded-2xl bg-surface/70 border border-border-subtle backdrop-blur-md space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-6">
+            {/* 4 Stat Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 flex-1">
+              <button
+                type="button"
+                onClick={() => setStatusFilter('OWNED')}
+                className={`p-3 rounded-xl border text-left transition-all ${
+                  statusFilter === 'OWNED'
+                    ? 'bg-emerald-500/15 border-emerald-500/40 shadow-sm'
+                    : 'bg-surface/60 border-border-subtle hover:border-emerald-500/30'
+                }`}
+              >
+                <span className="font-mono text-xl font-bold text-emerald-400 block">
+                  {ownedCount}
+                </span>
+                <span className="text-[11px] text-editorial-muted">Dimiliki</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStatusFilter('WISHLIST')}
+                className={`p-3 rounded-xl border text-left transition-all ${
+                  statusFilter === 'WISHLIST'
+                    ? 'bg-amber-500/15 border-amber-500/40 shadow-sm'
+                    : 'bg-surface/60 border-border-subtle hover:border-amber-500/30'
+                }`}
+              >
+                <span className="font-mono text-xl font-bold text-amber-400 block">
+                  {wishlistCount}
+                </span>
+                <span className="text-[11px] text-editorial-muted">Wishlist</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStatusFilter('PREORDERED')}
+                className={`p-3 rounded-xl border text-left transition-all ${
+                  statusFilter === 'PREORDERED'
+                    ? 'bg-burgundy-400/15 border-burgundy-400/40 shadow-sm'
+                    : 'bg-surface/60 border-border-subtle hover:border-burgundy-400/30'
+                }`}
+              >
+                <span className="font-mono text-xl font-bold text-burgundy-400 block">
+                  {preorderedCount}
+                </span>
+                <span className="text-[11px] text-editorial-muted">Pre-order</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('series')}
+                className="p-3 rounded-xl bg-surface/60 border border-border-subtle hover:border-gold/40 text-left transition-all group"
+              >
+                <span className="font-mono text-xl font-bold text-gold block group-hover:scale-105 transition-transform">
+                  {incompleteSeriesCount}
+                </span>
+                <span className="text-[11px] text-editorial-muted flex items-center justify-between">
+                  <span>Seri Belum Lengkap</span>
+                  <ArrowRight className="w-3 h-3 text-editorial-faint group-hover:text-gold transition-colors" />
+                </span>
+              </button>
+            </div>
+
+            {/* Backup / Export Controls */}
+            <div className="flex items-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-border-subtle shrink-0">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="min-h-[40px] px-3 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title flex items-center justify-center gap-2 transition-colors active:scale-95"
+                title="Impor backup JSON koleksi"
+              >
+                <Upload className="w-3.5 h-3.5 text-editorial-faint" />
+                <span className="hidden sm:inline">Impor</span>
+              </button>
+              <button
+                type="button"
+                onClick={exportCollectionJson}
+                className="min-h-[40px] px-3 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title flex items-center justify-center gap-2 transition-colors active:scale-95"
+                title="Unduh cadangan JSON koleksi"
+              >
+                <Download className="w-3.5 h-3.5 text-gold" />
+                <span className="hidden sm:inline">Ekspor</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Filtering, Search & Sorting Controls */}
+          <div className="space-y-3">
+            {/* Status Filter Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+              {[
+                { id: 'ALL', label: 'Semua', count: allCount },
+                { id: 'OWNED', label: 'Dimiliki', count: ownedCount },
+                { id: 'WISHLIST', label: 'Wishlist', count: wishlistCount },
+                { id: 'PREORDERED', label: 'Pre-order', count: preorderedCount },
+              ].map((f) => {
+                const isActive = statusFilter === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setStatusFilter(f.id as CollectionStatusFilter)}
+                    className={`min-h-[38px] px-3.5 py-1.5 rounded-xl text-xs font-medium shrink-0 transition-all border ${
+                      isActive
+                        ? 'bg-gold text-background border-gold font-semibold shadow-sm'
+                        : 'bg-surface border-border-subtle text-editorial-muted hover:text-editorial-title hover:bg-surface-raised'
+                    }`}
+                  >
+                    {f.label} ({f.count})
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Search Input & Sort Dropdown */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-editorial-faint" />
+                <input
+                  type="text"
+                  placeholder="Cari judul, pengarang, penerbit dalam koleksi..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-surface border border-border-subtle focus:border-gold/50 focus:outline-none text-xs text-editorial-title placeholder:text-editorial-faint"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-editorial-faint hover:text-editorial-title text-xs"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Sort Selector */}
+              <div className="flex items-center gap-2 shrink-0">
+                <ArrowUpDown className="w-3.5 h-3.5 text-editorial-faint" />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  className="px-3 py-2 rounded-xl bg-surface border border-border-subtle text-xs text-editorial-body focus:outline-none focus:border-gold/50"
+                >
+                  <option value="recent">Baru ditambahkan</option>
+                  <option value="title-asc">Judul A-Z</option>
+                  <option value="release-desc">Rilis terbaru</option>
+                  <option value="price-asc">Harga terendah</option>
+                  <option value="price-desc">Harga tertinggi</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Collected Books Feed */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
+                  Daftar Buku Koleksi ({filteredAndSortedBooks.length})
+                </h2>
+                <p className="text-xs text-editorial-muted mt-0.5">
+                  Publikasi yang Anda tandai dalam koleksi personal
+                </p>
+              </div>
+            </div>
+
+            {filteredAndSortedBooks.length === 0 ? (
+              <div className="p-12 text-center bg-surface/30 rounded-2xl border border-border-subtle space-y-3">
+                <BookmarkCheck className="w-10 h-10 text-editorial-faint mx-auto" />
+                {searchQuery.trim() ? (
+                  <>
+                    <h3 className="font-editorial text-base font-semibold text-editorial-title">
+                      Tidak ditemukan hasil untuk &quot;{searchQuery}&quot;
+                    </h3>
+                    <p className="text-xs text-editorial-muted max-w-sm mx-auto">
+                      Coba gunakan kata kunci pencarian yang lain atau bersihkan filter.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface border border-border-subtle text-xs text-gold font-medium"
+                    >
+                      Reset Pencarian
+                    </button>
+                  </>
+                ) : statusFilter === 'WISHLIST' ? (
+                  <>
+                    <h3 className="font-editorial text-base font-semibold text-editorial-title">
+                      Belum ada wishlist.
+                    </h3>
+                    <p className="text-xs text-editorial-muted max-w-sm mx-auto">
+                      Tambahkan buku yang ingin kamu baca nanti melalui tombol bookmark atau opsi koleksi di setiap buku.
+                    </p>
+                    <Link
+                      href="/discover"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gold text-background text-xs font-semibold hover:bg-gold-400 transition-colors shadow-sm"
+                    >
+                      <span>Jelajahi Rilisan</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </>
+                ) : statusFilter === 'OWNED' ? (
+                  <>
+                    <h3 className="font-editorial text-base font-semibold text-editorial-title">
+                      Belum ada buku yang ditandai dimiliki.
+                    </h3>
+                    <p className="text-xs text-editorial-muted max-w-sm mx-auto">
+                      Buka detail buku yang sudah kamu miliki di rak fisikmu dan tandai sebagai &quot;Dimiliki&quot;.
+                    </p>
+                  </>
+                ) : statusFilter === 'PREORDERED' ? (
+                  <>
+                    <h3 className="font-editorial text-base font-semibold text-editorial-title">
+                      Belum ada buku dalam status pre-order.
+                    </h3>
+                    <p className="text-xs text-editorial-muted max-w-sm mx-auto">
+                      Tandai buku yang sudah kamu pesan di gerai resmi sebelum tanggal terbit tiba.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="font-editorial text-base font-semibold text-editorial-title">
+                      Koleksi personalmu masih kosong.
+                    </h3>
+                    <p className="text-xs text-editorial-muted max-w-sm mx-auto">
+                      Mulai tandai komik, manga, atau novel favoritmu untuk memantau koleksi dan status kepemilikannya.
+                    </p>
+                    <Link
+                      href="/discover"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gold text-background text-xs font-semibold hover:bg-gold-400 transition-colors shadow-sm"
+                    >
+                      <span>Temukan Buku Baru</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+                {filteredAndSortedBooks.map(({ pub }) => (
+                  <ReleaseCard key={pub.id} publication={pub} layout="grid" />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: PELACAK SERI SAYA (Requirement 10) */}
+      {activeTab === 'series' && (
+        <div className="space-y-6">
+          <UserSeriesTracker />
+        </div>
+      )}
+
+      {/* TAB 3: WATCHLIST RADAR */}
       {activeTab === 'watchlist' && (
         <div className="space-y-8">
           {/* Followed Targets Strip */}
@@ -259,7 +594,7 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
               <div className="p-12 text-center bg-surface/30 rounded-2xl border border-border-subtle space-y-3">
                 <Bookmark className="w-8 h-8 text-editorial-faint mx-auto" />
                 <h3 className="font-editorial text-base font-semibold text-editorial-title">
-                  Your library is quiet.
+                  Radar Anda masih tenang.
                 </h3>
                 <p className="text-xs text-editorial-muted max-w-sm mx-auto">
                   Mulai ikuti penerbit atau seri favorit Anda untuk melihat jadwal dan pemberitahuan rilis terbarunya di sini.
@@ -283,227 +618,7 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
         </div>
       )}
 
-      {/* TAB 2: COLLECTION */}
-      {activeTab === 'collection' && (
-        <div className="space-y-6 sm:space-y-8">
-          {/* Collection Metrics & Backup Strip (Responsive) */}
-          <div className="p-4 sm:p-6 rounded-2xl bg-surface/70 border border-border-subtle backdrop-blur-md space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-6">
-            {/* Mobile 3-Column Metrics Bar */}
-            <div className="grid grid-cols-3 gap-2 text-center sm:hidden">
-              <div className="p-2 rounded-xl bg-surface/50 border border-border-subtle">
-                <span className="font-mono text-lg font-bold text-emerald-400 block">
-                  {ownedCount}
-                </span>
-                <span className="text-[10px] text-editorial-faint">Dimiliki</span>
-              </div>
-              <div className="p-2 rounded-xl bg-surface/50 border border-border-subtle">
-                <span className="font-mono text-lg font-bold text-amber-400 block">
-                  {wishlistCount}
-                </span>
-                <span className="text-[10px] text-editorial-faint">Wishlist</span>
-              </div>
-              <div className="p-2 rounded-xl bg-surface/50 border border-border-subtle">
-                <span className="font-mono text-lg font-bold text-burgundy-400 block">
-                  {preorderedCount}
-                </span>
-                <span className="text-[10px] text-editorial-faint">Pre-order</span>
-              </div>
-            </div>
-
-            {/* Desktop Metrics Bar */}
-            <div className="hidden sm:flex items-center gap-6 divide-x divide-border-subtle text-xs">
-              <div>
-                <span className="font-mono text-xl font-bold text-emerald-400 block">
-                  {ownedCount}
-                </span>
-                <span className="text-editorial-faint">Dimiliki (Owned)</span>
-              </div>
-              <div className="pl-6">
-                <span className="font-mono text-xl font-bold text-amber-400 block">
-                  {wishlistCount}
-                </span>
-                <span className="text-editorial-faint">Wishlist</span>
-              </div>
-              <div className="pl-6">
-                <span className="font-mono text-xl font-bold text-burgundy-400 block">
-                  {preorderedCount}
-                </span>
-                <span className="text-editorial-faint">Pre-ordered</span>
-              </div>
-            </div>
-
-            {/* Export / Import Controls */}
-            <div className="flex items-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-border-subtle">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex-1 sm:flex-initial min-h-[44px] px-3.5 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title flex items-center justify-center gap-2 transition-colors active:scale-95"
-                title="Impor backup JSON koleksi"
-              >
-                <Upload className="w-3.5 h-3.5 text-editorial-faint" />
-                <span>Impor</span>
-              </button>
-              <button
-                type="button"
-                onClick={exportCollectionJson}
-                className="flex-1 sm:flex-initial min-h-[44px] px-3.5 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title flex items-center justify-center gap-2 transition-colors active:scale-95"
-                title="Unduh cadangan JSON koleksi"
-              >
-                <Download className="w-3.5 h-3.5 text-gold" />
-                <span>Ekspor</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Horizontal Scroll Status Filter Chips */}
-          <div className="space-y-2">
-            <span className="text-[10px] font-mono text-editorial-faint uppercase tracking-wider block">
-              Filter Status Koleksi:
-            </span>
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-              {[
-                { id: 'ALL', label: 'Semua', count: collectionTotal },
-                { id: 'OWNED', label: 'Dimiliki', count: ownedCount },
-                { id: 'WISHLIST', label: 'Wishlist', count: wishlistCount },
-                { id: 'PREORDERED', label: 'Pre-order', count: preorderedCount },
-                { id: 'MISSING', label: 'Belum Lengkap', count: missingSeries.length },
-              ].map((f) => {
-                const isActive = collectionFilter === f.id;
-                return (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => setCollectionFilter(f.id as CollectionStatusFilter)}
-                    className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-medium shrink-0 transition-all border ${
-                      isActive
-                        ? 'bg-gold text-background border-gold font-semibold shadow-sm'
-                        : 'bg-surface border-border-subtle text-editorial-muted hover:text-editorial-title hover:bg-surface-raised'
-                    }`}
-                  >
-                    {f.label} ({f.count})
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Collected Books Feed (when not filtering by MISSING only) */}
-          {collectionFilter !== 'MISSING' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
-                    Daftar Buku Koleksi ({filteredCollectedBooks.length})
-                  </h2>
-                  <p className="text-xs text-editorial-muted mt-0.5">
-                    Publikasi yang Anda tandai dalam koleksi personal
-                  </p>
-                </div>
-              </div>
-
-              {filteredCollectedBooks.length === 0 ? (
-                <div className="p-10 text-center bg-surface/30 rounded-2xl border border-border-subtle space-y-2">
-                  <BookmarkCheck className="w-8 h-8 text-editorial-faint mx-auto" />
-                  <p className="text-xs font-medium text-editorial-title">
-                    Belum ada buku dengan status ini.
-                  </p>
-                  <p className="text-[11px] text-editorial-muted max-w-sm mx-auto">
-                    Buka katalog atau halaman buku dan tekan tombol &quot;+ Koleksi&quot; untuk menambahkan ke koleksi Anda.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-                  {filteredCollectedBooks.map(({ pub }) => (
-                    <ReleaseCard key={pub.id} publication={pub} layout="grid" />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Series Completion Tracker (when ALL or MISSING) */}
-          {(collectionFilter === 'ALL' || collectionFilter === 'MISSING') && (
-            <div className="space-y-4 pt-2">
-              <div>
-                <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
-                  {collectionFilter === 'MISSING'
-                    ? `Seri Belum Lengkap (${missingSeries.length})`
-                    : 'Pelacak Kelengkapan Seri Populer'}
-                </h2>
-                <p className="text-xs text-editorial-muted mt-0.5">
-                  Periksa nomor volume yang telah Anda kumpulkan untuk setiap seri
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                {(collectionFilter === 'MISSING' ? missingSeries : featuredSeries).map((s) => {
-                  const progress = getSeriesProgress(s.id, s.totalVolumes);
-                  return (
-                    <div
-                      key={s.id}
-                      className="glass-card rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                    >
-                      <div className="flex items-center gap-4 min-w-0">
-                        <div className="w-12 h-16 bg-surface rounded-lg overflow-hidden shrink-0 border border-border-subtle">
-                          {s.coverUrl ? (
-                            <img src={s.coverUrl} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-editorial-faint text-[10px]">
-                              Cover
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-[10px] font-mono text-editorial-faint block uppercase">
-                            {s.publisherName}
-                          </span>
-                          <h3 className="font-editorial text-sm sm:text-base font-bold text-editorial-title truncate">
-                            {s.name}
-                          </h3>
-                          <p className="text-xs text-editorial-muted mt-0.5">
-                            {progress.owned} dari {progress.total} volume dimiliki ({progress.percentage}%)
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Progress Bar & Actions */}
-                      <div className="flex items-center gap-4 sm:w-64">
-                        <div className="flex-1 space-y-1">
-                          <div className="w-full h-2 bg-surface rounded-full overflow-hidden border border-border-subtle">
-                            <div
-                              className="h-full bg-gradient-to-r from-emerald-500 to-gold rounded-full transition-all duration-500"
-                              style={{ width: `${progress.percentage}%` }}
-                            />
-                          </div>
-                          <div className="flex justify-between text-[10px] font-mono text-editorial-faint">
-                            <span>{progress.owned} Dimiliki</span>
-                            <span>{progress.total - progress.owned} Kurang</span>
-                          </div>
-                        </div>
-                        <Link
-                          href={`/series/${s.slug}`}
-                          className="min-h-[40px] px-3 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title hover:text-gold transition-colors shrink-0 flex items-center justify-center"
-                        >
-                          Kelola
-                        </Link>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB 3: HISTORY (Recently Viewed) */}
+      {/* TAB 4: HISTORY (Recently Viewed) */}
       {activeTab === 'history' && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -566,7 +681,7 @@ export function LibraryView({ publications, featuredSeries }: LibraryViewProps) 
         </div>
       )}
 
-      {/* Secondary Settings: Density & Motion Preferences (Mobile & Desktop) */}
+      {/* Secondary Settings: Density & Motion Preferences */}
       <div className="pt-6 border-t border-border-subtle">
         <div className="p-4 sm:p-5 rounded-2xl bg-surface/50 border border-border-subtle space-y-4">
           <div className="flex items-center justify-between">

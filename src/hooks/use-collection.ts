@@ -17,45 +17,18 @@ export function useCollection() {
       if (stored) {
         const parsed: UserCollectionItem[] = JSON.parse(stored);
         const map = new Map<string, UserCollectionItem>();
-        parsed.forEach((item) => map.set(item.publicationId, item));
+        parsed.forEach((item) => {
+          if (item && item.publicationId) {
+            map.set(item.publicationId, item);
+          }
+        });
         setCollection(map);
       } else {
-        // Initial sample items for collection showcase
-        const defaults: UserCollectionItem[] = [
-          {
-            publicationId: 'pub_one_piece_108',
-            seriesId: 'ser_one_piece',
-            volume: 108,
-            status: 'PREORDERED',
-            updatedAt: new Date().toISOString(),
-          },
-          {
-            publicationId: 'pub_kagurabachi_01',
-            seriesId: 'ser_kagurabachi',
-            volume: 1,
-            status: 'OWNED',
-            updatedAt: new Date().toISOString(),
-          },
-          {
-            publicationId: 'pub_cantik_itu_luka_ce',
-            status: 'WISHLIST',
-            updatedAt: new Date().toISOString(),
-          },
-          {
-            publicationId: 'pub_frieren_11',
-            seriesId: 'ser_frieren',
-            volume: 11,
-            status: 'OWNED',
-            updatedAt: new Date().toISOString(),
-          },
-        ];
-        const map = new Map<string, UserCollectionItem>();
-        defaults.forEach((item) => map.set(item.publicationId, item));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
-        setCollection(map);
+        // No fake data: start with empty collection
+        setCollection(new Map());
       }
     } catch {
-      // LocalStorage fallback
+      setCollection(new Map());
     } finally {
       setIsLoaded(true);
     }

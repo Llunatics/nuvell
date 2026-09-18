@@ -469,7 +469,7 @@ export function ReleaseFeed({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Draggable Feel Touch Bar (Mobile) */}
-            <div className="w-12 h-1.5 rounded-full bg-border-bold/50 mx-auto mt-3 mb-1 md:hidden" />
+            <div className="w-12 h-1.5 rounded-full bg-border-medium mx-auto mt-3 mb-1 md:hidden" />
 
             <div className="space-y-5 p-5 sm:p-6 overflow-y-auto flex-1">
               {/* Drawer Header */}

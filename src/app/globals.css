@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  *, ::before, ::after {
+    border-color: var(--border-subtle);
+  }
+}
+
 :root {
   /* Light Theme Defaults */
   --bg-rgb: 247 248 250;
@@ -15,9 +21,9 @@
   --surface-raised: #F3F4F6;
   --surface-sunken: #E6E9EE;
   --surface-overlay: #FFFFFF;
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --border-medium: rgba(0, 0, 0, 0.16);
-  --border-bold: rgba(0, 0, 0, 0.28);
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-medium: rgba(15, 23, 42, 0.14);
+  --border-bold: rgba(15, 23, 42, 0.22);
   --editorial-title: #111827;
   --editorial-body: #374151;
   --editorial-muted: #6B7280;
@@ -29,7 +35,7 @@
 
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-card-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border: rgba(15, 23, 42, 0.08);
 }
 
 .dark {
@@ -45,9 +51,9 @@
   --surface-raised: #161A22;
   --surface-sunken: #060709;
   --surface-overlay: #1B202A;
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --border-medium: rgba(255, 255, 255, 0.10);
-  --border-bold: rgba(255, 255, 255, 0.18);
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-medium: rgba(255, 255, 255, 0.13);
+  --border-bold: rgba(255, 255, 255, 0.20);
   --editorial-title: #F9FAFB;
   --editorial-body: #E5E7EB;
   --editorial-muted: #9CA3AF;
@@ -58,8 +64,8 @@
   --burgundy-rgb: 139 38 62;
 
   --glass-bg: rgba(17, 20, 26, 0.78);
-  --glass-card-bg: rgba(22, 26, 34, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-card-bg: rgba(22, 26, 34, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.07);
 }
 
 html {

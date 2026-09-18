@@ -14,6 +14,7 @@ import {
 } from '@/types';
 import scrapedData from './scraped-data.json';
 import { getTodayDateWIB, getRollingPastDateWIB } from '@/lib/formatters';
+import { getDeterministicRecommendations, RecommendationResult } from '@/lib/recommendations';
 
 // Comprehensive Crawler Sources & Multi-Vector System Configuration
 // Covering all 254 Indonesian & International licensed publishers via Gramedia.com Ingestion Engine & direct publisher pipelines
@@ -483,15 +484,12 @@ class DataService {
   }
 
   public getRelatedPublications(publication: Publication, limit = 4): Publication[] {
-    return this.publications
-      .filter((p) => p.id !== publication.id)
-      .filter(
-        (p) =>
-          (p.seriesId && p.seriesId === publication.seriesId) ||
-          p.publisherId === publication.publisherId ||
-          p.genres.some((g) => publication.genres.includes(g))
-      )
-      .slice(0, limit);
+    const recs = getDeterministicRecommendations(publication, this.publications, limit);
+    return recs.items.map((i) => i.publication);
+  }
+
+  public getRecommendationsForPublication(publication: Publication, limit = 4): RecommendationResult {
+    return getDeterministicRecommendations(publication, this.publications, limit);
   }
 
   // Publishers (Guaranteed 100% unique canonical entities without key or slug collisions)

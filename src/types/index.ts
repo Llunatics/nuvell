@@ -212,12 +212,18 @@ export interface Publication {
   dimensions?: string | null;
   weight?: number | null;
   currentPrice?: number | null;
+  regularPrice?: number | null;
+  salePrice?: number | null;
+  discountPercent?: number | null;
+  isDiscounted?: boolean;
   lowestObservedPrice?: number | null;
   highestObservedPrice?: number | null;
+  lastPriceObservedAt?: string;
   authors: PublicationAuthor[];
   genres: string[];
   sources: AvailabilityObservation[];
   priceHistory: PriceObservation[];
+  priceSnapshots?: PriceSnapshot[];
   changes: PublicationChange[];
   editions?: Edition[];
   sourceCount: number;
@@ -278,6 +284,81 @@ export interface Announcement {
   relatedPublicationTitle?: string | null;
 }
 
+export interface PriceSnapshot {
+  id: string;
+  bookId: string;
+  sourceId: string;
+  sourceName?: string;
+  observedAt: string;
+  currency: string;
+  regularPrice: number;
+  salePrice: number | null;
+  effectivePrice: number;
+  discountPercent?: number | null;
+  isDiscounted: boolean;
+  availability: string;
+  sourceUrl?: string;
+}
+
+export type NotificationType =
+  | 'RELEASE_SOON'
+  | 'NEW_RELEASE'
+  | 'PRICE_DROP'
+  | 'PRICE_ALERT'
+  | 'PREORDER_OPEN'
+  | 'AVAILABILITY_CHANGE'
+  | 'SERIES_GAP'
+  | 'COLLECTION_EVENT';
+
+export interface NotificationItem {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  bookId?: string;
+  seriesId?: string;
+  title: string;
+  message: string;
+  createdAt: string;
+  readAt?: string | null;
+  isRead: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export type VolumeStatus = 'OWNED' | 'WISHLIST' | 'MISSING' | 'PREORDER';
+
+export interface UserSeriesVolume {
+  id: string;
+  seriesId: string;
+  volumeNumber: number;
+  bookId?: string;
+  status: VolumeStatus;
+  notes?: string;
+}
+
+export interface UserSeries {
+  id: string;
+  userId: string;
+  title: string;
+  author?: string;
+  publisher?: string;
+  status: 'ONGOING' | 'COMPLETED';
+  totalVolumes?: number | null;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  volumes: UserSeriesVolume[];
+}
+
+export interface PriceAlert {
+  id: string;
+  userId: string;
+  bookId: string;
+  targetPrice: number;
+  triggerType: 'DROP' | 'BELOW_TARGET';
+  isActive: boolean;
+  createdAt: string;
+}
+
 export interface ReviewQueueItem {
   id: string;
   publicationId?: string | null;
@@ -305,3 +386,4 @@ export interface UserWatchlistItem {
   targetSlug: string;
   createdAt: string;
 }
+

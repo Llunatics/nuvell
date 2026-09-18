@@ -2,63 +2,79 @@
 
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Bell, Check, Sparkles, ArrowUpRight, X, Clock, TrendingDown, BookOpen } from 'lucide-react';
+import {
+  Bell,
+  Check,
+  Sparkles,
+  ArrowUpRight,
+  X,
+  Clock,
+  TrendingDown,
+  BookOpen,
+  CheckCheck,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useModalOverlay } from '@/hooks/use-modal-overlay';
-
-interface NotificationItem {
-  id: string;
-  title: string;
-  message: string;
-  timestamp: string;
-  href: string;
-  read: boolean;
-  type: 'RELEASE' | 'PREORDER' | 'PRICE_DROP';
-}
-
-const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'notif_1',
-    title: 'Kagurabachi Vol. 01 Resmi Rilis!',
-    message: 'Elex Media Komputindo telah merilis volume perdana Kagurabachi di gerai Gramedia seluruh Indonesia.',
-    timestamp: '2 jam lalu',
-    href: '/books/kagurabachi-vol-01',
-    read: false,
-    type: 'RELEASE',
-  },
-  {
-    id: 'notif_2',
-    title: 'Pre-order Dibuka: One Piece Vol. 108',
-    message: 'Pre-order One Piece Vol. 108 edisi Pulau Egghead kini dibuka dengan harga Rp 45.000.',
-    timestamp: '5 jam lalu',
-    href: '/books/one-piece-vol-108',
-    read: false,
-    type: 'PREORDER',
-  },
-  {
-    id: 'notif_3',
-    title: 'Penurunan Harga Terdeteksi: Cantik Itu Luka',
-    message: 'Edisi 20 Tahun Kolektor turun dari Rp 180.000 menjadi Rp 162.000 (diskon 10% di Gramedia.com).',
-    timestamp: '1 hari lalu',
-    href: '/books/cantik-itu-luka-collector-edition',
-    read: true,
-    type: 'PRICE_DROP',
-  },
-];
+import { useNotifications } from '@/hooks/use-notifications';
+import { formatRelativeTime } from '@/lib/formatters';
+import { NotificationType } from '@/types';
 
 export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(DEFAULT_NOTIFICATIONS);
+  const {
+    notifications,
+    unreadCount,
+    badgeText,
+    isLoaded,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications();
 
   const mounted = useModalOverlay(isOpen);
-  const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const getNotifMeta = (type: NotificationType) => {
+    switch (type) {
+      case 'RELEASE_SOON':
+      case 'NEW_RELEASE':
+        return {
+          icon: Sparkles,
+          color: 'text-gold bg-gold/10 border-gold/25',
+          tag: 'RILIS',
+        };
+      case 'PRICE_DROP':
+      case 'PRICE_ALERT':
+        return {
+          icon: TrendingDown,
+          color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/25',
+          tag: 'HARGA',
+        };
+      case 'PREORDER_OPEN':
+        return {
+          icon: Clock,
+          color: 'text-burgundy-400 bg-burgundy-400/10 border-burgundy-400/25',
+          tag: 'PRE-ORDER',
+        };
+      case 'SERIES_GAP':
+      case 'COLLECTION_EVENT':
+        return {
+          icon: BookOpen,
+          color: 'text-sky-400 bg-sky-400/10 border-sky-400/25',
+          tag: 'SERI',
+        };
+      case 'AVAILABILITY_CHANGE':
+      default:
+        return {
+          icon: Bell,
+          color: 'text-amber-400 bg-amber-400/10 border-amber-400/25',
+          tag: 'STATUS',
+        };
+    }
   };
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  const getNotifHref = (item: { bookId?: string; seriesId?: string }) => {
+    if (item.bookId) return `/books/${item.bookId}`;
+    if (item.seriesId) return `/library?tab=series`;
+    return '/radar';
   };
 
   return (
@@ -67,12 +83,12 @@ export function NotificationCenter() {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="relative w-10 h-10 rounded-xl bg-surface border border-border-subtle hover:border-gold/40 text-editorial-muted hover:text-editorial-title flex items-center justify-center transition-all active:scale-95"
-        aria-label="Notifikasi Rilis"
+        aria-label={`Radar Notifikasi (${unreadCount} belum dibaca)`}
       >
         <Bell className="w-4 h-4" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gold text-background text-[10px] font-bold flex items-center justify-center animate-pulse">
-            {unreadCount}
+        {badgeText && (
+          <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-gold text-background text-[10px] font-bold flex items-center justify-center font-mono">
+            {badgeText}
           </span>
         )}
       </button>
@@ -109,9 +125,9 @@ export function NotificationCenter() {
                   <button
                     type="button"
                     onClick={markAllAsRead}
-                    className="min-h-[44px] px-2.5 text-xs text-editorial-muted hover:text-gold active:text-gold transition-colors flex items-center gap-1"
+                    className="min-h-[44px] px-2.5 text-xs text-editorial-muted hover:text-gold active:text-gold transition-colors flex items-center gap-1 font-medium"
                   >
-                    <Check className="w-3.5 h-3.5" /> Tandai semua
+                    <CheckCheck className="w-3.5 h-3.5" /> Tandai semua
                   </button>
                 )}
                 <button
@@ -127,45 +143,52 @@ export function NotificationCenter() {
 
             {/* Notification List */}
             <div className="flex-1 overflow-y-auto divide-y divide-border-subtle p-1">
-              {notifications.length === 0 ? (
+              {!isLoaded ? (
                 <div className="py-12 text-center text-xs text-editorial-faint">
-                  Tidak ada notifikasi baru saat ini.
+                  Memeriksa radar rilis...
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="py-14 px-6 text-center space-y-2">
+                  <div className="w-10 h-10 rounded-full bg-surface border border-border-subtle flex items-center justify-center mx-auto text-editorial-muted">
+                    <Bell className="w-5 h-5" />
+                  </div>
+                  <p className="text-sm font-semibold text-editorial-title">Belum ada notifikasi baru</p>
+                  <p className="text-xs text-editorial-muted max-w-xs mx-auto">
+                    Radar akan mendeteksi jadwal rilis resmi, penurunan harga buku favorit, dan missing volume koleksimu.
+                  </p>
                 </div>
               ) : (
                 notifications.map((notif) => {
-                  const Icon =
-                    notif.type === 'RELEASE'
-                      ? Sparkles
-                      : notif.type === 'PREORDER'
-                      ? Clock
-                      : TrendingDown;
-                  const iconColor =
-                    notif.type === 'RELEASE'
-                      ? 'text-gold bg-gold/10'
-                      : notif.type === 'PREORDER'
-                      ? 'text-burgundy-400 bg-burgundy-400/10'
-                      : 'text-emerald-400 bg-emerald-400/10';
+                  const meta = getNotifMeta(notif.type);
+                  const Icon = meta.icon;
+                  const href = getNotifHref(notif);
+
                   return (
                     <Link
                       key={notif.id}
-                      href={notif.href}
+                      href={href}
                       onClick={() => {
                         markAsRead(notif.id);
                         setIsOpen(false);
                       }}
                       className={`flex items-start gap-3 p-4 hover:bg-surface transition-colors active:bg-surface-raised ${
-                        !notif.read ? 'bg-surface/60 border-l-4 border-gold' : 'opacity-80'
+                        !notif.isRead ? 'bg-surface/80 border-l-2 border-gold' : 'opacity-75'
                       }`}
                     >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${iconColor}`}>
+                      <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 ${meta.color}`}>
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-xs font-semibold text-editorial-title">{notif.title}</p>
-                          <span className="text-[10px] font-mono text-editorial-faint shrink-0">{notif.timestamp}</span>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] font-mono uppercase tracking-wider text-editorial-faint">
+                            {meta.tag}
+                          </span>
+                          <span className="text-[10px] font-mono text-editorial-faint shrink-0">
+                            {formatRelativeTime(notif.createdAt)}
+                          </span>
                         </div>
-                        <p className="text-xs text-editorial-muted mt-1 leading-relaxed">{notif.message}</p>
+                        <p className="text-xs font-semibold text-editorial-title mt-0.5">{notif.title}</p>
+                        <p className="text-xs text-editorial-muted mt-1 leading-relaxed line-clamp-2">{notif.message}</p>
                       </div>
                     </Link>
                   );
@@ -180,7 +203,7 @@ export function NotificationCenter() {
                 onClick={() => setIsOpen(false)}
                 className="w-full min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-surface-raised hover:bg-surface border border-border-subtle text-xs font-semibold text-gold transition-colors"
               >
-                <span>Buka My Release Radar Lengkap</span>
+                <span>Buka Radar Lengkap</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -200,7 +223,7 @@ export function NotificationCenter() {
               <span className="text-sm font-semibold text-editorial-title">Radar Notifikasi</span>
               {unreadCount > 0 && (
                 <span className="px-1.5 py-0.5 text-[11px] font-medium bg-gold/10 text-gold rounded-full border border-gold/20">
-                  {unreadCount} baru
+                  {badgeText} baru
                 </span>
               )}
             </div>
@@ -209,7 +232,7 @@ export function NotificationCenter() {
                 <button
                   type="button"
                   onClick={markAllAsRead}
-                  className="text-xs text-editorial-muted hover:text-gold transition-colors flex items-center gap-1"
+                  className="text-xs text-editorial-muted hover:text-gold transition-colors flex items-center gap-1 font-medium"
                 >
                   <Check className="w-3 h-3" /> Tandai semua
                 </button>
@@ -218,6 +241,7 @@ export function NotificationCenter() {
                 type="button"
                 onClick={() => setIsOpen(false)}
                 className="p-1 rounded hover:bg-surface text-editorial-faint"
+                aria-label="Tutup notifikasi"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -225,30 +249,50 @@ export function NotificationCenter() {
           </div>
 
           <div className="max-h-80 overflow-y-auto divide-y divide-border-subtle">
-            {notifications.length === 0 ? (
+            {!isLoaded ? (
               <div className="py-8 text-center text-xs text-editorial-faint">
-                Tidak ada notifikasi baru saat ini.
+                Memeriksa radar rilis...
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="py-10 px-4 text-center space-y-2">
+                <div className="w-8 h-8 rounded-full bg-surface border border-border-subtle flex items-center justify-center mx-auto text-editorial-muted">
+                  <Bell className="w-4 h-4" />
+                </div>
+                <p className="text-xs font-semibold text-editorial-title">Belum ada notifikasi</p>
+                <p className="text-[11px] text-editorial-muted">
+                  Notifikasi rilis jadwal dan alert harga buku favorit akan muncul di sini.
+                </p>
               </div>
             ) : (
-              notifications.map((notif) => (
-                <Link
-                  key={notif.id}
-                  href={notif.href}
-                  onClick={() => {
-                    markAsRead(notif.id);
-                    setIsOpen(false);
-                  }}
-                  className={`block px-4 py-3 hover:bg-surface transition-colors ${
-                    !notif.read ? 'bg-surface/60 border-l-2 border-gold' : 'opacity-80'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-xs font-semibold text-editorial-title">{notif.title}</p>
-                    <span className="text-[10px] text-editorial-faint shrink-0">{notif.timestamp}</span>
-                  </div>
-                  <p className="text-xs text-editorial-muted mt-1 line-clamp-2">{notif.message}</p>
-                </Link>
-              ))
+              notifications.map((notif) => {
+                const meta = getNotifMeta(notif.type);
+                const href = getNotifHref(notif);
+
+                return (
+                  <Link
+                    key={notif.id}
+                    href={href}
+                    onClick={() => {
+                      markAsRead(notif.id);
+                      setIsOpen(false);
+                    }}
+                    className={`block px-4 py-3 hover:bg-surface transition-colors ${
+                      !notif.isRead ? 'bg-surface/70 border-l-2 border-gold' : 'opacity-75'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[9px] font-mono uppercase tracking-wider text-gold font-semibold">
+                        {meta.tag}
+                      </span>
+                      <span className="text-[10px] text-editorial-faint shrink-0 font-mono">
+                        {formatRelativeTime(notif.createdAt)}
+                      </span>
+                    </div>
+                    <p className="text-xs font-semibold text-editorial-title mt-0.5">{notif.title}</p>
+                    <p className="text-xs text-editorial-muted mt-0.5 line-clamp-2 leading-relaxed">{notif.message}</p>
+                  </Link>
+                );
+              })
             )}
           </div>
 
@@ -256,9 +300,9 @@ export function NotificationCenter() {
             <Link
               href="/radar"
               onClick={() => setIsOpen(false)}
-              className="text-xs text-gold hover:underline flex items-center justify-center gap-1"
+              className="text-xs text-gold hover:underline flex items-center justify-center gap-1 font-medium"
             >
-              Buka My Release Radar <ArrowUpRight className="w-3 h-3" />
+              Buka Radar Lengkap <ArrowUpRight className="w-3 h-3" />
             </Link>
           </div>
         </div>

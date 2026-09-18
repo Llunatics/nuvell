@@ -10,6 +10,8 @@ import { Bookmark, Sparkles, Moon, Sun, Laptop, Check } from 'lucide-react';
 import { useWatchlist } from '@/hooks/use-watchlist';
 import { useDisplaySettings } from '@/hooks/use-display-settings';
 import { Tooltip } from '@/components/ui/tooltip';
+import { UserMenu } from '@/components/auth/user-menu';
+import { LiveBadge } from './live-badge';
 
 export function Header() {
   const { items } = useWatchlist();
@@ -49,13 +51,10 @@ export function Header() {
             <span className="font-editorial text-lg font-bold tracking-tight text-editorial-title group-hover:text-gold transition-colors">
               nuvell
             </span>
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold tracking-wider bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              LIVE
-            </span>
+            <LiveBadge />
           </Link>
 
-          {/* Right Icon Actions: Watchlist, Notification, Theme */}
+          {/* Right Icon Actions: Watchlist, Notification, Theme, User */}
           <div className="flex items-center gap-1.5">
             {/* Watchlist */}
             <Link
@@ -73,6 +72,9 @@ export function Header() {
 
             {/* Notification Center */}
             <NotificationCenter />
+
+            {/* User Account Menu */}
+            <UserMenu />
 
             {/* Mobile Theme Popover */}
             <div className="relative">
@@ -150,10 +152,7 @@ export function Header() {
             <span className="font-editorial text-xl font-bold tracking-tight text-editorial-title group-hover:text-gold transition-colors">
               nuvell
             </span>
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              LIVE
-            </span>
+            <LiveBadge />
           </Link>
 
           {/* Desktop Breadcrumb Context */}
@@ -207,6 +206,9 @@ export function Header() {
 
           {/* Display Settings Popover (Theme, Density, Grid/List, Motion, Admin) */}
           <SettingsPopover />
+
+          {/* User Profile / Auth Menu */}
+          <UserMenu />
         </div>
       </div>
     </header>

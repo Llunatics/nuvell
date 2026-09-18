@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/header';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { DisplaySettingsProvider } from '@/hooks/use-display-settings';
 import { ToastProvider } from '@/hooks/use-toast';
+import { AuthProvider } from '@/contexts/auth-context';
 import Link from 'next/link';
 
 export const viewport: Viewport = {
@@ -49,51 +50,53 @@ export default function RootLayout({
   return (
     <html lang="id" className="dark" suppressHydrationWarning>
       <body className="min-h-screen bg-background text-editorial-body antialiased flex flex-col selection:bg-gold selection:text-background">
-        <DisplaySettingsProvider>
-          <ToastProvider>
-            <div className="flex flex-1 min-h-screen">
-              {/* Desktop Left Sidebar (Collapsible) */}
-              <Sidebar />
+        <AuthProvider>
+          <DisplaySettingsProvider>
+            <ToastProvider>
+              <div className="flex flex-1 min-h-screen">
+                {/* Desktop Left Sidebar (Collapsible) */}
+                <Sidebar />
 
-              {/* Main App Content Canvas */}
-              <div className="flex-1 flex flex-col min-w-0 pb-[max(6.5rem,calc(5rem+env(safe-area-inset-bottom,24px)))] lg:pb-0">
-                <Header />
-                <main className="flex-1">
-                  {children}
-                </main>
+                {/* Main App Content Canvas */}
+                <div className="flex-1 flex flex-col min-w-0 pb-[max(6.5rem,calc(5rem+env(safe-area-inset-bottom,24px)))] lg:pb-0">
+                  <Header />
+                  <main className="flex-1">
+                    {children}
+                  </main>
 
-                {/* Minimal Editorial Consumer Footer */}
-                <footer className="border-t border-border-subtle bg-surface/30 px-6 sm:px-12 py-8 text-xs text-editorial-faint">
-                  <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div>
-                      <p className="font-editorial text-sm font-semibold text-editorial-title">
-                        nuvell • Indonesian Book Release Tracker
-                      </p>
-                      <p className="mt-0.5 text-editorial-muted text-[11px]">
-                        Mengagregasi metadata publik dan tanggal rilis resmi penerbit Indonesia secara etis.
-                      </p>
+                  {/* Minimal Editorial Consumer Footer */}
+                  <footer className="border-t border-border-subtle bg-surface/30 px-6 sm:px-12 py-8 text-xs text-editorial-faint">
+                    <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div>
+                        <p className="font-editorial text-sm font-semibold text-editorial-title">
+                          nuvell • Indonesian Book Release Tracker
+                        </p>
+                        <p className="mt-0.5 text-editorial-muted text-[11px]">
+                          Mengagregasi metadata publik dan tanggal rilis resmi penerbit Indonesia secara etis.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-5 text-editorial-muted text-[11px]">
+                        <Link href="/discover" className="hover:text-gold transition-colors">
+                          Explore
+                        </Link>
+                        <Link href="/calendar" className="hover:text-gold transition-colors">
+                          Kalender
+                        </Link>
+                        <Link href="/sources" className="hover:text-gold transition-colors">
+                          Sources
+                        </Link>
+                        <span className="text-editorial-faint">Asia/Jakarta (WIB)</span>
+                      </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-5 text-editorial-muted text-[11px]">
-                      <Link href="/discover" className="hover:text-gold transition-colors">
-                        Explore
-                      </Link>
-                      <Link href="/calendar" className="hover:text-gold transition-colors">
-                        Kalender
-                      </Link>
-                      <Link href="/sources" className="hover:text-gold transition-colors">
-                        Sources
-                      </Link>
-                      <span className="text-editorial-faint">Asia/Jakarta (WIB)</span>
-                    </div>
-                  </div>
-                </footer>
+                  </footer>
+                </div>
               </div>
-            </div>
 
-            {/* Mobile Fixed Bottom Navigation */}
-            <MobileNav />
-          </ToastProvider>
-        </DisplaySettingsProvider>
+              {/* Mobile Fixed Bottom Navigation */}
+              <MobileNav />
+            </ToastProvider>
+          </DisplaySettingsProvider>
+        </AuthProvider>
       </body>
     </html>
   );

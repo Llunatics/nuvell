@@ -11,6 +11,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      borderColor: {
+        DEFAULT: 'var(--border-subtle)',
+        subtle: 'var(--border-subtle)',
+        medium: 'var(--border-medium)',
+        bold: 'var(--border-bold)',
+      },
       colors: {
         background: 'rgb(var(--bg-rgb) / <alpha-value>)',
         surface: {
@@ -20,6 +26,7 @@ const config: Config = {
           overlay: 'rgb(var(--surface-overlay-rgb) / <alpha-value>)',
         },
         border: {
+          DEFAULT: 'var(--border-subtle)',
           subtle: 'var(--border-subtle)',
           medium: 'var(--border-medium)',
           bold: 'var(--border-bold)',

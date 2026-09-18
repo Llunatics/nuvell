@@ -198,3 +198,29 @@ export function formatRelativeTime(dateInput: string | Date): string {
   if (diffSec < 604800) return `${Math.floor(diffSec / 86400)} hari lalu`;
   return formatShortDate(date);
 }
+
+/**
+ * Format date & time in Asia/Jakarta timezone (e.g. "18 Sep 2026, 07:00 WIB")
+ */
+export function formatDateTimeWIB(dateInput: string | Date | null | undefined): string {
+  if (!dateInput) return 'Belum pernah diperbarui';
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  if (isNaN(date.getTime())) return 'Waktu tidak valid';
+
+  const datePart = new Intl.DateTimeFormat('id-ID', {
+    timeZone: TIMEZONE,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+
+  const timePart = new Intl.DateTimeFormat('id-ID', {
+    timeZone: TIMEZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(date);
+
+  return `${datePart}, ${timePart.replace('.', ':')} WIB`;
+}
+

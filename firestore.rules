@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Public read-only catalog collections
+    match /publications/{bookId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /series/{seriesId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /publishers/{publisherId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Personal user data boundary: strictly isolated by userId
+    match /users/{userId} {
+      // User profile doc
+      allow read, write: if isOwner(userId);
+
+      // Collection items (/users/{userId}/collection/{bookId})
+      match /collection/{bookId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Watchlist items (/users/{userId}/watchlist/{itemId})
+      match /watchlist/{itemId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Series tracker (/users/{userId}/series/{seriesId})
+      match /series/{seriesId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Notifications (/users/{userId}/notifications/{notificationId})
+      match /notifications/{notificationId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Price alerts (/users/{userId}/priceAlerts/{alertId})
+      match /priceAlerts/{alertId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Deny any undefined document access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

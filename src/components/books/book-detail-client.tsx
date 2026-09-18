@@ -23,18 +23,22 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { Publication } from '@/types';
-import { formatIDR, formatDate, getReleaseCountdown, formatShortDate } from '@/lib/formatters';
+import { formatIDR, formatDate, getReleaseCountdown, formatShortDate, formatDateTimeWIB } from '@/lib/formatters';
+import { RecommendationResult } from '@/lib/recommendations';
+import { ReleaseCard } from './release-card';
 import { useWatchlist } from '@/hooks/use-watchlist';
 import { useCollection } from '@/hooks/use-collection';
 import { useRecentlyViewed } from '@/hooks/use-recently-viewed';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/auth-context';
+import { GuestAuthModal } from '@/components/auth/guest-auth-modal';
 
 const PriceHistoryChart = dynamic(
   () => import('./price-history-chart').then((mod) => mod.PriceHistoryChart),
   {
     ssr: false,
     loading: () => (
-      <div className="glass-card p-4 rounded-xl h-56 w-full flex items-center justify-center text-xs text-editorial-faint font-mono">
+      <div className="rounded-xl p-4 h-56 w-full flex items-center justify-center text-xs text-editorial-faint font-mono bg-surface/50 border border-border-subtle">
         Memuat riwayat fluktuasi harga...
       </div>
     ),
@@ -45,13 +49,17 @@ interface BookDetailClientProps {
   publication: Publication;
   relatedPublications: Publication[];
   neighborVolumes: Publication[];
+  recommendationResult?: RecommendationResult;
 }
 
 export function BookDetailClient({
   publication,
   relatedPublications,
   neighborVolumes,
+  recommendationResult,
 }: BookDetailClientProps) {
+  const { user } = useAuth();
+  const [isGuestModalOpen, setIsGuestModalOpen] = React.useState(false);
   const { isWatchlisted, toggleWatchlist } = useWatchlist();
   const { getItemStatus, setItemStatus } = useCollection();
   const { addRecentItem } = useRecentlyViewed();
@@ -86,13 +94,6 @@ export function BookDetailClient({
     });
   }, [publication, addRecentItem]);
 
-  // Price chart data
-  const chartData = publication.priceHistory.map((p) => ({
-    date: formatShortDate(p.recordedAt),
-    price: p.price,
-    source: p.sourceName || 'Katalog Resmi',
-  }));
-
   const handleShare = () => {
     if (typeof window !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
@@ -108,6 +109,9 @@ export function BookDetailClient({
     });
     if (nextStatus === 'OWNED') {
       toast({ title: 'Ditandai sebagai Dimiliki', description: publication.title, variant: 'success' });
+      if (!user) {
+        setIsGuestModalOpen(true);
+      }
     } else {
       toast({ title: 'Dihapus dari Koleksi', description: publication.title });
     }
@@ -216,6 +220,9 @@ export function BookDetailClient({
                         );
                         if (nextStatus) {
                           toast({ title: `Status diubah: ${s.label}`, description: publication.title, variant: 'success' });
+                          if (!user) {
+                            setIsGuestModalOpen(true);
+                          }
                         } else {
                           toast({ title: 'Dihapus dari status koleksi', description: publication.title });
                         }
@@ -344,13 +351,23 @@ export function BookDetailClient({
                 Tanggal Rilis Resmi: {formatDate(publication.releaseDate)} (WIB)
               </p>
             </div>
-            <div className="text-left sm:text-right">
+            <div className="text-left sm:text-right space-y-0.5">
               <span className="text-[10px] text-editorial-faint uppercase font-mono block">
                 Harga Teramati
               </span>
-              <span className="text-xl sm:text-2xl font-bold font-editorial text-editorial-title">
-                {formatIDR(publication.currentPrice)}
-              </span>
+              <div className="flex items-baseline gap-2 justify-start sm:justify-end">
+                <span className="text-xl sm:text-2xl font-bold font-editorial text-editorial-title">
+                  {formatIDR(publication.currentPrice)}
+                </span>
+                {publication.isDiscounted && publication.regularPrice && (
+                  <span className="font-mono text-xs text-editorial-faint line-through">
+                    {formatIDR(publication.regularPrice)}
+                  </span>
+                )}
+              </div>
+              <p className="text-[10px] text-editorial-faint font-mono">
+                Harga diperbarui {formatDateTimeWIB(publication.lastPriceObservedAt || publication.lastSeenAt)}
+              </p>
             </div>
           </div>
 
@@ -384,7 +401,7 @@ export function BookDetailClient({
 
           {/* Description (Collapsible on Mobile) */}
           {publication.description && (
-            <div className="space-y-2 pt-2 border-t border-border-subtle/70 md:border-t-0">
+            <div className="space-y-2 pt-2 border-t border-border-subtle md:border-t-0">
               <button
                 type="button"
                 onClick={() => toggleSection('description')}
@@ -438,7 +455,7 @@ export function BookDetailClient({
                         {src.availability}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between pt-1 border-t border-border-subtle/60">
+                    <div className="flex items-center justify-between pt-1 border-t border-border-subtle">
                       <span className="font-mono font-bold text-xs text-editorial-title">
                         {formatIDR(publication.currentPrice)}
                       </span>
@@ -505,35 +522,30 @@ export function BookDetailClient({
           </div>
 
           {/* Price Tracking Chart (Collapsible on Mobile) */}
-          {chartData.length > 0 && (
-            <div className="space-y-3 pt-4 border-t border-border-subtle">
-              <button
-                type="button"
-                onClick={() => toggleSection('priceHistory')}
-                className="w-full md:cursor-default flex items-center justify-between text-left py-1"
-              >
-                <div className="flex items-center gap-2">
-                  <TrendingDown className="w-4 h-4 text-emerald-400" />
-                  <h3 className="font-editorial text-sm sm:text-base font-bold text-editorial-title">
-                    Riwayat & Fluktuasi Harga
-                  </h3>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-editorial-faint font-mono hidden sm:inline">
-                    Terendah: {formatIDR(publication.lowestObservedPrice)}
-                  </span>
-                  <ChevronDown className={`w-4 h-4 text-gold transition-transform md:hidden ${openSections.priceHistory ? 'rotate-180' : ''}`} />
-                </div>
-              </button>
-
-              <div className={`${openSections.priceHistory ? 'block' : 'hidden md:block'} space-y-3`}>
-                <div className="sm:hidden text-xs text-editorial-faint font-mono">
-                  Terendah teramati: <span className="text-gold font-bold">{formatIDR(publication.lowestObservedPrice)}</span>
-                </div>
-                <PriceHistoryChart data={chartData} />
+          <div className="space-y-3 pt-4 border-t border-border-subtle">
+            <button
+              type="button"
+              onClick={() => toggleSection('priceHistory')}
+              className="w-full md:cursor-default flex items-center justify-between text-left py-1"
+            >
+              <div className="flex items-center gap-2">
+                <TrendingDown className="w-4 h-4 text-emerald-400" />
+                <h3 className="font-editorial text-sm sm:text-base font-bold text-editorial-title">
+                  Riwayat & Fluktuasi Harga
+                </h3>
               </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-editorial-faint font-mono hidden sm:inline">
+                  Terendah: {formatIDR(publication.lowestObservedPrice || publication.currentPrice)}
+                </span>
+                <ChevronDown className={`w-4 h-4 text-gold transition-transform md:hidden ${openSections.priceHistory ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
+
+            <div className={`${openSections.priceHistory ? 'block' : 'hidden md:block'} space-y-3`}>
+              <PriceHistoryChart publication={publication} />
             </div>
-          )}
+          </div>
 
           {/* Change Detection Audit Trail (Collapsible on Mobile) */}
           {publication.changes.length > 0 && (
@@ -629,34 +641,30 @@ export function BookDetailClient({
         </div>
       </div>
 
-      {/* Related Releases in Same Series or Publisher */}
-      {relatedPublications.length > 0 && (
+      {/* Related Releases with Explainable Recommendation */}
+      {(recommendationResult?.items?.length || relatedPublications.length) > 0 && (
         <section className="space-y-4 pt-8 border-t border-border-subtle">
-          <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
-            Rilisan Terkait yang Mungkin Anda Sukai
-          </h2>
+          <div>
+            <h2 className="font-editorial text-lg sm:text-xl font-bold text-editorial-title">
+              {recommendationResult?.suggestedSectionTitle || 'Rilisan Terkait yang Mungkin Anda Sukai'}
+            </h2>
+            <p className="text-xs text-editorial-muted mt-0.5">
+              {recommendationResult?.suggestedSubtitle || 'Rekomendasi terkurasi berdasarkan korelasi seri, pengarang, dan kategori.'}
+            </p>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            {relatedPublications.map((rel) => (
-              <Link
-                key={rel.id}
-                href={`/books/${rel.slug}`}
-                className="glass-card rounded-xl p-3 flex flex-col justify-between group hover:border-gold/40 transition-all"
-              >
-                <div className="aspect-[3/4] w-full bg-surface-overlay rounded-lg overflow-hidden mb-2">
-                  {rel.coverImage && (
-                    <img src={rel.coverImage} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-xs font-bold text-editorial-title line-clamp-1 group-hover:text-gold transition-colors">
-                    {rel.title}
-                  </h3>
-                  <p className="text-[11px] text-editorial-muted font-mono mt-0.5">
-                    {formatIDR(rel.currentPrice)}
-                  </p>
-                </div>
-              </Link>
-            ))}
+            {recommendationResult?.items && recommendationResult.items.length > 0
+              ? recommendationResult.items.map(({ publication: rel, reasonLabel }) => (
+                  <ReleaseCard
+                    key={rel.id}
+                    publication={rel}
+                    layout="grid"
+                    relationBadge={reasonLabel}
+                  />
+                ))
+              : relatedPublications.map((rel) => (
+                  <ReleaseCard key={rel.id} publication={rel} layout="grid" />
+                ))}
           </div>
         </section>
       )}
@@ -706,6 +714,14 @@ export function BookDetailClient({
           <Share2 className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Polite Guest Auth Prompt Modal */}
+      <GuestAuthModal
+        isOpen={isGuestModalOpen}
+        onClose={() => setIsGuestModalOpen(false)}
+        title="Simpan ke Koleksi Personal"
+        description="Masuk atau buat akun Nuvell gratis untuk menyinkronkan koleksi buku, wishlist, dan riwayat fluktuasi harga ke semua perangkatmu."
+      />
     </div>
   );
 }

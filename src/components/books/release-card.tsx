@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { Bookmark, Check, Calendar, ExternalLink, Plus } from 'lucide-react';
+import { Bookmark, Check, Calendar, Plus } from 'lucide-react';
 import { Publication } from '@/types';
 import { formatIDR, getReleaseCountdown, formatShortDate } from '@/lib/formatters';
 import { useWatchlist } from '@/hooks/use-watchlist';
@@ -13,9 +13,10 @@ import { Tooltip } from '@/components/ui/tooltip';
 interface ReleaseCardProps {
   publication: Publication;
   layout?: 'grid' | 'list' | 'feed';
+  relationBadge?: string;
 }
 
-export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) {
+export function ReleaseCard({ publication, layout = 'grid', relationBadge }: ReleaseCardProps) {
   const { isWatchlisted, toggleWatchlist } = useWatchlist();
   const { getItemStatus, setItemStatus } = useCollection();
   const { toast } = useToast();
@@ -67,28 +68,29 @@ export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) 
   const getBadgeStyle = (badge?: string | null) => {
     switch (badge) {
       case 'NEW':
-        return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+        return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25';
       case 'PRICE DROP':
-        return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+        return 'bg-amber-500/15 text-amber-400 border-amber-500/25';
       case 'PREORDER':
-        return 'bg-burgundy/15 text-burgundy-400 border-burgundy/30';
+        return 'bg-burgundy/20 text-rose-300 border-burgundy/30';
       default:
-        return 'bg-surface-raised/80 text-editorial-muted border-border-subtle';
+        return 'bg-surface-raised/90 text-editorial-muted border-border-subtle';
     }
   };
 
   // 1. List Layout
   if (layout === 'list') {
     return (
-      <article className="glass-card rounded-xl p-3 sm:p-4 flex items-center justify-between gap-3 sm:gap-4 transition-all hover:border-gold/30">
+      <article className="rounded-xl p-3 sm:p-4 flex items-center justify-between gap-3 sm:gap-4 transition-all duration-200 bg-surface/90 hover:bg-surface-raised border border-border-subtle hover:border-gold/30 shadow-xs group">
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
           <Link href={`/books/${publication.slug}`} className="shrink-0 group">
-            <div className="w-14 h-19 sm:w-16 sm:h-22 aspect-[3/4] bg-surface rounded-lg border border-border-subtle overflow-hidden relative shadow-xs">
+            <div className="w-14 h-19 sm:w-16 sm:h-22 aspect-[3/4] bg-surface-sunken rounded-lg border border-border-subtle overflow-hidden relative shadow-xs">
               {publication.coverImage ? (
                 <img
                   src={publication.coverImage}
                   alt={publication.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-editorial-faint text-[10px] text-center p-1 bg-surface-sunken">
@@ -108,8 +110,13 @@ export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) 
                   Vol. {publication.volume}
                 </span>
               )}
+              {relationBadge && (
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-gold/10 text-gold border border-gold/20">
+                  {relationBadge}
+                </span>
+              )}
               {publication.recentChangeBadge && (
-                <span className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded border ${getBadgeStyle(publication.recentChangeBadge)}`}>
+                <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border ${getBadgeStyle(publication.recentChangeBadge)}`}>
                   {publication.recentChangeBadge}
                 </span>
               )}
@@ -121,10 +128,15 @@ export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) 
               </h3>
             </Link>
 
-            <div className="flex items-center gap-2 text-xs text-editorial-muted flex-wrap">
+            <div className="flex items-center gap-2 text-xs text-editorial-muted flex-wrap pt-0.5">
               <span className="font-mono font-bold text-editorial-title text-xs sm:text-sm">
                 {formatIDR(publication.currentPrice)}
               </span>
+              {publication.isDiscounted && publication.regularPrice && (
+                <span className="font-mono text-[11px] text-editorial-faint line-through">
+                  {formatIDR(publication.regularPrice)}
+                </span>
+              )}
               <span className="text-editorial-faint">•</span>
               <span className={`inline-flex items-center gap-1 text-[11px] ${countdown.isToday ? 'text-gold font-semibold' : 'text-editorial-muted'}`}>
                 <Calendar className="w-3 h-3 text-gold shrink-0" />
@@ -171,17 +183,18 @@ export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) 
     );
   }
 
-  // 2. Grid Layout (Breathable & Content-First Hierarchy)
+  // 2. Grid Layout (Refined Solid & Subtle Hierarchy)
   return (
-    <article className="glass-card rounded-2xl overflow-hidden flex flex-col group relative transition-all duration-300 hover:border-gold/40 bg-surface/60">
+    <article className="rounded-2xl overflow-hidden flex flex-col group relative transition-all duration-250 bg-surface/90 hover:bg-surface-raised border border-border-subtle hover:border-gold/35 shadow-xs hover:shadow-md hover:-translate-y-0.5">
       {/* Cover Image Container */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface">
-        <Link href={`/books/${publication.slug}`} className="block w-full h-full">
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface-sunken">
+        <Link href={`/books/${publication.slug}`} className="block w-full h-full" tabIndex={-1} aria-hidden="true">
           {publication.coverImage ? (
             <img
               src={publication.coverImage}
               alt={publication.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300 ease-out"
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-surface-sunken">
@@ -193,39 +206,47 @@ export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) 
         </Link>
 
         {/* Floating Controls: Status Badge (Left) & Watchlist Toggle (Right) */}
-        <div className="absolute top-2 left-2 right-2 flex items-center justify-between gap-1.5 pointer-events-none">
-          {publication.recentChangeBadge ? (
-            <span
-              className={`text-[9px] sm:text-[10px] md:text-xs font-mono font-bold tracking-wider uppercase px-2 py-0.5 sm:px-2.5 sm:py-1 rounded shadow-sm border backdrop-blur-md ${getBadgeStyle(
-                publication.recentChangeBadge
-              )}`}
-            >
-              {publication.recentChangeBadge}
-            </span>
-          ) : (
-            <span className="text-[9px] sm:text-[10px] md:text-xs font-mono font-medium px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded bg-surface/85 text-editorial-muted backdrop-blur-md border border-border-subtle">
-              {publication.format}
-            </span>
-          )}
+        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1.5 pointer-events-none">
+          <div className="flex items-center gap-1">
+            {publication.recentChangeBadge ? (
+              <span
+                className={`text-[9px] sm:text-[10px] font-mono font-bold tracking-wider uppercase px-2 py-0.5 rounded border backdrop-blur-md ${getBadgeStyle(
+                  publication.recentChangeBadge
+                )}`}
+              >
+                {publication.recentChangeBadge}
+              </span>
+            ) : (
+              <span className="text-[9px] sm:text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-surface/90 text-editorial-muted backdrop-blur-md border border-border-subtle">
+                {publication.format}
+              </span>
+            )}
+
+            {relationBadge && (
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-gold/90 text-background font-semibold backdrop-blur-md">
+                {relationBadge}
+              </span>
+            )}
+          </div>
 
           <button
             type="button"
             onClick={handleWatchlistToggle}
-            className={`pointer-events-auto p-2 sm:p-2 md:p-2.5 rounded-full backdrop-blur-md border transition-all active:scale-90 ${
+            className={`pointer-events-auto p-2 rounded-full backdrop-blur-md border transition-all active:scale-90 ${
               isFollowed
-                ? 'bg-gold text-background border-gold shadow-md'
-                : 'bg-surface/85 text-editorial-title border-border-subtle hover:bg-surface hover:text-gold'
+                ? 'bg-gold text-background border-gold shadow-sm'
+                : 'bg-surface/85 text-editorial-muted border-border-subtle hover:bg-surface hover:text-gold'
             }`}
             aria-label={isFollowed ? 'Hapus dari Watchlist' : 'Tambah ke Watchlist'}
           >
-            <Bookmark className="w-3.5 h-3.5 md:w-4 md:h-4" fill={isFollowed ? 'currentColor' : 'none'} />
+            <Bookmark className="w-3.5 h-3.5" fill={isFollowed ? 'currentColor' : 'none'} />
           </button>
         </div>
       </div>
 
       {/* Card Content Body */}
-      <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-2 sm:space-y-3">
-        <div className="space-y-1 sm:space-y-1.5">
+      <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-3">
+        <div className="space-y-1.5">
           {/* Eyebrow: Publisher & Volume */}
           <div className="flex items-center justify-between text-[11px] sm:text-xs text-editorial-faint font-mono">
             <span className="truncate">{publication.publisherName}</span>
@@ -236,59 +257,69 @@ export function ReleaseCard({ publication, layout = 'grid' }: ReleaseCardProps) 
 
           {/* Title: 2 lines clamp */}
           <Link href={`/books/${publication.slug}`} className="block group-hover:text-gold transition-colors">
-            <h3 className="font-editorial text-xs sm:text-sm md:text-base font-bold text-editorial-title leading-snug line-clamp-2">
+            <h3 className="font-editorial text-xs sm:text-sm font-bold text-editorial-title leading-snug line-clamp-2">
               {publication.title}
             </h3>
           </Link>
         </div>
 
-        {/* Release Date info */}
-        <div className="pt-2 border-t border-border-subtle/80 flex items-center justify-between text-[11px] sm:text-xs">
-          <div className="flex items-center gap-1.5 text-editorial-muted min-w-0">
-            <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gold shrink-0" />
-            <span className={`truncate ${countdown.isToday ? 'text-emerald-400 font-bold' : 'text-editorial-muted'}`}>
-              {countdown.label}
-            </span>
-          </div>
-          <span className="font-mono text-[10px] sm:text-xs text-editorial-faint shrink-0 ml-1">
-            {formatShortDate(publication.releaseDate)}
-          </span>
-        </div>
-
-        {/* Price & Collection CTA */}
-        <div className="pt-2 border-t border-border-subtle/80 flex items-center justify-between gap-2">
-          <div>
-            <span className="text-[9px] sm:text-[10px] text-editorial-faint uppercase font-mono block leading-none">
-              Harga
-            </span>
-            <span className="text-xs sm:text-sm md:text-base font-bold text-editorial-title font-mono">
-              {formatIDR(publication.currentPrice)}
+        {/* Release Date Info & Pricing Row */}
+        <div className="space-y-2 pt-1">
+          {/* Release Date */}
+          <div className="flex items-center justify-between text-[11px] sm:text-xs">
+            <div className="flex items-center gap-1.5 text-editorial-muted min-w-0">
+              <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gold shrink-0" />
+              <span className={`truncate ${countdown.isToday ? 'text-emerald-400 font-semibold' : 'text-editorial-muted'}`}>
+                {countdown.label}
+              </span>
+            </div>
+            <span className="font-mono text-[10px] sm:text-[11px] text-editorial-faint shrink-0 ml-1">
+              {formatShortDate(publication.releaseDate)}
             </span>
           </div>
 
-          {/* Quick Collection Toggle Button */}
-          <button
-            type="button"
-            onClick={handleCollectionToggle}
-            className={`h-7 sm:h-7 md:h-8 px-2 sm:px-2.5 md:px-3 rounded-lg text-[11px] sm:text-[11px] md:text-xs font-medium border flex items-center gap-1.5 transition-all active:scale-95 ${
-              collectionStatus === 'OWNED'
-                ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 font-semibold'
-                : 'bg-surface hover:bg-surface-raised border-border-subtle text-editorial-muted hover:text-editorial-title'
-            }`}
-            aria-label={collectionStatus === 'OWNED' ? 'Sudah dimiliki' : 'Tambahkan ke koleksi'}
-          >
-            {collectionStatus === 'OWNED' ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Dimiliki</span>
-              </>
-            ) : (
-              <>
-                <Plus className="w-3.5 h-3.5 text-editorial-faint" />
-                <span>+ Koleksi</span>
-              </>
-            )}
-          </button>
+          {/* Price & Collection CTA */}
+          <div className="flex items-center justify-between gap-2 pt-1">
+            <div className="min-w-0">
+              <span className="text-[9px] text-editorial-faint uppercase font-mono block leading-none">
+                Harga
+              </span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-xs sm:text-sm md:text-base font-bold text-editorial-title font-mono">
+                  {formatIDR(publication.currentPrice)}
+                </span>
+                {publication.isDiscounted && publication.regularPrice && (
+                  <span className="font-mono text-[10px] text-editorial-faint line-through hidden sm:inline">
+                    {formatIDR(publication.regularPrice)}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Collection Toggle Button */}
+            <button
+              type="button"
+              onClick={handleCollectionToggle}
+              className={`h-7 sm:h-8 px-2.5 sm:px-3 rounded-lg text-[11px] sm:text-xs font-medium border flex items-center gap-1.5 transition-all active:scale-95 shrink-0 ${
+                collectionStatus === 'OWNED'
+                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 font-semibold'
+                  : 'bg-surface hover:bg-surface-raised border-border-subtle text-editorial-muted hover:text-editorial-title'
+              }`}
+              aria-label={collectionStatus === 'OWNED' ? 'Sudah dimiliki' : 'Tambahkan ke koleksi'}
+            >
+              {collectionStatus === 'OWNED' ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Dimiliki</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-3.5 h-3.5 text-editorial-faint" />
+                  <span>+ Koleksi</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </article>
