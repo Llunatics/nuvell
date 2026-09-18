@@ -11,6 +11,7 @@ import {
   LogOut,
   ChevronDown,
   Sparkles,
+  Terminal,
   ExternalLink,
 } from 'lucide-react';
 
@@ -70,6 +71,12 @@ export function UserMenu() {
     .slice(0, 2)
     .toUpperCase();
 
+  const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  const isAdmin = Boolean(user.email && adminEmails.includes(user.email.toLowerCase()));
+
   return (
     <div className="relative" ref={containerRef}>
       <button
@@ -107,14 +114,32 @@ export function UserMenu() {
             <p className="text-[11px] font-mono text-editorial-faint truncate mt-0.5">
               {user.email}
             </p>
-            <div className="mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-gold/10 text-gold border border-gold/25">
-              <Sparkles className="w-2.5 h-2.5" />
-              <span>Nuvell Account</span>
-            </div>
+            {isAdmin ? (
+              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-gold/15 text-gold border border-gold/30 font-bold">
+                <Sparkles className="w-2.5 h-2.5" />
+                <span>Admin Nuvell</span>
+              </div>
+            ) : (
+              <div className="mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-surface-raised text-editorial-faint border border-border-subtle">
+                <Sparkles className="w-2.5 h-2.5" />
+                <span>Nuvell Account</span>
+              </div>
+            )}
           </div>
 
           {/* Nav Links */}
           <div className="space-y-0.5">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-gold hover:text-gold-300 hover:bg-gold/10 transition-colors font-medium border border-gold/25 mb-1"
+              >
+                <Terminal className="w-4 h-4 text-gold" />
+                <span>Crawler Dashboard</span>
+              </Link>
+            )}
+
             <Link
               href="/library"
               onClick={() => setIsOpen(false)}

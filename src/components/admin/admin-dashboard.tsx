@@ -19,10 +19,14 @@ import {
   FileText,
   Sparkles,
   Camera,
+  LogIn,
+  ShieldAlert,
+  KeyRound,
 } from 'lucide-react';
 import { Source, CrawlLog, ReviewQueueItem } from '@/types';
 import { formatDate } from '@/lib/formatters';
 import { transcribeSocialPoster, PosterTranscriptionResult } from '@/crawler/social/poster-transcriber';
+import { useAuth } from '@/contexts/auth-context';
 
 interface AdminDashboardProps {
   initialSources: Source[];
@@ -35,11 +39,14 @@ export function AdminDashboard({
   initialLogs,
   reviewQueue,
 }: AdminDashboardProps) {
+  const { user, isLoading: isAuthLoading, loginWithGoogle, logout } = useAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const [isLoggingInGoogle, setIsLoggingInGoogle] = useState(false);
   const [unlockError, setUnlockError] = useState<string | null>(null);
   const [secretInput, setSecretInput] = useState('');
+  const [showSecretOverride, setShowSecretOverride] = useState(false);
   const [sources, setSources] = useState<Source[]>(initialSources);
   const [logs, setLogs] = useState<CrawlLog[]>(initialLogs);
   const [activeTab, setActiveTab] = useState<'SOURCES' | 'LOGS' | 'REVIEW' | 'TRANSCRIBER'>('SOURCES');
@@ -49,24 +56,53 @@ export function AdminDashboard({
   const [sourceCategoryFilter, setSourceCategoryFilter] = useState<'ALL' | 'STOREFRONT' | 'PUBLISHER'>('ALL');
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
-  // Check existing session on mount
+  // Check existing session on mount or authenticate automatically via Firebase user
   useEffect(() => {
     let mounted = true;
-    fetch('/api/admin/auth')
-      .then((res) => res.json())
-      .then((data) => {
+
+    async function checkOrAuthSession() {
+      try {
+        // 1. Check existing cookie session
+        const res = await fetch('/api/admin/auth');
+        const data = await res.json();
         if (mounted && data?.authenticated) {
           setIsAuthenticated(true);
+          setIsCheckingSession(false);
+          return;
         }
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (mounted) setIsCheckingSession(false);
-      });
+
+        // 2. If user is logged in to Firebase, attempt automatic authorization
+        if (user && user.email) {
+          const idToken = await user.getIdToken().catch(() => null);
+          const authRes = await fetch('/api/admin/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken, email: user.email }),
+          });
+          const authData = await authRes.json();
+          if (mounted && authRes.ok && authData?.success) {
+            setIsAuthenticated(true);
+            setIsCheckingSession(false);
+            return;
+          }
+        }
+      } catch {
+        // Continue to unlock screen
+      } finally {
+        if (mounted) {
+          setIsCheckingSession(false);
+        }
+      }
+    }
+
+    if (!isAuthLoading) {
+      checkOrAuthSession();
+    }
+
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [user, isAuthLoading]);
 
   // Social Flyer Transcriber State
   const [posterText, setPosterText] = useState(`September 9th Releases
@@ -84,7 +120,19 @@ Drama Queen Vol. 3 (Comic)`);
     setTranscriptionResult(result);
   };
 
-  const handleUnlock = async (e: React.FormEvent) => {
+  const handleGoogleAdminLogin = async () => {
+    setIsLoggingInGoogle(true);
+    setUnlockError(null);
+    try {
+      await loginWithGoogle();
+    } catch {
+      setUnlockError('Gagal melakukan login dengan Google. Pastikan popup tidak diblokir.');
+    } finally {
+      setIsLoggingInGoogle(false);
+    }
+  };
+
+  const handleUnlockWithSecret = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!secretInput.trim() || isUnlocking) return;
 
@@ -254,7 +302,7 @@ Drama Queen Vol. 3 (Comic)`);
               Crawler Admin Dashboard
             </h1>
             <p className="text-xs text-editorial-muted">
-              Masukkan ADMIN_SECRET untuk mengakses observability & kontrol perayap data.
+              Observabilitas dan kontrol crawler pipeline. Akses dibatasi khusus administrator.
             </p>
           </div>
 
@@ -265,31 +313,93 @@ Drama Queen Vol. 3 (Comic)`);
             </div>
           )}
 
-          <form onSubmit={handleUnlock} className="space-y-3">
-            <input
-              type="password"
-              required
-              disabled={isUnlocking}
-              value={secretInput}
-              onChange={(e) => setSecretInput(e.target.value)}
-              placeholder="Kunci Rahasia Admin..."
-              className="w-full px-4 py-2.5 rounded-xl bg-surface border border-white/[0.06] text-xs text-editorial-title placeholder-editorial-faint focus:outline-none focus:border-gold disabled:opacity-50"
-            />
+          {/* User Status and Primary Login Option */}
+          {user ? (
+            <div className="p-4 rounded-2xl bg-surface border border-white/[0.06] text-left space-y-3">
+              <div className="flex items-center gap-2 text-xs text-editorial-faint font-mono">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span>Akun Terhubung:</span>
+              </div>
+              <p className="text-xs font-semibold text-editorial-title break-all">
+                {user.email}
+              </p>
+              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 leading-relaxed">
+                Akun ini belum diizinkan pada variabel lingkungan <code className="font-mono text-gold">ADMIN_EMAILS</code> di server Vercel.
+              </div>
+              <button
+                type="button"
+                onClick={() => logout()}
+                className="w-full py-2 px-3 rounded-xl bg-surface-raised hover:bg-surface-raised/80 border border-white/[0.06] text-xs text-editorial-muted hover:text-editorial-title transition-colors flex items-center justify-center gap-1.5"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Ganti Akun Google</span>
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <button
+                type="button"
+                disabled={isLoggingInGoogle}
+                onClick={handleGoogleAdminLogin}
+                className="w-full py-3 rounded-xl bg-gold text-background text-xs font-bold hover:bg-gold-400 transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isLoggingInGoogle ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Menghubungkan Google...</span>
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="w-4 h-4" />
+                    <span>Masuk dengan Google (Akun Admin)</span>
+                  </>
+                )}
+              </button>
+              <p className="text-[11px] text-editorial-faint">
+                Login menggunakan email yang terdaftar sebagai admin Nuvell untuk otomatis membuka panel.
+              </p>
+            </div>
+          )}
+
+          {/* Collapsible Secret Key Override */}
+          <div className="pt-2 border-t border-white/[0.06]">
             <button
-              type="submit"
-              disabled={isUnlocking}
-              className="w-full py-2.5 rounded-xl bg-gold text-background text-xs font-semibold hover:bg-gold-400 transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+              type="button"
+              onClick={() => setShowSecretOverride((prev) => !prev)}
+              className="text-[11px] font-mono text-editorial-faint hover:text-gold transition-colors inline-flex items-center gap-1.5"
             >
-              {isUnlocking ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Memverifikasi...</span>
-                </>
-              ) : (
-                <span>Buka Akses Admin</span>
-              )}
+              <KeyRound className="w-3 h-3" />
+              <span>{showSecretOverride ? 'Sembunyikan Kunci Server' : 'Otorisasi Darurat via Server Secret Key'}</span>
             </button>
-          </form>
+
+            {showSecretOverride && (
+              <form onSubmit={handleUnlockWithSecret} className="space-y-2.5 mt-3 animate-in fade-in slide-in-from-top-2">
+                <input
+                  type="password"
+                  required
+                  disabled={isUnlocking}
+                  value={secretInput}
+                  onChange={(e) => setSecretInput(e.target.value)}
+                  placeholder="Kunci Rahasia Server (ADMIN_SECRET)..."
+                  className="w-full px-3.5 py-2 rounded-xl bg-surface border border-white/[0.06] text-xs text-editorial-title placeholder-editorial-faint focus:outline-none focus:border-gold disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={isUnlocking}
+                  className="w-full py-2 rounded-xl bg-surface-raised hover:bg-surface-raised/80 border border-white/[0.08] text-editorial-title text-xs font-semibold transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isUnlocking ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Memverifikasi...</span>
+                    </>
+                  ) : (
+                    <span>Verifikasi Kunci Server</span>
+                  )}
+                </button>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -308,7 +418,7 @@ Drama Queen Vol. 3 (Comic)`);
             Crawler Control Panel
           </h1>
           <p className="text-xs sm:text-sm text-editorial-muted">
-            Manajemen 16 pipeline perayap, audit log pemindaian, dan agregasi 254 penerbit berlisensi di Indonesia.
+            Manajemen 16 pipeline crawler, audit log pemindaian, dan agregasi 254 penerbit berlisensi di Indonesia.
           </p>
         </div>
 
@@ -658,7 +768,7 @@ Drama Queen Vol. 3 (Comic)`);
               Antrean Verifikasi Duplikasi Ambiguitas (Confidence &lt; 0.85)
             </h3>
             <p className="text-xs sm:text-sm text-editorial-muted leading-relaxed">
-              Kandidat hasil perayapan yang memiliki kemiripan judul parsial namun tidak memenuhi batas confidence otomatis (0.85) dikarantina di sini agar tidak terjadi penggabungan data yang keliru.
+              Kandidat hasil crawling yang memiliki kemiripan judul parsial namun tidak memenuhi batas confidence otomatis (0.85) dikarantina di sini agar tidak terjadi penggabungan data yang keliru.
             </p>
             <div className="py-12 text-center text-xs sm:text-sm text-editorial-faint border border-dashed border-white/[0.08] rounded-xl bg-surface/30">
               Antrean bersih. Seluruh data rilisan saat ini memiliki confidence skor &gt; 0.90 atau berstatus entitas unik.

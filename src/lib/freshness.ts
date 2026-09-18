@@ -39,7 +39,7 @@ export function getSystemFreshness(
       label: 'DEGRADED',
       badgeClass: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
       dotClass: 'bg-rose-500',
-      tooltipText: 'Sebagian jalur perayap mengalami kendala teknis.',
+      tooltipText: 'Sebagian pipeline crawler mengalami kendala teknis.',
       lastSyncAt: latestLog?.finishedAt || null,
     };
   }

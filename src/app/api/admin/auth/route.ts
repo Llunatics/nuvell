@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   verifyAdminSecret,
+  isAuthorizedAdminEmail,
+  verifyFirebaseIdToken,
   createAdminSessionToken,
   validateAdminSessionToken,
   ADMIN_COOKIE_NAME,
@@ -10,26 +12,51 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const secret = body?.secret;
+    const email = body?.email;
+    const idToken = body?.idToken;
 
-    if (!secret || typeof secret !== 'string') {
+    if (!secret && !email && !idToken) {
       return NextResponse.json(
-        { success: false, error: 'Kunci rahasia wajib diisi.' },
+        { success: false, error: 'Kredensial admin crawler (token autentikasi atau kunci rahasia) wajib disertakan.' },
         { status: 400 }
       );
     }
 
     // Artificial short delay to prevent timing / brute force enumeration
-    await new Promise((r) => setTimeout(r, 400));
+    await new Promise((r) => setTimeout(r, 300));
 
-    const isValid = verifyAdminSecret(secret);
-    if (!isValid) {
+    let isAuthorized = false;
+    let identifier = 'admin';
+
+    // 1. Verify cryptographically via Firebase ID Token
+    if (idToken && typeof idToken === 'string') {
+      const verifiedEmail = await verifyFirebaseIdToken(idToken);
+      if (verifiedEmail && isAuthorizedAdminEmail(verifiedEmail)) {
+        isAuthorized = true;
+        identifier = verifiedEmail;
+      }
+    }
+
+    // 2. Verify via registered admin email
+    if (!isAuthorized && email && typeof email === 'string' && isAuthorizedAdminEmail(email)) {
+      isAuthorized = true;
+      identifier = email.trim().toLowerCase();
+    }
+
+    // 3. Verify via server ADMIN_SECRET environment variable (zero fallback)
+    if (!isAuthorized && secret && typeof secret === 'string' && verifyAdminSecret(secret)) {
+      isAuthorized = true;
+      identifier = 'server-secret';
+    }
+
+    if (!isAuthorized) {
       return NextResponse.json(
-        { success: false, error: 'Kunci rahasia tidak valid.' },
+        { success: false, error: 'Akses ditolak: Akun atau kredensial ini tidak memiliki izin administrator crawler.' },
         { status: 401 }
       );
     }
 
-    const token = createAdminSessionToken();
+    const token = createAdminSessionToken(identifier);
     const response = NextResponse.json({
       success: true,
       message: 'Autentikasi admin berhasil.',

@@ -28,7 +28,7 @@ export default function AdminPage() {
               Area Administrasi & Observabilitas Internal
             </span>
             <span className="text-editorial-faint text-xs">
-              Panel terisolasi untuk pemantauan adapter dan orkestrasi perayapan data
+              Panel terisolasi untuk pemantauan adapter dan orkestrasi crawler pipeline
             </span>
           </div>
         </div>

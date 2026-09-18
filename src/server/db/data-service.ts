@@ -53,7 +53,7 @@ export const INITIAL_SOURCES: Source[] = [
     status: 'HEALTHY',
     robotsStatus: 'ALLOWED',
     confidenceLevel: 'OFFICIAL_BOOKSTORE',
-    notes: 'Perayap berkala mendeteksi buku segera terbit, kloter pre-order spesial, dan restok buku nasional lintas 254 penerbit.',
+    notes: 'Crawler berkala mendeteksi buku segera terbit, kloter pre-order spesial, dan restok buku nasional lintas 254 penerbit.',
   },
   {
     id: 'src_perpusnas_isbn',

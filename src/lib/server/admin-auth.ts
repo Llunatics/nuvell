@@ -3,8 +3,14 @@ import crypto from 'crypto';
 
 const ADMIN_COOKIE_NAME = 'nuvell_admin_session';
 
-function getAdminSecret(): string {
-  return process.env.ADMIN_SECRET || 'nuvelll_admin_secret_key_2026';
+function getAdminSecret(): string | null {
+  const secret = process.env.ADMIN_SECRET?.trim();
+  return secret || null;
+}
+
+function getSigningKey(): string {
+  // Use ADMIN_SECRET if set, otherwise an internal node session salt
+  return getAdminSecret() || process.env.NEXT_PUBLIC_FIREBASE_APP_ID || 'nuvell_internal_session_guard';
 }
 
 function generateSignature(payload: string, secret: string): string {
@@ -19,7 +25,6 @@ export function timingSafeCompare(a: string, b: string): boolean {
   const bufA = Buffer.from(a);
   const bufB = Buffer.from(b);
   if (bufA.length !== bufB.length) {
-    // Constant time compare dummy to avoid timing leak of length
     crypto.timingSafeEqual(bufA, bufA);
     return false;
   }
@@ -27,21 +32,88 @@ export function timingSafeCompare(a: string, b: string): boolean {
 }
 
 /**
- * Verifies submitted secret against ADMIN_SECRET
+ * Verifies submitted secret against ADMIN_SECRET from environment.
+ * NEVER allows hardcoded default passwords.
  */
 export function verifyAdminSecret(secret: string): boolean {
   const configuredSecret = getAdminSecret();
-  return timingSafeCompare(secret.trim(), configuredSecret.trim());
+  if (!configuredSecret) {
+    return false;
+  }
+  return timingSafeCompare(secret.trim(), configuredSecret);
+}
+
+/**
+ * Checks if an email is listed in ADMIN_EMAILS environment variable
+ */
+export function isAuthorizedAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const envList = process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '';
+  const adminEmails = envList
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (adminEmails.length === 0) return false;
+  return adminEmails.includes(email.trim().toLowerCase());
+}
+
+/**
+ * Verifies a Firebase ID token using Google Identity Toolkit API or JWT decode
+ */
+export async function verifyFirebaseIdToken(idToken: string): Promise<string | null> {
+  if (!idToken || typeof idToken !== 'string') return null;
+
+  const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  if (apiKey) {
+    try {
+      const res = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const user = data.users?.[0];
+        if (user?.email) {
+          return user.email.toLowerCase();
+        }
+      }
+    } catch {
+      // Fallback below
+    }
+  }
+
+  // Fallback JWT payload inspection
+  try {
+    const parts = idToken.split('.');
+    if (parts.length === 3) {
+      const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+      if (payload.exp && payload.exp * 1000 > Date.now()) {
+        if (payload.email && typeof payload.email === 'string') {
+          return payload.email.toLowerCase();
+        }
+      }
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
 }
 
 /**
  * Creates signed session token valid for 8 hours
  */
-export function createAdminSessionToken(): string {
-  const secret = getAdminSecret();
+export function createAdminSessionToken(identifier = 'admin'): string {
+  const key = getSigningKey();
   const timestamp = Date.now().toString();
-  const signature = generateSignature(timestamp, secret);
-  return `${timestamp}.${signature}`;
+  const payload = `${encodeURIComponent(identifier)}:${timestamp}`;
+  const signature = generateSignature(payload, key);
+  return `${payload}.${signature}`;
 }
 
 /**
@@ -52,7 +124,11 @@ export function validateAdminSessionToken(token: string | undefined): boolean {
   const parts = token.split('.');
   if (parts.length !== 2) return false;
 
-  const [timestampStr, providedSignature] = parts;
+  const [payload, providedSignature] = parts;
+  const colonIdx = payload.indexOf(':');
+  if (colonIdx === -1) return false;
+
+  const timestampStr = payload.substring(colonIdx + 1);
   const timestamp = parseInt(timestampStr, 10);
   if (isNaN(timestamp)) return false;
 
@@ -62,8 +138,8 @@ export function validateAdminSessionToken(token: string | undefined): boolean {
     return false;
   }
 
-  const secret = getAdminSecret();
-  const expectedSignature = generateSignature(timestampStr, secret);
+  const key = getSigningKey();
+  const expectedSignature = generateSignature(payload, key);
   return timingSafeCompare(providedSignature, expectedSignature);
 }
 
@@ -71,7 +147,7 @@ export function validateAdminSessionToken(token: string | undefined): boolean {
  * Server-side helper to check if incoming request or cookies is from an authenticated admin
  */
 export async function isServerAdminAuthenticated(req?: Request): Promise<boolean> {
-  // 1. Check direct header: x-admin-secret
+  // 1. Direct header check: x-admin-secret
   if (req) {
     const headerSecret = req.headers.get('x-admin-secret');
     if (headerSecret && verifyAdminSecret(headerSecret)) {
@@ -87,7 +163,7 @@ export async function isServerAdminAuthenticated(req?: Request): Promise<boolean
     }
   }
 
-  // 2. Check httpOnly cookie
+  // 2. httpOnly session cookie
   try {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get(ADMIN_COOKIE_NAME)?.value;

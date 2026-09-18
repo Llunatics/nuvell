@@ -16,7 +16,7 @@ import { formatDate } from '@/lib/formatters';
 export const metadata: Metadata = {
   title: 'Transparansi Sumber & Etika Crawler | nuvell',
   description:
-    'Komitmen keterbukaan data, etika perayapan (web crawling) yang sopan, kepatuhan robots.txt, dan daftar sumber terverifikasi di nuvell.',
+    'Komitmen keterbukaan data, etika web crawling yang sopan, kepatuhan robots.txt, dan daftar sumber terverifikasi di nuvell.',
 };
 
 export default function SourcesPage() {
@@ -160,7 +160,7 @@ export default function SourcesPage() {
           nuvell-bot/1.0 (+https://nuvell.id/crawler-policy; contact@nuvell.id)
         </code>
         <p className="text-[11px] text-editorial-faint font-sans pt-1">
-          Pengelola situs web yang ingin memperbarui instruksi atau meminta pengecualian perayapan dapat menghubungi kontak di atas.
+          Pengelola situs web yang ingin memperbarui instruksi atau meminta pengecualian crawling dapat menghubungi kontak di atas.
         </p>
       </div>
     </div>
