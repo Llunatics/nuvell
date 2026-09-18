@@ -71,11 +71,48 @@ export function UserMenu() {
     .slice(0, 2)
     .toUpperCase();
 
-  const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-  const isAdmin = Boolean(user.email && adminEmails.includes(user.email.toLowerCase()));
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check admin status securely from server (no NEXT_PUBLIC_ needed)
+  useEffect(() => {
+    let mounted = true;
+    if (!user?.email) {
+      setIsAdmin(false);
+      return;
+    }
+
+    // Direct check if NEXT_PUBLIC_ADMIN_EMAILS is provided
+    const publicAdmins = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    if (publicAdmins.includes(user.email.toLowerCase())) {
+      setIsAdmin(true);
+      return;
+    }
+
+    // Secure server-side validation against ADMIN_EMAILS
+    user
+      .getIdToken()
+      .then((idToken) =>
+        fetch('/api/admin/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken, email: user.email }),
+        })
+      )
+      .then((res) => res.json())
+      .then((data) => {
+        if (mounted && data?.success) {
+          setIsAdmin(true);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
 
   return (
     <div className="relative" ref={containerRef}>
