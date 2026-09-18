@@ -13,7 +13,6 @@ import {
   PanelLeft,
   Sparkles,
   Zap,
-  Terminal,
   X,
 } from 'lucide-react';
 import { useDisplaySettings, ThemeMode, DensityMode, ViewMode, MotionMode } from '@/hooks/use-display-settings';
@@ -264,19 +263,6 @@ export function SettingsPopover() {
                 })}
               </div>
             </div>
-          </div>
-
-          {/* Discreet Internal Administration Access */}
-          <div className="p-3 bg-surface-raised/70 border-t border-border-subtle flex items-center justify-between">
-            <span className="text-[11px] text-editorial-faint font-mono">INTERNAL</span>
-            <Link
-              href="/admin"
-              onClick={() => setIsOpen(false)}
-              className="inline-flex items-center gap-1.5 text-xs text-editorial-muted hover:text-gold transition-colors font-medium"
-            >
-              <Terminal className="w-3.5 h-3.5" />
-              <span>Crawler Admin Portal →</span>
-            </Link>
           </div>
         </div>
       )}

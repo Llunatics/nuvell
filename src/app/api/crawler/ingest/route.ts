@@ -1,7 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { dataService } from '@/server/db/data-service';
+import { isServerAdminAuthenticated } from '@/lib/server/admin-auth';
 
-export async function POST() {
+export async function POST(req: NextRequest) {
+  const isAuthorized = await isServerAdminAuthenticated(req);
+  if (!isAuthorized) {
+    return NextResponse.json(
+      { success: false, error: 'Akses ditolak. Diperlukan sesi atau kunci otorisasi admin.' },
+      { status: 401 }
+    );
+  }
+
   const result = dataService.runComprehensiveIngestion();
   return NextResponse.json({
     success: true,

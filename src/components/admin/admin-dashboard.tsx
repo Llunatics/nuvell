@@ -1,15 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Terminal,
   ShieldCheck,
   Play,
   CheckCircle2,
   AlertTriangle,
+  AlertCircle,
   Clock,
   RefreshCw,
   Lock,
+  LogOut,
+  Loader2,
   History,
   Radio,
   Eye,
@@ -33,6 +36,9 @@ export function AdminDashboard({
   reviewQueue,
 }: AdminDashboardProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const [unlockError, setUnlockError] = useState<string | null>(null);
   const [secretInput, setSecretInput] = useState('');
   const [sources, setSources] = useState<Source[]>(initialSources);
   const [logs, setLogs] = useState<CrawlLog[]>(initialLogs);
@@ -42,6 +48,25 @@ export function AdminDashboard({
   const [crawlProgressStage, setCrawlProgressStage] = useState('');
   const [sourceCategoryFilter, setSourceCategoryFilter] = useState<'ALL' | 'STOREFRONT' | 'PUBLISHER'>('ALL');
   const [successToast, setSuccessToast] = useState<string | null>(null);
+
+  // Check existing session on mount
+  useEffect(() => {
+    let mounted = true;
+    fetch('/api/admin/auth')
+      .then((res) => res.json())
+      .then((data) => {
+        if (mounted && data?.authenticated) {
+          setIsAuthenticated(true);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (mounted) setIsCheckingSession(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Social Flyer Transcriber State
   const [posterText, setPosterText] = useState(`September 9th Releases
@@ -59,13 +84,38 @@ Drama Queen Vol. 3 (Comic)`);
     setTranscriptionResult(result);
   };
 
-  const handleUnlock = (e: React.FormEvent) => {
+  const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Default admin secret check
-    if (secretInput === 'nuvell_admin_secret_key_2026' || secretInput === 'nuvelll_admin_secret_key_2026' || secretInput === 'admin') {
-      setIsAuthenticated(true);
-    } else {
-      alert('Kunci rahasia admin salah.');
+    if (!secretInput.trim() || isUnlocking) return;
+
+    setIsUnlocking(true);
+    setUnlockError(null);
+
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: secretInput }),
+      });
+      const data = await res.json();
+      if (res.ok && data?.success) {
+        setIsAuthenticated(true);
+        setSecretInput('');
+      } else {
+        setUnlockError(data?.error || 'Kunci rahasia admin salah atau tidak valid.');
+      }
+    } catch {
+      setUnlockError('Gagal menghubungi server untuk verifikasi kunci admin.');
+    } finally {
+      setIsUnlocking(false);
+    }
+  };
+
+  const handleLockSession = async () => {
+    try {
+      await fetch('/api/admin/auth', { method: 'DELETE' });
+    } finally {
+      setIsAuthenticated(false);
     }
   };
 
@@ -182,6 +232,15 @@ Drama Queen Vol. 3 (Comic)`);
     );
   };
 
+  if (isCheckingSession) {
+    return (
+      <div className="max-w-md mx-auto py-24 px-4 text-center space-y-3">
+        <Loader2 className="w-7 h-7 text-gold animate-spin mx-auto" />
+        <p className="text-xs text-editorial-faint font-mono">Memeriksa sesi otorisasi admin...</p>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto py-16 px-4">
@@ -199,23 +258,37 @@ Drama Queen Vol. 3 (Comic)`);
             </p>
           </div>
 
+          {unlockError && (
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/25 flex items-start gap-2 text-xs text-rose-400 text-left animate-in fade-in">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{unlockError}</span>
+            </div>
+          )}
+
           <form onSubmit={handleUnlock} className="space-y-3">
             <input
               type="password"
+              required
+              disabled={isUnlocking}
               value={secretInput}
               onChange={(e) => setSecretInput(e.target.value)}
               placeholder="Kunci Rahasia Admin..."
-              className="w-full px-4 py-2.5 rounded-xl bg-surface border border-white/[0.06] text-xs text-editorial-title placeholder-editorial-faint focus:outline-none focus:border-gold"
+              className="w-full px-4 py-2.5 rounded-xl bg-surface border border-white/[0.06] text-xs text-editorial-title placeholder-editorial-faint focus:outline-none focus:border-gold disabled:opacity-50"
             />
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-gold text-background text-xs font-semibold hover:bg-gold-400 transition-colors shadow-sm"
+              disabled={isUnlocking}
+              className="w-full py-2.5 rounded-xl bg-gold text-background text-xs font-semibold hover:bg-gold-400 transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              Buka Akses Admin
+              {isUnlocking ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Memverifikasi...</span>
+                </>
+              ) : (
+                <span>Buka Akses Admin</span>
+              )}
             </button>
-            <p className="text-[10px] font-mono text-editorial-faint">
-              Hint dev: nuvell_admin_secret_key_2026 atau admin
-            </p>
           </form>
         </div>
       </div>
@@ -238,6 +311,19 @@ Drama Queen Vol. 3 (Comic)`);
             Manajemen 16 pipeline perayap, audit log pemindaian, dan agregasi 254 penerbit berlisensi di Indonesia.
           </p>
         </div>
+
+        <div className="flex items-center gap-2.5 self-start md:self-auto">
+          <button
+            type="button"
+            onClick={handleLockSession}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface hover:bg-rose-500/15 border border-white/[0.06] hover:border-rose-500/30 text-xs text-editorial-muted hover:text-rose-300 transition-colors shadow-xs"
+            title="Kunci sesi admin"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Kunci Sesi Admin</span>
+          </button>
+        </div>
+      </div>
 
         {/* Tab Controls */}
         <div className="flex items-center gap-1.5 p-1 bg-surface-raised rounded-2xl border border-white/[0.06] overflow-x-auto no-scrollbar shadow-xs">
@@ -286,7 +372,6 @@ Drama Queen Vol. 3 (Comic)`);
             Social Flyer Transcriber
           </button>
         </div>
-      </div>
 
       {/* Tab Content: SOURCES */}
       {activeTab === 'SOURCES' && (
