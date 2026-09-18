@@ -47,7 +47,7 @@ export function Header() {
       <div className="sm:hidden px-4 pt-2.5 pb-2.5 space-y-2.5">
         {/* Row 1: Brand Logo + Streamlined Controls (Theme Toggle & Profile) */}
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-1.5 focus:outline-none group">
+          <Link href="/" className="inline-flex items-center gap-1 focus:outline-none group">
             <span className="font-editorial text-lg font-bold tracking-tight text-editorial-title group-hover:text-gold transition-colors">
               nuvell
             </span>
@@ -87,7 +87,7 @@ export function Header() {
       <div className="hidden sm:flex items-center justify-between gap-4 px-6 lg:px-8 py-3">
         {/* Left: Solid Brand & Desktop Breadcrumb Context */}
         <div className="flex items-center gap-3 shrink-0">
-          <Link href="/" className="flex items-center gap-1.5 focus:outline-none group">
+          <Link href="/" className="inline-flex items-center gap-1 focus:outline-none group">
             <span className="font-editorial text-xl font-bold tracking-tight text-editorial-title group-hover:text-gold transition-colors">
               nuvell
             </span>

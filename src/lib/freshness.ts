@@ -24,7 +24,7 @@ export function getSystemFreshness(
     return {
       status: 'SYNCING',
       label: 'SYNCING',
-      badgeClass: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+      badgeClass: 'bg-amber-500/10 text-amber-400 border-amber-500/25',
       dotClass: 'bg-amber-400 animate-ping',
       tooltipText: 'Sedang melakukan sinkronisasi data katalog penerbit...',
       lastSyncAt: latestLog?.finishedAt || null,
@@ -37,7 +37,7 @@ export function getSystemFreshness(
     return {
       status: 'ERROR',
       label: 'DEGRADED',
-      badgeClass: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
+      badgeClass: 'bg-rose-500/10 text-rose-400 border-rose-500/25',
       dotClass: 'bg-rose-500',
       tooltipText: 'Sebagian pipeline crawler mengalami kendala teknis.',
       lastSyncAt: latestLog?.finishedAt || null,
@@ -49,7 +49,7 @@ export function getSystemFreshness(
     return {
       status: 'TRACKER',
       label: 'TRACKER',
-      badgeClass: 'bg-sky-500/15 text-sky-400 border-sky-500/30',
+      badgeClass: 'bg-sky-500/10 text-sky-400 border-sky-500/25',
       dotClass: 'bg-sky-400 animate-pulse',
       tooltipText: 'Pelacak aktif • Siap menyinkronkan rilis resmi',
       lastSyncAt: null,
@@ -64,7 +64,7 @@ export function getSystemFreshness(
     return {
       status: 'LIVE',
       label: 'LIVE',
-      badgeClass: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+      badgeClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25',
       dotClass: 'bg-emerald-400 animate-pulse',
       tooltipText: `Data diperbarui ${formatRelativeTime(syncDateStr)} (${formatDateTimeWIB(syncDateStr)})`,
       lastSyncAt: syncDateStr,
@@ -73,7 +73,7 @@ export function getSystemFreshness(
     return {
       status: 'TRACKER',
       label: 'SYNC',
-      badgeClass: 'bg-gold/15 text-gold border-gold/30',
+      badgeClass: 'bg-gold/10 text-gold border-gold/25',
       dotClass: 'bg-gold',
       tooltipText: `Sinkronisasi terakhir: ${formatDateTimeWIB(syncDateStr)}`,
       lastSyncAt: syncDateStr,
@@ -82,7 +82,7 @@ export function getSystemFreshness(
     return {
       status: 'STALE',
       label: 'STALE',
-      badgeClass: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30',
+      badgeClass: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/25',
       dotClass: 'bg-zinc-400',
       tooltipText: `Data melampaui SLA (>24 jam). Sinkronisasi terakhir: ${formatDateTimeWIB(syncDateStr)}`,
       lastSyncAt: syncDateStr,

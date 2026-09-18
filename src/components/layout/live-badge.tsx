@@ -26,11 +26,14 @@ export function LiveBadge() {
   return (
     <Tooltip content={freshness.tooltipText} side="bottom">
       <span
-        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-tight border shadow-2xs cursor-help transition-colors ${freshness.badgeClass}`}
+        className={`inline-flex items-center px-1 py-[1px] rounded-[3px] text-[7px] sm:text-[7.5px] font-mono font-semibold tracking-wider uppercase border leading-none cursor-help transition-all ${freshness.badgeClass}`}
       >
-        <span className={`w-1 h-1 rounded-full shrink-0 ${freshness.dotClass}`} />
+        {(freshness.status === 'LIVE' || freshness.status === 'SYNCING') && (
+          <span className={`w-1 h-1 rounded-full mr-1 shrink-0 ${freshness.dotClass}`} />
+        )}
         <span className="leading-none">{freshness.label}</span>
       </span>
     </Tooltip>
   );
 }
+

@@ -200,8 +200,8 @@ export function UserMenu({ onOpenNotifications }: UserMenuProps) {
             </div>
           ) : (
             <div className="p-3 border-b border-border-subtle bg-surface-raised/40 rounded-xl space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-gold/15 text-gold flex items-center justify-center">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-surface-raised border border-border-subtle text-editorial-muted flex items-center justify-center">
                   <User className="w-4 h-4" />
                 </div>
                 <div>
@@ -234,19 +234,19 @@ export function UserMenu({ onOpenNotifications }: UserMenuProps) {
             </div>
           )}
 
-          {/* Section 2: Mobile Quick Actions (Watchlist & Notif) */}
+          {/* Section 2: Navigation Actions (Clean & Modern Tone) */}
           <div className="space-y-0.5 pt-0.5">
             <Link
               href="/library?tab=watchlist"
               onClick={() => setIsOpen(false)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-editorial-body hover:text-editorial-title hover:bg-surface transition-colors group"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-editorial-body hover:text-editorial-title hover:bg-surface-raised transition-colors group"
             >
               <div className="flex items-center gap-2.5">
-                <Bookmark className="w-4 h-4 text-gold group-hover:scale-110 transition-transform" />
+                <Bookmark className="w-4 h-4 text-editorial-muted group-hover:text-editorial-title transition-colors" />
                 <span className="font-medium">Watchlist & Bookmark</span>
               </div>
               {watchlistItems.length > 0 && (
-                <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30">
+                <span className="font-mono text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-raised border border-border-subtle text-editorial-muted group-hover:text-editorial-title transition-colors">
                   {watchlistItems.length}
                 </span>
               )}
@@ -260,15 +260,16 @@ export function UserMenu({ onOpenNotifications }: UserMenuProps) {
                   onOpenNotifications();
                 }
               }}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-editorial-body hover:text-editorial-title hover:bg-surface transition-colors group"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-editorial-body hover:text-editorial-title hover:bg-surface-raised transition-colors group"
             >
               <div className="flex items-center gap-2.5">
-                <Bell className="w-4 h-4 text-sky-400 group-hover:scale-110 transition-transform" />
+                <Bell className="w-4 h-4 text-editorial-muted group-hover:text-editorial-title transition-colors" />
                 <span className="font-medium">Radar Notifikasi</span>
               </div>
               {unreadCount > 0 && (
-                <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse">
-                  {badgeText}
+                <span className="inline-flex items-center gap-1.5 font-mono text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-raised border border-border-subtle text-editorial-title">
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0" />
+                  <span>{badgeText}</span>
                 </span>
               )}
             </button>
@@ -276,10 +277,10 @@ export function UserMenu({ onOpenNotifications }: UserMenuProps) {
             <Link
               href="/library?tab=collection"
               onClick={() => setIsOpen(false)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-editorial-body hover:text-editorial-title hover:bg-surface transition-colors group"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-editorial-body hover:text-editorial-title hover:bg-surface-raised transition-colors group"
             >
               <div className="flex items-center gap-2.5">
-                <BookMarked className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                <BookMarked className="w-4 h-4 text-editorial-muted group-hover:text-editorial-title transition-colors" />
                 <span className="font-medium">Koleksi Buku Saya</span>
               </div>
             </Link>
@@ -287,10 +288,10 @@ export function UserMenu({ onOpenNotifications }: UserMenuProps) {
             <Link
               href="/library?tab=series"
               onClick={() => setIsOpen(false)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-editorial-body hover:text-editorial-title hover:bg-surface transition-colors group"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-editorial-body hover:text-editorial-title hover:bg-surface-raised transition-colors group"
             >
               <div className="flex items-center gap-2.5">
-                <Layers className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+                <Layers className="w-4 h-4 text-editorial-muted group-hover:text-editorial-title transition-colors" />
                 <span className="font-medium">Pelacak Seri Komik & Novel</span>
               </div>
             </Link>
@@ -302,9 +303,9 @@ export function UserMenu({ onOpenNotifications }: UserMenuProps) {
               <Link
                 href="/admin"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-gold hover:text-gold-300 hover:bg-gold/10 transition-colors font-medium border border-gold/25"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-editorial-body hover:text-editorial-title hover:bg-surface-raised transition-colors group font-medium"
               >
-                <Terminal className="w-4 h-4 text-gold" />
+                <Terminal className="w-4 h-4 text-editorial-muted group-hover:text-gold transition-colors" />
                 <span>Crawler Dashboard</span>
               </Link>
             </div>
@@ -319,9 +320,9 @@ export function UserMenu({ onOpenNotifications }: UserMenuProps) {
                   setIsOpen(false);
                   await logout();
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-burgundy-400 hover:text-burgundy-300 hover:bg-burgundy-500/10 transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-editorial-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors group"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-4 h-4 text-editorial-muted group-hover:text-rose-400 transition-colors" />
                 <span>Keluar (Sign Out)</span>
               </button>
             </div>
