@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Bookmark, Check, Calendar, Plus } from 'lucide-react';
+import { Bookmark, Check, Calendar, Plus, BookOpen } from 'lucide-react';
 import { Publication } from '@/types';
 import { formatIDR, getReleaseCountdown, formatShortDate } from '@/lib/formatters';
 import { useWatchlist } from '@/hooks/use-watchlist';
@@ -25,6 +25,7 @@ export function ReleaseCard({ publication, layout = 'grid', relationBadge }: Rel
   const isFollowed = isWatchlisted('BOOK', publication.id);
   const collectionStatus = getItemStatus(publication.id);
   const countdown = getReleaseCountdown(publication.releaseDate);
+  const [imgError, setImgError] = useState(false);
 
   const handleWatchlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -47,55 +48,54 @@ export function ReleaseCard({ publication, layout = 'grid', relationBadge }: Rel
   const handleCollectionToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const nextStatus = collectionStatus === 'OWNED' ? null : 'OWNED';
-    setItemStatus(publication.id, nextStatus, {
+    const newStatus = collectionStatus === 'OWNED' ? null : 'OWNED';
+    setItemStatus(publication.id, newStatus, {
       seriesId: publication.seriesId || undefined,
       volume: publication.volume || undefined,
     });
-    if (nextStatus === 'OWNED') {
-      toast({
-        title: 'Ditandai sebagai Dimiliki',
-        description: publication.title,
-        variant: 'success',
-      });
-    } else {
-      toast({
-        title: 'Dihapus dari Koleksi',
-        description: publication.title,
-      });
-    }
+    toast({
+      title: newStatus === 'OWNED' ? 'Ditambahkan ke Koleksi' : 'Dihapus dari Koleksi',
+      description: publication.title,
+      variant: newStatus === 'OWNED' ? 'success' : 'default',
+    });
   };
 
-  const getBadgeStyle = (badge?: string | null) => {
+  const getBadgeStyle = (badge: string) => {
     switch (badge) {
       case 'NEW':
-        return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25';
-      case 'PRICE DROP':
-        return 'bg-amber-500/15 text-amber-400 border-amber-500/25';
-      case 'PREORDER':
-        return 'bg-burgundy/20 text-rose-300 border-burgundy/30';
+        return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+      case 'PRICE_CHANGE':
+        return 'bg-sky-500/15 text-sky-400 border-sky-500/30';
+      case 'DATE_SHIFT':
+        return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+      case 'COVER_UPDATE':
+        return 'bg-purple-500/15 text-purple-400 border-purple-500/30';
+      case 'UPCOMING':
+        return 'bg-gold/15 text-gold border-gold/30';
       default:
-        return 'bg-surface-raised/90 text-editorial-muted border-border-subtle';
+        return 'bg-surface-raised text-editorial-muted border-border-subtle';
     }
   };
 
-  // 1. List Layout
+  // 1. Horizontal List Layout (Streamlined for Feed / Search / Condensed)
   if (layout === 'list') {
     return (
-      <article className="rounded-xl p-3 sm:p-4 flex items-center justify-between gap-3 sm:gap-4 transition-all duration-200 bg-surface/90 hover:bg-surface-raised border border-border-subtle hover:border-gold/30 shadow-xs group">
+      <article className="glass-panel p-3 sm:p-4 rounded-xl flex items-center justify-between gap-3 sm:gap-4 hover:border-gold/40 transition-all group">
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-          <Link href={`/books/${publication.slug}`} className="shrink-0 group">
-            <div className="w-14 h-19 sm:w-16 sm:h-22 aspect-[3/4] bg-surface-sunken rounded-lg border border-border-subtle overflow-hidden relative shadow-xs">
-              {publication.coverImage ? (
+          <Link href={`/books/${publication.slug}`} className="shrink-0" tabIndex={-1} aria-hidden="true">
+            <div className="w-12 h-16 sm:w-14 sm:h-20 rounded-lg overflow-hidden bg-surface-sunken border border-border-subtle shrink-0 relative">
+              {!imgError && publication.coverImage ? (
                 <img
                   src={publication.coverImage}
                   alt={publication.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={() => setImgError(true)}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                   loading="lazy"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-editorial-faint text-[10px] text-center p-1 bg-surface-sunken">
-                  No Cover
+                <div className="w-full h-full flex flex-col items-center justify-center text-editorial-faint text-[9px] text-center p-1 bg-surface-sunken">
+                  <BookOpen className="w-3.5 h-3.5 mb-0.5 opacity-60" />
+                  <span>Buku</span>
                 </div>
               )}
             </div>
@@ -124,17 +124,17 @@ export function ReleaseCard({ publication, layout = 'grid', relationBadge }: Rel
             </div>
 
             <Link href={`/books/${publication.slug}`}>
-              <h3 className="text-xs sm:text-sm font-editorial font-bold text-editorial-title hover:text-gold transition-colors line-clamp-2 leading-snug">
+              <h3 className="font-sans font-bold text-xs sm:text-sm text-editorial-title hover:text-gold transition-colors line-clamp-2 leading-snug tracking-tight">
                 {publication.title}
               </h3>
             </Link>
 
             <div className="flex items-center gap-2 text-xs text-editorial-muted flex-wrap pt-0.5">
-              <span className="font-mono font-bold text-editorial-title text-xs sm:text-sm">
+              <span className="font-mono font-bold text-editorial-title text-xs sm:text-sm whitespace-nowrap">
                 {formatIDR(publication.currentPrice)}
               </span>
               {publication.isDiscounted && publication.regularPrice && (
-                <span className="font-mono text-[11px] text-editorial-faint line-through">
+                <span className="font-mono text-[11px] text-editorial-faint line-through whitespace-nowrap">
                   {formatIDR(publication.regularPrice)}
                 </span>
               )}
@@ -190,18 +190,25 @@ export function ReleaseCard({ publication, layout = 'grid', relationBadge }: Rel
       {/* Cover Image Container */}
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface-sunken">
         <Link href={`/books/${publication.slug}`} className="block w-full h-full" tabIndex={-1} aria-hidden="true">
-          {publication.coverImage ? (
+          {!imgError && publication.coverImage ? (
             <img
               src={publication.coverImage}
               alt={publication.title}
+              onError={() => setImgError(true)}
               className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300 ease-out"
               loading="lazy"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-surface-sunken">
-              <span className="text-xs text-editorial-muted font-medium line-clamp-3">
+              <BookOpen className="w-7 h-7 text-editorial-faint/60 mb-2" />
+              <span className="text-xs text-editorial-muted font-medium line-clamp-2 leading-tight">
                 {publication.title}
               </span>
+              {publication.publisherName && (
+                <span className="text-[10px] font-mono text-editorial-faint mt-1.5 truncate max-w-full">
+                  {publication.publisherName}
+                </span>
+              )}
             </div>
           )}
         </Link>
@@ -256,9 +263,9 @@ export function ReleaseCard({ publication, layout = 'grid', relationBadge }: Rel
             )}
           </div>
 
-          {/* Title: 2 lines clamp */}
+          {/* Title: 2 lines clamp with crisp, clear modern sans typography */}
           <Link href={`/books/${publication.slug}`} className="block group-hover:text-gold transition-colors">
-            <h3 className="font-editorial text-xs sm:text-sm md:text-[15px] font-bold text-editorial-title leading-snug line-clamp-2">
+            <h3 className="font-sans font-bold text-xs sm:text-sm md:text-[15px] text-editorial-title leading-snug line-clamp-2 tracking-tight">
               {publication.title}
             </h3>
           </Link>
@@ -280,28 +287,28 @@ export function ReleaseCard({ publication, layout = 'grid', relationBadge }: Rel
           </div>
 
           {/* Price & Collection CTA */}
-          <div className="flex items-center justify-between gap-2 pt-1">
-            <div className="min-w-0">
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2 pt-1">
+            <div className="min-w-0 flex-1">
               <span className="text-[9px] text-editorial-faint uppercase font-mono block leading-none">
                 Harga
               </span>
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-xs sm:text-sm md:text-base font-bold text-editorial-title font-mono">
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className="text-xs sm:text-sm md:text-base font-bold text-editorial-title font-mono whitespace-nowrap">
                   {formatIDR(publication.currentPrice)}
                 </span>
                 {publication.isDiscounted && publication.regularPrice && (
-                  <span className="font-mono text-[10px] text-editorial-faint line-through hidden sm:inline">
+                  <span className="font-mono text-[10px] text-editorial-faint line-through hidden sm:inline whitespace-nowrap">
                     {formatIDR(publication.regularPrice)}
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Quick Collection Toggle Button */}
+            {/* Quick Collection Toggle Button: compact icon only on mobile, text on desktop */}
             <button
               type="button"
               onClick={handleCollectionToggle}
-              className={`h-7 sm:h-8 px-2.5 sm:px-3 rounded-lg text-[11px] sm:text-xs font-medium border flex items-center gap-1.5 transition-all active:scale-95 shrink-0 ${
+              className={`h-7 w-7 sm:w-auto sm:h-8 sm:px-3 rounded-lg text-[11px] sm:text-xs font-medium border flex items-center justify-center gap-1.5 transition-all active:scale-95 shrink-0 ${
                 collectionStatus === 'OWNED'
                   ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 font-semibold'
                   : 'bg-surface hover:bg-surface-raised border-border-subtle text-editorial-muted hover:text-editorial-title'
@@ -310,13 +317,13 @@ export function ReleaseCard({ publication, layout = 'grid', relationBadge }: Rel
             >
               {collectionStatus === 'OWNED' ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Dimiliki</span>
+                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span className="hidden sm:inline">Dimiliki</span>
                 </>
               ) : (
                 <>
-                  <Plus className="w-3.5 h-3.5 text-editorial-faint" />
-                  <span>+ Koleksi</span>
+                  <Plus className="w-3.5 h-3.5 text-editorial-faint shrink-0" />
+                  <span className="hidden sm:inline">+ Koleksi</span>
                 </>
               )}
             </button>

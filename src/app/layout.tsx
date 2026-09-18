@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Plus_Jakarta_Sans, Newsreader } from 'next/font/google';
 import './globals.css';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
@@ -7,6 +8,21 @@ import { DisplaySettingsProvider } from '@/hooks/use-display-settings';
 import { ToastProvider } from '@/hooks/use-toast';
 import { AuthProvider } from '@/contexts/auth-context';
 import Link from 'next/link';
+
+const sansFont = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+  weight: ['400', '500', '600', '700', '800'],
+});
+
+const editorialFont = Newsreader({
+  subsets: ['latin'],
+  variable: '--font-editorial',
+  display: 'swap',
+  style: ['normal', 'italic'],
+  weight: ['400', '500', '600', '700', '800'],
+});
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -48,8 +64,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className="dark" suppressHydrationWarning>
-      <body className="min-h-screen bg-background text-editorial-body antialiased flex flex-col selection:bg-gold selection:text-background">
+    <html lang="id" className={`dark ${sansFont.variable} ${editorialFont.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen bg-background text-editorial-body font-sans antialiased flex flex-col selection:bg-gold selection:text-background">
         <AuthProvider>
           <DisplaySettingsProvider>
             <ToastProvider>

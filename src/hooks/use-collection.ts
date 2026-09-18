@@ -7,6 +7,14 @@ const STORAGE_KEY = 'nuvell_user_collection';
 const LEGACY_STORAGE_KEY = 'nuvelll_user_collection';
 const SYNC_EVENT = 'nuvell_collection_sync';
 
+// Deprecated mock seed IDs to purge from existing user localStorages
+const LEGACY_MOCK_IDS = new Set([
+  'pub_one_piece_108',
+  'pub_kagurabachi_01',
+  'pub_cantik_itu_luka_ce',
+  'pub_frieren_11',
+]);
+
 export function useCollection() {
   const [collection, setCollection] = useState<Map<string, UserCollectionItem>>(new Map());
   const [isLoaded, setIsLoaded] = useState(false);
@@ -17,14 +25,27 @@ export function useCollection() {
       if (stored) {
         const parsed: UserCollectionItem[] = JSON.parse(stored);
         const map = new Map<string, UserCollectionItem>();
+        let hadLegacyMocks = false;
         parsed.forEach((item) => {
           if (item && item.publicationId) {
+            if (LEGACY_MOCK_IDS.has(item.publicationId)) {
+              hadLegacyMocks = true;
+              return;
+            }
             map.set(item.publicationId, item);
           }
         });
         setCollection(map);
+        if (hadLegacyMocks) {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(map.values())));
+            localStorage.removeItem(LEGACY_STORAGE_KEY);
+          } catch {
+            // ignore
+          }
+        }
       } else {
-        // No fake data: start with empty collection
+        // Start with clean empty collection
         setCollection(new Map());
       }
     } catch {

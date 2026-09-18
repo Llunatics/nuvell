@@ -157,7 +157,7 @@ body {
 
 /* Editorial Serif Accents */
 .font-editorial {
-  font-family: 'Merriweather', Georgia, serif;
+  font-family: var(--font-editorial), 'Newsreader', Georgia, serif;
 }
 
 /* Subtle background noise texture */

@@ -26,10 +26,10 @@ export function LiveBadge() {
   return (
     <Tooltip content={freshness.tooltipText} side="bottom">
       <span
-        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold tracking-wider border shadow-sm cursor-help transition-colors ${freshness.badgeClass}`}
+        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-tight border shadow-2xs cursor-help transition-colors ${freshness.badgeClass}`}
       >
-        <span className={`w-1.5 h-1.5 rounded-full ${freshness.dotClass}`} />
-        <span>{freshness.label}</span>
+        <span className={`w-1 h-1 rounded-full shrink-0 ${freshness.dotClass}`} />
+        <span className="leading-none">{freshness.label}</span>
       </span>
     </Tooltip>
   );

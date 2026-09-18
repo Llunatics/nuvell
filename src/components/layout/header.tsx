@@ -16,7 +16,7 @@ import { LiveBadge } from './live-badge';
 export function Header() {
   const { items } = useWatchlist();
   const { theme, setTheme, resolvedDark } = useDisplaySettings();
-  const [isThemeOpen, setIsThemeOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const pathname = usePathname();
 
   // Determine editorial context / breadcrumb from current path
@@ -45,96 +45,32 @@ export function Header() {
     <header className="sticky top-0 z-30 w-full bg-background/90 backdrop-blur-xl border-b border-border-subtle pt-safe transition-all">
       {/* MOBILE HEADER (sm:hidden): Two-row intentional layout */}
       <div className="sm:hidden px-4 pt-2.5 pb-2.5 space-y-2.5">
-        {/* Row 1: Brand Logo + Icon Controls */}
+        {/* Row 1: Brand Logo + Streamlined Controls (Theme Toggle & Profile) */}
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 focus:outline-none group">
+          <Link href="/" className="flex items-center gap-1.5 focus:outline-none group">
             <span className="font-editorial text-lg font-bold tracking-tight text-editorial-title group-hover:text-gold transition-colors">
               nuvell
             </span>
             <LiveBadge />
           </Link>
 
-          {/* Right Icon Actions: Watchlist, Notification, Theme, User */}
-          <div className="flex items-center gap-1.5">
-            {/* Watchlist */}
-            <Link
-              href="/library?tab=watchlist"
-              className="relative p-2.5 rounded-xl bg-surface border border-border-subtle hover:border-gold/40 text-editorial-muted active:scale-95 transition-all"
-              aria-label={`Buka Watchlist (${items.length} item tersimpan)`}
+          {/* Right Icon Actions: Theme toggle (left) & Profile icon (right) */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleThemeQuick}
+              className="w-9 h-9 rounded-xl bg-surface border border-border-subtle hover:border-gold/40 text-editorial-muted flex items-center justify-center active:scale-95 transition-all"
+              aria-label={resolvedDark ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'}
             >
-              <Bookmark className="w-4 h-4 text-editorial-muted" />
-              {items.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gold text-background text-[10px] font-bold flex items-center justify-center font-mono">
-                  {items.length}
-                </span>
+              {resolvedDark ? (
+                <Sun className="w-4 h-4 text-amber-300" />
+              ) : (
+                <Moon className="w-4 h-4 text-editorial-body" />
               )}
-            </Link>
+            </button>
 
-            {/* Notification Center */}
-            <NotificationCenter />
-
-            {/* User Account Menu */}
-            <UserMenu />
-
-            {/* Mobile Theme Popover */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setIsThemeOpen(!isThemeOpen)}
-                className="w-10 h-10 rounded-xl bg-surface border border-border-subtle hover:border-gold/40 text-editorial-muted flex items-center justify-center active:scale-95 transition-all"
-                aria-label="Pilih Tema Tampilan (Dark, Light, System)"
-                aria-expanded={isThemeOpen}
-              >
-                {resolvedDark ? (
-                  <Sun className="w-4 h-4 text-amber-300" />
-                ) : (
-                  <Moon className="w-4 h-4 text-editorial-body" />
-                )}
-              </button>
-
-              {isThemeOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setIsThemeOpen(false)}
-                  />
-                  <div className="absolute right-0 mt-2 w-48 bg-surface-overlay border border-border-medium rounded-2xl shadow-xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 space-y-0.5">
-                    <div className="px-2.5 py-1 text-[10px] font-mono text-editorial-faint uppercase tracking-wider">
-                      Pilihan Tema
-                    </div>
-                    {[
-                      { id: 'dark', label: 'Gelap (Dark)', icon: Moon },
-                      { id: 'light', label: 'Terang (Light)', icon: Sun },
-                      { id: 'system', label: 'Sistem (Auto)', icon: Laptop },
-                    ].map((opt) => {
-                      const Icon = opt.icon;
-                      const isSelected = theme === opt.id;
-                      return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          onClick={() => {
-                            setTheme(opt.id as 'dark' | 'light' | 'system');
-                            setIsThemeOpen(false);
-                          }}
-                          className={`w-full min-h-[40px] flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors ${
-                            isSelected
-                              ? 'bg-gold/15 text-gold font-semibold'
-                              : 'text-editorial-body hover:bg-surface active:bg-surface'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <Icon className="w-4 h-4" />
-                            <span>{opt.label}</span>
-                          </div>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-gold" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-            </div>
+            {/* Profile Menu: Watchlist & Notifications are accessed inside */}
+            <UserMenu onOpenNotifications={() => setIsNotifOpen(true)} />
           </div>
         </div>
 
@@ -144,11 +80,14 @@ export function Header() {
         </div>
       </div>
 
+      {/* Hidden Mobile Notification Sheet Triggered from UserMenu */}
+      <NotificationCenter isOpen={isNotifOpen} onOpenChange={setIsNotifOpen} hideTrigger />
+
       {/* DESKTOP HEADER (hidden sm:flex): Elegant Single-Row Layout */}
       <div className="hidden sm:flex items-center justify-between gap-4 px-6 lg:px-8 py-3">
         {/* Left: Solid Brand & Desktop Breadcrumb Context */}
         <div className="flex items-center gap-3 shrink-0">
-          <Link href="/" className="flex items-center gap-2 focus:outline-none group">
+          <Link href="/" className="flex items-center gap-1.5 focus:outline-none group">
             <span className="font-editorial text-xl font-bold tracking-tight text-editorial-title group-hover:text-gold transition-colors">
               nuvell
             </span>

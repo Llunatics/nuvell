@@ -19,8 +19,23 @@ import { useNotifications } from '@/hooks/use-notifications';
 import { formatRelativeTime } from '@/lib/formatters';
 import { NotificationType } from '@/types';
 
-export function NotificationCenter() {
-  const [isOpen, setIsOpen] = useState(false);
+interface NotificationCenterProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
+}
+
+export function NotificationCenter({
+  isOpen: controlledIsOpen,
+  onOpenChange,
+  hideTrigger = false,
+}: NotificationCenterProps = {}) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+  const setIsOpen = (val: boolean) => {
+    if (onOpenChange) onOpenChange(val);
+    setInternalIsOpen(val);
+  };
   const {
     notifications,
     unreadCount,
@@ -79,19 +94,21 @@ export function NotificationCenter() {
 
   return (
     <div className="relative">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative w-10 h-10 rounded-xl bg-surface border border-border-subtle hover:border-gold/40 text-editorial-muted hover:text-editorial-title flex items-center justify-center transition-all active:scale-95"
-        aria-label={`Radar Notifikasi (${unreadCount} belum dibaca)`}
-      >
-        <Bell className="w-4 h-4" />
-        {badgeText && (
-          <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-gold text-background text-[10px] font-bold flex items-center justify-center font-mono">
-            {badgeText}
-          </span>
-        )}
-      </button>
+      {!hideTrigger && (
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="relative w-10 h-10 rounded-xl bg-surface border border-border-subtle hover:border-gold/40 text-editorial-muted hover:text-editorial-title flex items-center justify-center transition-all active:scale-95"
+          aria-label={`Radar Notifikasi (${unreadCount} belum dibaca)`}
+        >
+          <Bell className="w-4 h-4" />
+          {badgeText && (
+            <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-gold text-background text-[10px] font-bold flex items-center justify-center font-mono">
+              {badgeText}
+            </span>
+          )}
+        </button>
+      )}
 
       {/* Mobile Bottom Sheet (sm:hidden) */}
       {isOpen && mounted && createPortal(

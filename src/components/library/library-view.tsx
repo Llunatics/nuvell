@@ -17,7 +17,6 @@ import {
   ArrowRight,
   Plus,
   BookOpen,
-  SlidersHorizontal,
   Search,
   ArrowUpDown,
   Layers3,
@@ -27,7 +26,6 @@ import { ReleaseCard } from '@/components/books/release-card';
 import { useWatchlist } from '@/hooks/use-watchlist';
 import { useCollection } from '@/hooks/use-collection';
 import { useRecentlyViewed } from '@/hooks/use-recently-viewed';
-import { useDisplaySettings } from '@/hooks/use-display-settings';
 import { useUserSeries } from '@/hooks/use-user-series';
 import { UserSeriesTracker } from '@/components/series/user-series-tracker';
 import { formatShortDate } from '@/lib/formatters';
@@ -68,7 +66,6 @@ export function LibraryView({ publications }: LibraryViewProps) {
   } = useCollection();
   const { seriesList } = useUserSeries();
   const { items: recentItems, clearRecentItems } = useRecentlyViewed();
-  const { density, setDensity, motion, setMotion } = useDisplaySettings();
   const { toast } = useToast();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -716,83 +713,6 @@ export function LibraryView({ publications }: LibraryViewProps) {
           )}
         </div>
       )}
-
-      {/* Secondary Settings: Density & Motion Preferences */}
-      <div className="pt-6 border-t border-border-subtle">
-        <div className="p-4 sm:p-5 rounded-2xl bg-surface/50 border border-border-subtle space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="w-4 h-4 text-gold" />
-              <h3 className="font-editorial text-sm font-semibold text-editorial-title">
-                Preferensi Tampilan & Kenyamanan Baca
-              </h3>
-            </div>
-            <span className="text-[10px] font-mono text-editorial-faint">
-              Lokal Perangkat
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            {/* Density */}
-            <div className="space-y-1.5">
-              <span className="text-[11px] text-editorial-muted font-medium">Kerapatan Tampilan (Density)</span>
-              <div className="flex items-center gap-1.5 p-1 bg-surface rounded-xl border border-border-subtle">
-                <button
-                  type="button"
-                  onClick={() => setDensity('comfortable')}
-                  className={`flex-1 min-h-[40px] py-2 rounded-lg text-xs font-medium transition-all ${
-                    density === 'comfortable'
-                      ? 'bg-surface-raised text-gold font-semibold shadow-sm'
-                      : 'text-editorial-muted hover:text-editorial-title'
-                  }`}
-                >
-                  Nyaman (Comfortable)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDensity('compact')}
-                  className={`flex-1 min-h-[40px] py-2 rounded-lg text-xs font-medium transition-all ${
-                    density === 'compact'
-                      ? 'bg-surface-raised text-gold font-semibold shadow-sm'
-                      : 'text-editorial-muted hover:text-editorial-title'
-                  }`}
-                >
-                  Kompak (Compact)
-                </button>
-              </div>
-            </div>
-
-            {/* Motion */}
-            <div className="space-y-1.5">
-              <span className="text-[11px] text-editorial-muted font-medium">Efek Animasi (Motion)</span>
-              <div className="flex items-center gap-1.5 p-1 bg-surface rounded-xl border border-border-subtle">
-                <button
-                  type="button"
-                  onClick={() => setMotion('full')}
-                  className={`flex-1 min-h-[40px] py-2 rounded-lg text-xs font-medium transition-all ${
-                    motion === 'full'
-                      ? 'bg-surface-raised text-gold font-semibold shadow-sm'
-                      : 'text-editorial-muted hover:text-editorial-title'
-                  }`}
-                >
-                  Penuh (Full)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMotion('reduced')}
-                  className={`flex-1 min-h-[40px] py-2 rounded-lg text-xs font-medium transition-all ${
-                    motion === 'reduced'
-                      ? 'bg-surface-raised text-gold font-semibold shadow-sm'
-                      : 'text-editorial-muted hover:text-editorial-title'
-                  }`}
-                >
-                  Minimal (Reduced)
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
