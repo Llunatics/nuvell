@@ -253,17 +253,26 @@ export function InsightsView({ publications, publishers, sources }: InsightsView
               </p>
             </div>
             <CategoryPieChart data={categoryData} />
-            <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
-              {categoryData.map((entry) => (
-                <div key={entry.name} className="flex items-center gap-1.5">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: CATEGORY_COLORS[entry.name] || '#C5A059' }}
-                  />
-                  <span className="text-editorial-body">{entry.name}:</span>
-                  <span className="font-mono font-semibold text-editorial-title">{entry.value}</span>
-                </div>
-              ))}
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs pt-1">
+              {categoryData.map((entry) => {
+                const total = categoryData.reduce((a, b) => a + b.value, 0);
+                const pct = total > 0 ? ((entry.value / total) * 100).toFixed(1) : '0';
+                return (
+                  <div key={entry.name} className="flex items-center gap-1.5">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                      style={{ backgroundColor: CATEGORY_COLORS[entry.name] || '#C5A059' }}
+                    />
+                    <span className="text-editorial-body">{entry.name}:</span>
+                    <span className="font-mono font-semibold text-editorial-title">
+                      {entry.value.toLocaleString()}
+                    </span>
+                    <span className="text-[11px] font-mono text-editorial-faint">
+                      ({pct}%)
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

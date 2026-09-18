@@ -21,7 +21,10 @@ export default function InsightsPage() {
     title: p.title,
     publisherId: p.publisherId,
     publisherName: p.publisherName,
+    seriesName: p.seriesName,
+    volume: p.volume,
     format: p.format,
+    genres: p.genres || [],
     currentPrice: p.currentPrice,
     changes: p.changes || [],
   }));

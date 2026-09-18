@@ -14,8 +14,8 @@ export default function DiscoverPage() {
   const publishers = dataService.getAllPublishers();
   const allSeries = dataService.getAllSeries();
 
-  // Curate latest and upcoming publications for feed (400 items covers 16+ pages of feed results)
-  const publications = allPublications.slice(0, 400).map((p) => ({
+  // Curate 1,500 publications for rich multi-page feeds and genre explorations
+  const publications = allPublications.slice(0, 1500).map((p) => ({
     id: p.id,
     slug: p.slug,
     title: p.title,
@@ -24,7 +24,7 @@ export default function DiscoverPage() {
     releaseDate: p.releaseDate,
     status: p.status,
     format: p.format,
-    genres: p.genres,
+    genres: p.genres || [],
     currentPrice: p.currentPrice,
     publisherId: p.publisherId,
     publisherName: p.publisherName,
@@ -36,6 +36,15 @@ export default function DiscoverPage() {
     priceHistory: [],
     changes: [],
   }));
+
+  // True catalog-wide genre counts across all 8,216 publications
+  const genreCountMap = new Map<string, number>();
+  allPublications.forEach((p) => {
+    p.genres?.forEach((g) => {
+      genreCountMap.set(g, (genreCountMap.get(g) || 0) + 1);
+    });
+  });
+  const catalogGenres = Array.from(genreCountMap.entries()).sort((a, b) => b[1] - a[1]);
 
   // Curate active series with covers or multi-volumes (120 series)
   const series = allSeries
@@ -49,6 +58,7 @@ export default function DiscoverPage() {
           publications={publications as any}
           publishers={publishers}
           series={series}
+          catalogGenres={catalogGenres}
         />
       </Suspense>
     </div>

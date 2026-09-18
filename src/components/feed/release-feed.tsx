@@ -90,22 +90,11 @@ export function ReleaseFeed({
           case 'UPCOMING':
             return p.status === 'PREORDER' || p.status === 'ANNOUNCED' || d > todayStr;
           case 'MANGA':
-            return (
-              (p.genres?.includes('Manga') || p.genres?.includes('Manhwa') || p.genres?.includes('Komik')) &&
-              !p.genres?.includes('Light Novel') &&
-              !p.genres?.includes('Agama & Spiritualitas') &&
-              !p.genres?.includes('Novel') &&
-              p.format !== 'PAPERBACK'
-            );
+            return getPublicationCategory(p) === 'Komik & Manga';
           case 'LIGHT_NOVEL':
-            return p.genres?.includes('Light Novel');
+            return getPublicationCategory(p) === 'Light Novel';
           case 'NOVEL':
-            return (
-              p.genres?.includes('Novel') ||
-              p.genres?.includes('Literary Fiction') ||
-              p.genres?.includes('Historical Fiction') ||
-              p.genres?.includes('Fiction')
-            );
+            return getPublicationCategory(p) === 'Novel & Sastra';
           default:
             return true;
         }

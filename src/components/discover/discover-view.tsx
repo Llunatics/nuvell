@@ -22,11 +22,12 @@ interface DiscoverViewProps {
   publications: Publication[];
   publishers: Publisher[];
   series: Series[];
+  catalogGenres?: [string, number][];
 }
 
 type DiscoverTab = 'latest' | 'upcoming' | 'series' | 'publishers' | 'genres';
 
-export function DiscoverView({ publications, publishers, series }: DiscoverViewProps) {
+export function DiscoverView({ publications, publishers, series, catalogGenres }: DiscoverViewProps) {
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as DiscoverTab) || 'latest';
   const todayStr = useMemo(() => getTodayDateWIB(), []);
@@ -54,18 +55,25 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
     );
   }, [publishers, publisherSearch]);
 
-  // Unique genres
+  // Unique genres across the catalog
   const genresList = useMemo(() => {
-    const genreCounts = new Map<string, number>();
-    publications.forEach((p) => {
-      p.genres?.forEach((g) => {
-        genreCounts.set(g, (genreCounts.get(g) || 0) + 1);
-      });
-    });
-    return Array.from(genreCounts.entries()).sort((a, b) => b[1] - a[1]);
-  }, [publications]);
+    const rawList = catalogGenres && catalogGenres.length > 0
+      ? catalogGenres
+      : Array.from(
+          publications.reduce((map, p) => {
+            p.genres?.forEach((g) => map.set(g, (map.get(g) || 0) + 1));
+            return map;
+          }, new Map<string, number>()).entries()
+        );
+
+    // Filter out internal generic fallbacks & non-genres
+    return rawList
+      .filter(([g]) => g !== 'Fiksi Umum' && g !== 'Komik' && g !== 'Import Books' && g !== 'Buku Import')
+      .sort((a, b) => b[1] - a[1]);
+  }, [catalogGenres, publications]);
 
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [genreDisplayLimit, setGenreDisplayLimit] = useState(24);
   const genrePublications = useMemo(() => {
     if (!selectedGenre) return [];
     return publications.filter((p) => p.genres?.includes(selectedGenre));
@@ -295,7 +303,10 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
                 <button
                   key={genre}
                   type="button"
-                  onClick={() => setSelectedGenre(isSelected ? null : genre)}
+                  onClick={() => {
+                    setSelectedGenre(isSelected ? null : genre);
+                    setGenreDisplayLimit(24);
+                  }}
                   className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
                     isSelected
                       ? 'bg-gold text-background font-semibold shadow-sm'
@@ -328,10 +339,22 @@ export function DiscoverView({ publications, publishers, series }: DiscoverViewP
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {genrePublications.slice(0, 16).map((pub) => (
+                {genrePublications.slice(0, genreDisplayLimit).map((pub) => (
                   <ReleaseCard key={pub.id} publication={pub} layout="grid" />
                 ))}
               </div>
+
+              {genrePublications.length > genreDisplayLimit && (
+                <div className="text-center pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setGenreDisplayLimit((prev) => prev + 24)}
+                    className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-surface-raised hover:bg-surface border border-border-subtle text-editorial-body hover:text-editorial-title transition-all shadow-xs"
+                  >
+                    Tampilkan Lebih Banyak ({genrePublications.length - genreDisplayLimit} buku lagi)
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

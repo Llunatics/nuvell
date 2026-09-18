@@ -14,7 +14,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 
-const COLORS = ['#C5A059', '#3B82F6', '#10B981', '#EC4899', '#8B5CF6', '#F59E0B'];
+import { CATEGORY_COLORS } from '@/lib/categories';
 
 export interface CategoryItem {
   name: string;
@@ -23,6 +23,8 @@ export interface CategoryItem {
 
 export function CategoryPieChart({ data }: { data: CategoryItem[] }) {
   if (!data || data.length === 0) return null;
+
+  const total = data.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
     <div className="h-64">
@@ -37,8 +39,11 @@ export function CategoryPieChart({ data }: { data: CategoryItem[] }) {
             paddingAngle={3}
             dataKey="value"
           >
-            {data.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            {data.map((entry) => (
+              <Cell
+                key={`cell-${entry.name}`}
+                fill={CATEGORY_COLORS[entry.name] || '#C5A059'}
+              />
             ))}
           </Pie>
           <Tooltip
@@ -48,6 +53,11 @@ export function CategoryPieChart({ data }: { data: CategoryItem[] }) {
               borderRadius: '0.75rem',
               color: '#F9FAFB',
               fontSize: '12px',
+            }}
+            formatter={(val: any, name: any) => {
+              const num = Number(val) || 0;
+              const pct = total > 0 ? ((num / total) * 100).toFixed(1) : '0';
+              return [`${num.toLocaleString()} buku (${pct}%)`, String(name)];
             }}
           />
         </PieChart>
