@@ -9,6 +9,7 @@ import { useWatchlist } from '@/hooks/use-watchlist';
 import { useCollection } from '@/hooks/use-collection';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip } from '@/components/ui/tooltip';
+import { getPublicationCategory } from '@/lib/categories';
 
 interface ReleaseCardProps {
   publication: Publication;
@@ -217,8 +218,8 @@ export function ReleaseCard({ publication, layout = 'grid', relationBadge }: Rel
                 {publication.recentChangeBadge}
               </span>
             ) : (
-              <span className="text-[9px] sm:text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-surface/90 text-editorial-muted backdrop-blur-md border border-border-subtle">
-                {publication.format}
+              <span className="text-[9px] sm:text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-surface/90 text-editorial-title backdrop-blur-md border border-border-subtle shadow-2xs">
+                {getPublicationCategory(publication)}
               </span>
             )}
 
@@ -257,7 +258,7 @@ export function ReleaseCard({ publication, layout = 'grid', relationBadge }: Rel
 
           {/* Title: 2 lines clamp */}
           <Link href={`/books/${publication.slug}`} className="block group-hover:text-gold transition-colors">
-            <h3 className="font-editorial text-xs sm:text-sm font-bold text-editorial-title leading-snug line-clamp-2">
+            <h3 className="font-editorial text-xs sm:text-sm md:text-[15px] font-bold text-editorial-title leading-snug line-clamp-2">
               {publication.title}
             </h3>
           </Link>

@@ -59,11 +59,12 @@ export function LibraryView({ publications }: LibraryViewProps) {
     ['collection', 'series', 'watchlist', 'history'].includes(initialTab) ? initialTab : 'collection'
   );
 
-  const { items: watchlistItems, toggleWatchlist } = useWatchlist();
+  const { items: watchlistItems, toggleWatchlist, clearWatchlist } = useWatchlist();
   const {
     collection,
     exportCollectionJson,
     importCollectionJson,
+    clearCollection,
   } = useCollection();
   const { seriesList } = useUserSeries();
   const { items: recentItems, clearRecentItems } = useRecentlyViewed();
@@ -215,32 +216,34 @@ export function LibraryView({ publications }: LibraryViewProps) {
         </p>
       </div>
 
-      {/* Primary Tabs Segmented Bar */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-surface-raised rounded-2xl border border-border-subtle overflow-x-auto no-scrollbar shadow-sm">
-        {[
-          { id: 'collection', label: `Koleksi Buku (${allCount})`, icon: BookmarkCheck },
-          { id: 'series', label: `Pelacak Seri Saya (${seriesList.length})`, icon: Layers3 },
-          { id: 'watchlist', label: `Watchlist Radar (${watchlistItems.length})`, icon: Bookmark },
-          { id: 'history', label: `Terakhir Dilihat (${recentItems.length})`, icon: History },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id as LibraryTab)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-all shrink-0 ${
-                isActive
-                  ? 'bg-surface text-editorial-title font-semibold shadow-sm border border-border-subtle'
-                  : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-gold' : 'text-editorial-faint'}`} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
+      {/* Primary Tabs Segmented Bar (Centered & Scaled for Desktop) */}
+      <div className="flex items-center justify-center p-1.5 sm:p-2 bg-surface-raised rounded-2xl border border-border-subtle overflow-x-auto no-scrollbar shadow-sm mx-auto w-full max-w-4xl">
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 w-full">
+          {[
+            { id: 'collection', label: `Koleksi Buku (${allCount})`, icon: BookmarkCheck },
+            { id: 'series', label: `Pelacak Seri Saya (${seriesList.length})`, icon: Layers3 },
+            { id: 'watchlist', label: `Watchlist Radar (${watchlistItems.length})`, icon: Bookmark },
+            { id: 'history', label: `Terakhir Dilihat (${recentItems.length})`, icon: History },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id as LibraryTab)}
+                className={`flex items-center justify-center gap-2 sm:gap-2.5 px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all shrink-0 ${
+                  isActive
+                    ? 'bg-surface text-editorial-title font-semibold shadow-sm border border-border-subtle'
+                    : 'text-editorial-muted hover:text-editorial-title hover:bg-surface/50 border border-transparent'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-gold' : 'text-editorial-faint'}`} />
+                <span className="whitespace-nowrap">{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* TAB 1: KOLEKSI BUKU */}
@@ -253,59 +256,59 @@ export function LibraryView({ publications }: LibraryViewProps) {
               <button
                 type="button"
                 onClick={() => setStatusFilter('OWNED')}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3.5 sm:p-4 rounded-xl border text-left transition-all ${
                   statusFilter === 'OWNED'
                     ? 'bg-emerald-500/15 border-emerald-500/40 shadow-sm'
                     : 'bg-surface/60 border-border-subtle hover:border-emerald-500/30'
                 }`}
               >
-                <span className="font-mono text-xl font-bold text-emerald-400 block">
+                <span className="font-mono text-xl sm:text-2xl font-bold text-emerald-400 block">
                   {ownedCount}
                 </span>
-                <span className="text-[11px] text-editorial-muted">Dimiliki</span>
+                <span className="text-xs sm:text-sm text-editorial-muted">Dimiliki</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setStatusFilter('WISHLIST')}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3.5 sm:p-4 rounded-xl border text-left transition-all ${
                   statusFilter === 'WISHLIST'
                     ? 'bg-amber-500/15 border-amber-500/40 shadow-sm'
                     : 'bg-surface/60 border-border-subtle hover:border-amber-500/30'
                 }`}
               >
-                <span className="font-mono text-xl font-bold text-amber-400 block">
+                <span className="font-mono text-xl sm:text-2xl font-bold text-amber-400 block">
                   {wishlistCount}
                 </span>
-                <span className="text-[11px] text-editorial-muted">Wishlist</span>
+                <span className="text-xs sm:text-sm text-editorial-muted">Wishlist</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setStatusFilter('PREORDERED')}
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3.5 sm:p-4 rounded-xl border text-left transition-all ${
                   statusFilter === 'PREORDERED'
                     ? 'bg-burgundy-400/15 border-burgundy-400/40 shadow-sm'
                     : 'bg-surface/60 border-border-subtle hover:border-burgundy-400/30'
                 }`}
               >
-                <span className="font-mono text-xl font-bold text-burgundy-400 block">
+                <span className="font-mono text-xl sm:text-2xl font-bold text-burgundy-400 block">
                   {preorderedCount}
                 </span>
-                <span className="text-[11px] text-editorial-muted">Pre-order</span>
+                <span className="text-xs sm:text-sm text-editorial-muted">Pre-order</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('series')}
-                className="p-3 rounded-xl bg-surface/60 border border-border-subtle hover:border-gold/40 text-left transition-all group"
+                className="p-3.5 sm:p-4 rounded-xl bg-surface/60 border border-border-subtle hover:border-gold/40 text-left transition-all group"
               >
-                <span className="font-mono text-xl font-bold text-gold block group-hover:scale-105 transition-transform">
+                <span className="font-mono text-xl sm:text-2xl font-bold text-gold block group-hover:scale-105 transition-transform">
                   {incompleteSeriesCount}
                 </span>
-                <span className="text-[11px] text-editorial-muted flex items-center justify-between">
+                <span className="text-xs sm:text-sm text-editorial-muted flex items-center justify-between">
                   <span>Seri Belum Lengkap</span>
-                  <ArrowRight className="w-3 h-3 text-editorial-faint group-hover:text-gold transition-colors" />
+                  <ArrowRight className="w-3.5 h-3.5 text-editorial-faint group-hover:text-gold transition-colors" />
                 </span>
               </button>
             </div>
@@ -322,21 +325,37 @@ export function LibraryView({ publications }: LibraryViewProps) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="min-h-[40px] px-3 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title flex items-center justify-center gap-2 transition-colors active:scale-95"
+                className="min-h-[40px] px-3.5 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs sm:text-sm font-medium text-editorial-title flex items-center justify-center gap-2 transition-colors active:scale-95"
                 title="Impor backup JSON koleksi"
               >
-                <Upload className="w-3.5 h-3.5 text-editorial-faint" />
+                <Upload className="w-4 h-4 text-editorial-faint" />
                 <span className="hidden sm:inline">Impor</span>
               </button>
               <button
                 type="button"
                 onClick={exportCollectionJson}
-                className="min-h-[40px] px-3 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs font-medium text-editorial-title flex items-center justify-center gap-2 transition-colors active:scale-95"
+                className="min-h-[40px] px-3.5 py-2 rounded-xl bg-surface hover:bg-surface-raised border border-border-subtle text-xs sm:text-sm font-medium text-editorial-title flex items-center justify-center gap-2 transition-colors active:scale-95"
                 title="Unduh cadangan JSON koleksi"
               >
-                <Download className="w-3.5 h-3.5 text-gold" />
+                <Download className="w-4 h-4 text-gold" />
                 <span className="hidden sm:inline">Ekspor</span>
               </button>
+              {allCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm('Bersihkan semua item dari koleksi buku Anda?')) {
+                      clearCollection();
+                      toast({ title: 'Koleksi Dikosongkan', description: 'Semua item koleksi buku berhasil dihapus.' });
+                    }
+                  }}
+                  className="min-h-[40px] px-3 py-2 rounded-xl bg-surface hover:bg-rose-500/15 border border-border-subtle hover:border-rose-500/30 text-xs sm:text-sm font-medium text-editorial-muted hover:text-rose-400 flex items-center justify-center gap-1.5 transition-colors active:scale-95"
+                  title="Kosongkan semua item dalam koleksi"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Kosongkan</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -356,7 +375,7 @@ export function LibraryView({ publications }: LibraryViewProps) {
                     key={f.id}
                     type="button"
                     onClick={() => setStatusFilter(f.id as CollectionStatusFilter)}
-                    className={`min-h-[38px] px-3.5 py-1.5 rounded-xl text-xs font-medium shrink-0 transition-all border ${
+                    className={`min-h-[40px] px-4 py-2 rounded-xl text-xs sm:text-sm font-medium shrink-0 transition-all border ${
                       isActive
                         ? 'bg-gold text-background border-gold font-semibold shadow-sm'
                         : 'bg-surface border-border-subtle text-editorial-muted hover:text-editorial-title hover:bg-surface-raised'
@@ -377,7 +396,7 @@ export function LibraryView({ publications }: LibraryViewProps) {
                   placeholder="Cari judul, pengarang, penerbit dalam koleksi..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-surface border border-border-subtle focus:border-gold/50 focus:outline-none text-xs text-editorial-title placeholder:text-editorial-faint"
+                  className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-surface border border-border-subtle focus:border-gold/50 focus:outline-none text-xs sm:text-sm text-editorial-title placeholder:text-editorial-faint"
                 />
                 {searchQuery && (
                   <button
@@ -392,11 +411,11 @@ export function LibraryView({ publications }: LibraryViewProps) {
 
               {/* Sort Selector */}
               <div className="flex items-center gap-2 shrink-0">
-                <ArrowUpDown className="w-3.5 h-3.5 text-editorial-faint" />
+                <ArrowUpDown className="w-4 h-4 text-editorial-faint" />
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="px-3 py-2 rounded-xl bg-surface border border-border-subtle text-xs text-editorial-body focus:outline-none focus:border-gold/50"
+                  className="px-3.5 py-2.5 rounded-xl bg-surface border border-border-subtle text-xs sm:text-sm text-editorial-body focus:outline-none focus:border-gold/50"
                 >
                   <option value="recent">Baru ditambahkan</option>
                   <option value="title-asc">Judul A-Z</option>
@@ -515,14 +534,31 @@ export function LibraryView({ publications }: LibraryViewProps) {
         <div className="space-y-8">
           {/* Followed Targets Strip */}
           <div className="p-5 rounded-2xl bg-surface/70 border border-border-subtle backdrop-blur-md space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-editorial text-sm font-semibold text-editorial-title flex items-center gap-2">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h3 className="font-editorial text-sm sm:text-base font-semibold text-editorial-title flex items-center gap-2">
                 <Bookmark className="w-4 h-4 text-gold" />
                 <span>Entitas yang Anda Ikuti ({watchlistItems.length})</span>
               </h3>
-              <span className="text-[11px] font-mono text-editorial-faint">
-                {watchlistMatches.length} terbitan terdeteksi di radar
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono text-editorial-faint">
+                  {watchlistMatches.length} terbitan terdeteksi di radar
+                </span>
+                {watchlistItems.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm('Kosongkan semua entitas dari Watchlist Anda?')) {
+                        clearWatchlist();
+                        toast({ title: 'Watchlist Dikosongkan', description: 'Semua entitas di watchlist telah dihapus.' });
+                      }
+                    }}
+                    className="text-xs sm:text-sm text-editorial-faint hover:text-rose-400 transition-colors flex items-center gap-1 font-mono"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Kosongkan</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {watchlistItems.length === 0 ? (

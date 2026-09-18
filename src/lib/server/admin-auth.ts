@@ -8,9 +8,22 @@ function getAdminSecret(): string | null {
   return secret || null;
 }
 
+let inMemorySigningKey: string | null = null;
+
 function getSigningKey(): string {
-  // Use ADMIN_SECRET if set, otherwise an internal node session salt
-  return getAdminSecret() || process.env.NEXT_PUBLIC_FIREBASE_APP_ID || 'nuvell_internal_session_guard';
+  // Use ADMIN_SECRET if explicitly configured on server
+  const adminSecret = getAdminSecret();
+  if (adminSecret) return adminSecret;
+
+  if (process.env.SESSION_SECRET?.trim()) {
+    return process.env.SESSION_SECRET.trim();
+  }
+
+  // Generates cryptographically unforgeable 256-bit runtime key
+  if (!inMemorySigningKey) {
+    inMemorySigningKey = crypto.randomBytes(32).toString('hex');
+  }
+  return inMemorySigningKey;
 }
 
 function generateSignature(payload: string, secret: string): string {

@@ -15,40 +15,14 @@ export function useWatchlist() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       if (stored) {
-        setItems(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setItems(Array.isArray(parsed) ? parsed : []);
       } else {
-        // Default initial items for rich demonstration
-        const defaults: UserWatchlistItem[] = [
-          {
-            id: 'wl_one_piece',
-            type: 'SERIES',
-            targetId: 'ser_one_piece',
-            targetName: 'One Piece',
-            targetSlug: 'one-piece',
-            createdAt: new Date().toISOString(),
-          },
-          {
-            id: 'wl_elex',
-            type: 'PUBLISHER',
-            targetId: 'pub_elex',
-            targetName: 'Elex Media Komputindo',
-            targetSlug: 'elex-media-komputindo',
-            createdAt: new Date().toISOString(),
-          },
-          {
-            id: 'wl_kagurabachi',
-            type: 'BOOK',
-            targetId: 'pub_kagurabachi_01',
-            targetName: 'Kagurabachi Vol. 01',
-            targetSlug: 'kagurabachi-vol-01',
-            createdAt: new Date().toISOString(),
-          },
-        ];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
-        setItems(defaults);
+        // Clean slate: start with empty watchlist
+        setItems([]);
       }
     } catch {
-      // LocalStorage fallback
+      setItems([]);
     } finally {
       setIsLoaded(true);
     }
@@ -103,10 +77,22 @@ export function useWatchlist() {
     return items.some((i) => i.type === type && i.targetId === targetId);
   };
 
+  const clearWatchlist = () => {
+    setItems([]);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      window.dispatchEvent(new Event(SYNC_EVENT));
+    } catch {
+      // ignore
+    }
+  };
+
   return {
     items,
     isLoaded,
     toggleWatchlist,
     isWatchlisted,
+    clearWatchlist,
   };
 }

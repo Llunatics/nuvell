@@ -24,34 +24,14 @@ export function useRecentlyViewed() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       if (stored) {
-        setItems(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setItems(Array.isArray(parsed) ? parsed : []);
       } else {
-        // Sample recent items for rich initial demonstration
-        const defaults: RecentlyViewedItem[] = [
-          {
-            id: 'pub_one_piece_108',
-            slug: 'one-piece-vol-108',
-            title: 'One Piece Vol. 108',
-            coverImage: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400',
-            type: 'BOOK',
-            publisherName: 'Elex Media Komputindo',
-            viewedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-          },
-          {
-            id: 'ser_frieren',
-            slug: 'frieren-at-funerals-end',
-            title: "Frieren: Beyond Journey's End",
-            coverImage: 'https://images.unsplash.com/photo-1532012164546-f432f2e3777a?auto=format&fit=crop&q=80&w=400',
-            type: 'SERIES',
-            publisherName: 'm&c! Publishing',
-            viewedAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-          },
-        ];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
-        setItems(defaults);
+        // Clean slate: start with empty recently viewed
+        setItems([]);
       }
     } catch {
-      // ignore
+      setItems([]);
     } finally {
       setIsLoaded(true);
     }

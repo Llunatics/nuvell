@@ -37,13 +37,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Verify via registered admin email
-    if (!isAuthorized && email && typeof email === 'string' && isAuthorizedAdminEmail(email)) {
-      isAuthorized = true;
-      identifier = email.trim().toLowerCase();
-    }
-
-    // 3. Verify via server ADMIN_SECRET environment variable (zero fallback)
+    // 2. Verify via server ADMIN_SECRET environment variable (zero fallback)
     if (!isAuthorized && secret && typeof secret === 'string' && verifyAdminSecret(secret)) {
       isAuthorized = true;
       identifier = 'server-secret';

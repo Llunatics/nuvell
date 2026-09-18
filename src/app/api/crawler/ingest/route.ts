@@ -19,7 +19,15 @@ export async function POST(req: NextRequest) {
   });
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const isAuthorized = await isServerAdminAuthenticated(req);
+  if (!isAuthorized) {
+    return NextResponse.json(
+      { success: false, error: 'Akses ditolak. Diperlukan sesi atau kunci otorisasi admin.' },
+      { status: 401 }
+    );
+  }
+
   const sources = dataService.getAllSources();
   const logs = dataService.getCrawlLogs();
   return NextResponse.json({

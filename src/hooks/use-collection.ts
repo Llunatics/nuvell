@@ -120,6 +120,17 @@ export function useCollection() {
     }
   };
 
+  const clearCollection = () => {
+    setCollection(new Map());
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      window.dispatchEvent(new Event(SYNC_EVENT));
+    } catch {
+      // ignore
+    }
+  };
+
   return {
     collection,
     isLoaded,
@@ -128,6 +139,7 @@ export function useCollection() {
     getSeriesProgress,
     exportCollectionJson,
     importCollectionJson,
+    clearCollection,
     totalItems: collection.size,
   };
 }

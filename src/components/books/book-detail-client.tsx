@@ -24,6 +24,7 @@ import {
 import dynamic from 'next/dynamic';
 import { Publication } from '@/types';
 import { formatIDR, formatDate, getReleaseCountdown, formatShortDate, formatDateTimeWIB } from '@/lib/formatters';
+import { getPublicationCategory } from '@/lib/categories';
 import { RecommendationResult } from '@/lib/recommendations';
 import { ReleaseCard } from './release-card';
 import { useWatchlist } from '@/hooks/use-watchlist';
@@ -607,9 +608,9 @@ export function BookDetailClient({
                   <dd className="font-mono text-editorial-title font-medium">{publication.isbn13 || 'TBA'}</dd>
                 </div>
                 <div>
-                  <dt className="text-editorial-faint font-mono uppercase text-[10px]">Format Buku</dt>
-                  <dd className="font-mono text-editorial-title">
-                    {publication.format === 'HARDCOVER' ? 'Hard Cover' : publication.format}
+                  <dt className="text-editorial-faint font-mono uppercase text-[10px]">Kategori Buku</dt>
+                  <dd className="font-medium text-editorial-title">
+                    {getPublicationCategory(publication)}
                   </dd>
                 </div>
                 <div>

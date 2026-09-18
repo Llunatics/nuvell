@@ -20,6 +20,7 @@ import { useDisplaySettings } from '@/hooks/use-display-settings';
 import { Tooltip } from '@/components/ui/tooltip';
 import { useModalOverlay } from '@/hooks/use-modal-overlay';
 import { getTodayDateWIB, getRollingPastDateWIB } from '@/lib/formatters';
+import { getPublicationCategory } from '@/lib/categories';
 
 interface ReleaseFeedProps {
   initialPublications: Publication[];
@@ -46,7 +47,7 @@ export function ReleaseFeed({
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const mounted = useModalOverlay(isFilterDrawerOpen);
   const [selectedPublisher, setSelectedPublisher] = useState<string>('ALL');
-  const [selectedFormat, setSelectedFormat] = useState<string>('ALL');
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [priceMax, setPriceMax] = useState<number>(500000);
   const [onlyAvailable, setOnlyAvailable] = useState<boolean>(false);
 
@@ -58,16 +59,16 @@ export function ReleaseFeed({
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (selectedPublisher !== 'ALL') count++;
-    if (selectedFormat !== 'ALL') count++;
+    if (selectedCategory !== 'ALL') count++;
     if (priceMax < 500000) count++;
     if (onlyAvailable) count++;
     return count;
-  }, [selectedPublisher, selectedFormat, priceMax, onlyAvailable]);
+  }, [selectedPublisher, selectedCategory, priceMax, onlyAvailable]);
 
   const clearAllFilters = () => {
     setQuickCategory('ALL');
     setSelectedPublisher('ALL');
-    setSelectedFormat('ALL');
+    setSelectedCategory('ALL');
     setPriceMax(500000);
     setOnlyAvailable(false);
   };
@@ -116,8 +117,8 @@ export function ReleaseFeed({
       list = list.filter((p) => p.publisherId === selectedPublisher);
     }
 
-    if (selectedFormat !== 'ALL') {
-      list = list.filter((p) => p.format === selectedFormat);
+    if (selectedCategory !== 'ALL') {
+      list = list.filter((p) => getPublicationCategory(p) === selectedCategory);
     }
 
     if (priceMax < 500000) {
@@ -149,7 +150,7 @@ export function ReleaseFeed({
     });
 
     return list;
-  }, [initialPublications, quickCategory, selectedPublisher, selectedFormat, priceMax, onlyAvailable, sortBy]);
+  }, [initialPublications, quickCategory, selectedPublisher, selectedCategory, priceMax, onlyAvailable, sortBy]);
 
   const visibleItems = filteredItems.slice(0, displayLimit);
 
@@ -367,14 +368,13 @@ export function ReleaseFeed({
             </button>
           )}
 
-          {selectedFormat !== 'ALL' && (
+          {selectedCategory !== 'ALL' && (
             <button
-              type="button"
-              onClick={() => setSelectedFormat('ALL')}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface border border-gold/40 text-gold text-[11px] font-medium shrink-0 active:scale-95"
+              onClick={() => setSelectedCategory('ALL')}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface border border-gold/40 text-gold text-xs font-mono group"
             >
-              <span>{selectedFormat}</span>
-              <X className="w-3 h-3 text-gold/80" />
+              <span>{selectedCategory}</span>
+              <X className="w-3 h-3 group-hover:rotate-90 transition-transform" />
             </button>
           )}
 
@@ -509,21 +509,22 @@ export function ReleaseFeed({
                 </select>
               </div>
 
-              {/* Filter 2: Book Format */}
+              {/* Filter 2: Book Category */}
               <div className="space-y-2">
                 <label className="text-xs font-mono text-editorial-faint uppercase tracking-wider block">
-                  Format Fisik
+                  Kategori Buku
                 </label>
                 <select
-                  value={selectedFormat}
-                  onChange={(e) => setSelectedFormat(e.target.value)}
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
                   className="w-full bg-surface px-3 py-2.5 rounded-xl border border-border-subtle text-xs text-editorial-title focus:outline-none focus:ring-1 focus:ring-gold font-medium"
                 >
-                  <option value="ALL">Semua Format</option>
-                  <option value="TANKOBON">Manga Tankobon</option>
-                  <option value="PAPERBACK">Paperback / Novel Reguler</option>
-                  <option value="HARDCOVER">Hardcover Kolektor</option>
-                  <option value="BUNKOBAN">Bunkoban</option>
+                  <option value="ALL">Semua Kategori</option>
+                  <option value="Komik & Manga">Komik & Manga</option>
+                  <option value="Light Novel">Light Novel</option>
+                  <option value="Novel & Sastra">Novel & Sastra</option>
+                  <option value="Buku Anak & Remaja">Buku Anak & Remaja</option>
+                  <option value="Non-Fiksi & Pengetahuan">Non-Fiksi & Pengetahuan</option>
                 </select>
               </div>
 

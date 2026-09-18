@@ -14,14 +14,14 @@ import {
   CartesianGrid,
 } from 'recharts';
 
-const COLORS = ['#C5A059', '#3B82F6', '#10B981', '#8B5CF6', '#EC4899', '#F59E0B'];
+const COLORS = ['#C5A059', '#3B82F6', '#10B981', '#EC4899', '#8B5CF6', '#F59E0B'];
 
-interface FormatItem {
+export interface CategoryItem {
   name: string;
   value: number;
 }
 
-export function FormatPieChart({ data }: { data: FormatItem[] }) {
+export function CategoryPieChart({ data }: { data: CategoryItem[] }) {
   if (!data || data.length === 0) return null;
 
   return (
@@ -55,6 +55,8 @@ export function FormatPieChart({ data }: { data: FormatItem[] }) {
     </div>
   );
 }
+
+export const FormatPieChart = CategoryPieChart;
 
 interface PriceItem {
   range: string;

@@ -18,14 +18,15 @@ import {
 import dynamic from 'next/dynamic';
 import { Publication, Publisher, Source } from '@/types';
 import { formatIDR, formatShortDate, formatDate } from '@/lib/formatters';
+import { getPublicationCategory, CATEGORY_COLORS } from '@/lib/categories';
 
-const FormatPieChart = dynamic(
-  () => import('./insights-charts').then((mod) => mod.FormatPieChart),
+const CategoryPieChart = dynamic(
+  () => import('./insights-charts').then((mod) => mod.CategoryPieChart),
   {
     ssr: false,
     loading: () => (
       <div className="h-64 flex items-center justify-center text-xs text-editorial-faint font-mono">
-        Memuat grafik format...
+        Memuat grafik kategori...
       </div>
     ),
   }
@@ -116,13 +117,16 @@ export function InsightsView({ publications, publishers, sources }: InsightsView
     return Array.from(map.values()).sort((a, b) => b.count - a.count);
   }, [publishers, publications]);
 
-  // Format data
-  const formatData = useMemo(() => {
-    const formatMap = new Map<string, number>();
+  // Category breakdown data
+  const categoryData = useMemo(() => {
+    const categoryMap = new Map<string, number>();
     publications.forEach((p) => {
-      formatMap.set(p.format || 'OTHER', (formatMap.get(p.format || 'OTHER') || 0) + 1);
+      const cat = getPublicationCategory(p);
+      categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1);
     });
-    return Array.from(formatMap.entries()).map(([name, value]) => ({ name, value }));
+    return Array.from(categoryMap.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
   }, [publications]);
 
   // Price segments data
@@ -236,23 +240,23 @@ export function InsightsView({ publications, publishers, sources }: InsightsView
       {/* TAB 1: TRENDS */}
       {activeTab === 'trends' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Format Breakdown */}
+          {/* Category Breakdown */}
           <div className="glass-panel p-5 sm:p-6 rounded-2xl space-y-4">
             <div>
               <h3 className="font-editorial text-base font-bold text-editorial-title">
-                Distribusi Format Fisik
+                Distribusi Kategori Rilisan
               </h3>
               <p className="text-xs text-editorial-muted">
-                Perbandingan volume cetak antara Tankobon, Kanzenban, Paperback, dan Hardcover
+                Perbandingan volume rilisan antara Komik & Manga, Light Novel, Novel & Sastra, dan kategori lainnya
               </p>
             </div>
-            <FormatPieChart data={formatData} />
+            <CategoryPieChart data={categoryData} />
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
-              {formatData.map((entry, index) => (
+              {categoryData.map((entry) => (
                 <div key={entry.name} className="flex items-center gap-1.5">
                   <span
                     className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    style={{ backgroundColor: CATEGORY_COLORS[entry.name] || '#C5A059' }}
                   />
                   <span className="text-editorial-body">{entry.name}:</span>
                   <span className="font-mono font-semibold text-editorial-title">{entry.value}</span>
